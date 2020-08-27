@@ -16,7 +16,7 @@ module "registry" {
 }
 
 module "storage" {
-  source = "./modules/storage"
+  source = "../shared_modules/storage"
   project = {
     name = var.project
   }

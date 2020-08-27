@@ -97,7 +97,7 @@ module "registry" {
 }
 
 module "storage" {
-  source               = "./modules/storage"
+  source               = "../shared_modules/storage"
   project              = var.project
   region               = var.aws.region
   worker_iam_role_name = module.kubernetes.worker_iam_role_name
