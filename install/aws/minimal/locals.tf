@@ -17,6 +17,6 @@ locals {
   config_output_path = pathexpand("~/.kube/config")
   gitpod = {
     namespace   = "default"
-    valuesFiles = []
+    valueFiles = []
   }
 }

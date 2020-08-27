@@ -115,7 +115,7 @@ module "storage" {
 #
 
 module "gitpod" {
-  source       = "./modules/gitpod"
+  source       = "../shared_modules/gitpod"
   gitpod       = var.gitpod
   domain_name  = var.dns.domain
   cluster_name = module.kubernetes.cluster_id
@@ -128,7 +128,7 @@ module "gitpod" {
   auth_providers = var.auth_providers
 
   helm = {
-    repository = "${path.root}/../../"
+    repository = "${path.root}/../../../"
     chart      = "chart"
   }
 
