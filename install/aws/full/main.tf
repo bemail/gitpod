@@ -87,9 +87,9 @@ module "database" {
 
 
 module "registry" {
-  source               = "./modules/registry"
+  source               = "../shared_modules/registry"
   project              = var.project
-  gitpod               = var.gitpod
+  namespace            = var.gitpod.namespace
   region               = var.aws.region
   worker_iam_role_name = module.kubernetes.worker_iam_role_name
 

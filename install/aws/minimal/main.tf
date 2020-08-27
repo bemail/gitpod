@@ -4,11 +4,11 @@
  */
 
 module "registry" {
-  source = "./modules/registry"
+  source = "../shared_modules/registry"
   project = {
     name = var.project
   }
-  gitpod               = local.gitpod
+  namespace            = local.gitpod.namespace
   region               = var.region
   worker_iam_role_name = module.kubernetes.worker_iam_role_name
 

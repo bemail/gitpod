@@ -83,7 +83,7 @@ data "template_file" "gitpod_registry_auth" {
 resource "kubernetes_secret" "gitpod_registry_auth" {
   metadata {
     name      = local.secret_name
-    namespace = var.gitpod.namespace
+    namespace = var.namespace
   }
 
   data = {
