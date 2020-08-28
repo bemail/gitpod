@@ -33,7 +33,7 @@ resource "null_resource" "helm_dependency_update" {
   }
 
   triggers = {
-    always_run = "${timestamp()}"
+    always_run = timestamp()
   }
 }
 
