@@ -3,11 +3,11 @@
 
 # https://www.terraform.io/docs/providers/aws/r/db_subnet_group.html
 resource "aws_db_subnet_group" "gitpod" {
-  name       = "db_subnet_group-${var.project.name}"
+  name       = "db_subnet_group-${var.project_name}"
   subnet_ids = var.subnet_ids
 
   tags = {
-    project        = var.project.name
+    project        = var.project_name
     provisioned_by = "terraform"
   }
 }
@@ -33,7 +33,7 @@ resource "aws_db_instance" "gitpod" {
   db_subnet_group_name = aws_db_subnet_group.gitpod.id
 
   tags = {
-    project        = var.project.name
+    project        = var.project_name
     provisioned_by = "terraform"
   }
 }
@@ -57,7 +57,7 @@ resource "aws_security_group_rule" "gitpod_database" {
 resource "kubernetes_secret" "gitpod_database" {
   metadata {
     name      = "gitpod-database"
-    namespace = var.gitpod.namespace
+    namespace = var.gitpod_namespace
   }
 
   data = {
@@ -72,7 +72,7 @@ resource "kubernetes_secret" "gitpod_database" {
 resource "kubernetes_job" "mysql_initializer" {
   metadata {
     name      = "gitpod-db-initialization"
-    namespace = var.gitpod.namespace
+    namespace = var.gitpod_namespace
   }
   spec {
     template {

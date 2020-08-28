@@ -2,12 +2,14 @@
 
 # https://www.terraform.io/docs/providers/helm/r/release.html
 resource "helm_release" "gitpod" {
-  name          = "gitpod"
-  repository    = var.helm.repository
-  chart         = var.helm.chart
-  recreate_pods = true
-  wait          = true
-  timeout       = 600
+  name             = "gitpod"
+  repository       = var.helm.repository
+  namespace        = var.gitpod_namespace
+  create_namespace = true
+  chart            = var.helm.chart
+  recreate_pods    = true
+  wait             = true
+  timeout          = 600
   # Is buggy: https://github.com/hashicorp/terraform-provider-helm/issues/405
   # see below for workaround
   #dependency_update = true
@@ -15,7 +17,7 @@ resource "helm_release" "gitpod" {
   values = flatten([
     data.template_file.gitpod_values_main.rendered,
     data.template_file.gitpod_values_auth_provider.rendered,
-    [for path in var.gitpod.valueFiles : file(path)],
+    [for path in var.valueFiles : file(path)],
     var.values
   ])
 

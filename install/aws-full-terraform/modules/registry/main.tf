@@ -13,7 +13,7 @@ resource "aws_ecr_repository" "gitpod_registry" {
     scan_on_push = true
   }
   tags = {
-    project = var.project.name
+    project = var.project_name
   }
 }
 
@@ -25,13 +25,13 @@ resource "aws_ecr_repository" "gitpod_registry_base" {
     scan_on_push = true
   }
   tags = {
-    project = var.project.name
+    project = var.project_name
   }
 }
 
 
 resource "aws_iam_role_policy" "dns_manager" {
-  name = "${var.project.name}-registry"
+  name = "${var.project_name}-registry"
 
   policy = <<-EOF
 {
@@ -83,7 +83,7 @@ data "template_file" "gitpod_registry_auth" {
 resource "kubernetes_secret" "gitpod_registry_auth" {
   metadata {
     name      = local.secret_name
-    namespace = var.gitpod.namespace
+    namespace = var.gitpod_namespace
   }
 
   data = {

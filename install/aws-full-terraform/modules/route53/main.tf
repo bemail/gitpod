@@ -1,7 +1,7 @@
 ### Domain Configuration ###
 
 locals {
-  paths = [var.dns.domain, "*.${var.dns.domain}", "*.ws.${var.dns.domain}"]
+  paths = [var.domain, "*.${var.domain}", "*.ws.${var.domain}"]
 }
 
 # https://www.terraform.io/docs/providers/aws/d/elb_hosted_zone_id.html
@@ -28,6 +28,6 @@ resource "aws_route53_record" "root_record" {
 # User provided zone with Domain configured
 # https://www.terraform.io/docs/providers/aws/d/route53_zone.html
 data "aws_route53_zone" "zone" {
-  name         = var.dns.zone_name
+  name         = var.zone_name
   private_zone = false
 }

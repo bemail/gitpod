@@ -1,25 +1,21 @@
-variable "project" {
-  type = object({
-    name = string
-  })
+variable "project_name" {
+  type = string
 }
 
 variable "gitpod-node-arn" {
   type = string
 }
 
-variable "dns" {
-  type = object({
-    domain    = string
-    zone_name = string
-  })
+variable "domain" {
+  type = string
 }
 
-variable "aws" {
-  type = object({
-    region  = string
-    profile = string
-  })
+variable "zone_name" {
+  type = string
+}
+
+variable "region" {
+  type = string
 }
 
 variable "cluster_name" {
@@ -27,16 +23,10 @@ variable "cluster_name" {
 }
 
 
-variable "gitpod" {
-  type = object({
-    namespace  = string
-    valueFiles = list(string)
-  })
-  default = {
-    namespace  = "default"
-    valueFiles = ["./values.yml"]
-  }
+variable "gitpod_namespace" {
+  type = string
 }
+
 variable "cert_manager" {
   type = object({
     chart     = string

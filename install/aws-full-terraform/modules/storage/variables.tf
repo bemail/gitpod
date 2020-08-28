@@ -1,7 +1,5 @@
-variable "project" {
-  type = object({
-    name = string
-  })
+variable "project_name" {
+  type = string
 }
 
 variable "region" {

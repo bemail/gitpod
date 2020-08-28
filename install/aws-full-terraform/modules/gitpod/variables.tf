@@ -1,12 +1,5 @@
-variable "gitpod" {
-  type = object({
-    valueFiles = list(string)
-    namespace  = string
-  })
-  default = {
-    valueFiles = ["./values.yml"]
-    namespace  = "default"
-  }
+variable "gitpod_namespace" {
+  type = string
 }
 
 variable "helm" {
@@ -44,5 +37,9 @@ variable "auth_providers" {
 }
 
 variable "values" {
+  type = list(string)
+}
+
+variable "valueFiles" {
   type = list(string)
 }

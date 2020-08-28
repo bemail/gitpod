@@ -3,7 +3,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "2.44.0"
 
-  name                 = var.vpc.name
+  name                 = var.vpc_name
   cidr                 = "10.0.0.0/16"
   azs                  = data.aws_availability_zones.available.names
   private_subnets      = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
@@ -33,7 +33,7 @@ module "kubernetes" {
   cluster_version    = var.kubernetes.version
   subnets            = module.vpc.public_subnets
   write_kubeconfig   = true
-  config_output_path = "${var.kubernetes.home_dir}/.kube/config"
+  config_output_path = pathexpand("~/.kube/config")
   vpc_id             = module.vpc.vpc_id
 
   worker_groups = [for i in range(var.kubernetes.node_count) : {
@@ -55,15 +55,16 @@ resource "null_resource" "kubeconfig" {
 }
 
 module "cert-manager" {
-  source          = "./modules/https"
-  gitpod-node-arn = module.kubernetes.worker_iam_role_arn
-  cluster_name    = module.kubernetes.cluster_id
-  dns             = var.dns
-  aws             = var.aws
-  cert_manager    = var.cert_manager
-  gitpod          = var.gitpod
+  source           = "./modules/https"
+  gitpod-node-arn  = module.kubernetes.worker_iam_role_arn
+  cluster_name     = module.kubernetes.cluster_id
+  domain           = var.domain
+  zone_name        = var.zone_name
+  region           = var.region
+  cert_manager     = var.cert_manager
+  gitpod_namespace = var.gitpod_namespace
 
-  project = var.project
+  project_name = var.project
 
   providers = {
     local   = local
@@ -79,18 +80,15 @@ module "database" {
   security_group_id = module.kubernetes.worker_security_group_id
   database          = var.database
 
-  project = var.project
-  gitpod  = var.gitpod
-
+  project_name     = var.project
+  gitpod_namespace = var.gitpod_namespace
 }
-
-
 
 module "registry" {
   source               = "./modules/registry"
-  project              = var.project
-  gitpod               = var.gitpod
-  region               = var.aws.region
+  project_name         = var.project
+  gitpod_namespace     = var.gitpod_namespace
+  region               = var.region
   worker_iam_role_name = module.kubernetes.worker_iam_role_name
 
   depends_on = [module.kubernetes.cluster_id]
@@ -98,8 +96,8 @@ module "registry" {
 
 module "storage" {
   source               = "./modules/storage"
-  project              = var.project
-  region               = var.aws.region
+  project_name         = var.project
+  region               = var.region
   worker_iam_role_name = module.kubernetes.worker_iam_role_name
   vpc_id               = module.vpc.vpc_id
 
@@ -115,10 +113,11 @@ module "storage" {
 #
 
 module "gitpod" {
-  source       = "./modules/gitpod"
-  gitpod       = var.gitpod
-  domain_name  = var.dns.domain
-  cluster_name = module.kubernetes.cluster_id
+  source           = "./modules/gitpod"
+  gitpod_namespace = var.gitpod_namespace
+  valueFiles       = var.valueFiles
+  domain_name      = var.domain
+  cluster_name     = module.kubernetes.cluster_id
 
   providers = {
     helm       = helm
@@ -147,6 +146,7 @@ module "gitpod" {
 
 module "route53" {
   source       = "./modules/route53"
-  dns          = var.dns
+  zone_name    = var.zone_name
+  domain       = var.domain
   external_dns = module.gitpod.external_dns
 }

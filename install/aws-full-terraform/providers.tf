@@ -1,7 +1,7 @@
 # https://www.terraform.io/docs/providers/aws/index.html
 provider "aws" {
-  profile = var.aws.profile
-  region  = var.aws.region
+  profile = "default"
+  region  = var.region
 }
 
 # https://www.terraform.io/docs/providers/kubernetes/index.html

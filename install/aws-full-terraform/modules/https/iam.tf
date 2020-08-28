@@ -4,7 +4,7 @@
 # AWS IAM role 'dns-manager-role'
 #
 resource "aws_iam_role" "dns_manager" {
-  name = "dns-manager-role-${var.project.name}"
+  name = "dns-manager-role-${var.project_name}"
 
   assume_role_policy = <<-EOF
 {

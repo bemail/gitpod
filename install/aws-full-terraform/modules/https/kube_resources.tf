@@ -23,7 +23,7 @@ spec:
     solvers:
       - dns01:
           route53:
-            region: ${var.aws.region}
+            region: ${var.region}
             hostedZoneID: ${data.aws_route53_zone.zone.id}
             role: "${aws_iam_role.dns_manager.arn}"
 YAML
@@ -45,14 +45,14 @@ apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: gitpod-certificate
-  namespace: ${var.gitpod.namespace}
+  namespace: ${var.gitpod_namespace}
 spec:
   renewBefore: 24h
   secretName: proxy-config-certificates
   dnsNames:
-    - "${var.dns.domain}"
-    - "*.${var.dns.domain}"
-    - "*.ws.${var.dns.domain}"
+    - "${var.domain}"
+    - "*.${var.domain}"
+    - "*.ws.${var.domain}"
   issuerRef:
     name: letsencrypt-issuer
     kind: ClusterIssuer

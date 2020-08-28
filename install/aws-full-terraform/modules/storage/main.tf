@@ -3,16 +3,16 @@
 #
 
 resource "aws_s3_bucket" "gitpod_storage" {
-  bucket = "${var.project.name}-storage"
+  bucket = "${var.project_name}-storage"
   acl    = "private"
   tags = {
-    project = var.project.name
+    project = var.project_name
   }
 }
 
 resource "aws_s3_access_point" "gitpod_storage" {
   bucket = aws_s3_bucket.gitpod_storage.id
-  name   = "${var.project.name}-storage"
+  name   = "${var.project_name}-storage"
   vpc_configuration {
     vpc_id = var.vpc_id
   }
@@ -57,17 +57,17 @@ EOF
 #
 
 resource "aws_iam_user" "gitpod_storage" {
-  name = "${var.project.name}-storage"
+  name = "${var.project_name}-storage"
 
   tags = {
-    project = var.project.name
+    project = var.project_name
   }
 }
 
 
 
 resource "aws_iam_user_policy" "gitpod_storage" {
-  name = "${var.project.name}-storage"
+  name = "${var.project_name}-storage"
 
   policy = <<-EOF
 {

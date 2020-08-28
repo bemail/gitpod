@@ -4,7 +4,7 @@ data "aws_availability_zones" "available" {
 }
 
 data "aws_route53_zone" "selected" {
-  name         = var.dns.zone_name
+  name         = var.zone_name
   private_zone = false
 }
 

@@ -1,38 +1,25 @@
 variable "project" {
-  type = object({
-    name = string
-  })
-  default = {
-    name = "self-hosted"
-  }
+  type    = string
+  default = "self-hosted"
 }
 
-variable "gitpod" {
-  type = object({
-    namespace  = string
-    valueFiles = list(string)
-  })
-  default = {
-    namespace  = "default"
-    valueFiles = ["./values.yml"]
-  }
+variable "valueFiles" {
+  type    = list(string)
+  default = ["./values.yml"]
 }
 
-variable "aws" {
-  type = object({
-    region  = string
-    profile = string
-  })
-  default = {
-    region  = "us-east-2"
-    profile = "default"
-  }
+variable "gitpod_namespace" {
+  type    = string
+  default = "default"
+}
+
+variable "region" {
+  type = string
 }
 
 variable "kubernetes" {
   type = object({
     cluster_name  = string
-    home_dir      = string
     version       = string
     node_count    = number
     instance_type = string
@@ -42,15 +29,16 @@ variable "kubernetes" {
     version       = "1.16"
     node_count    = 6
     instance_type = "m4.large"
-    home_dir      = "/home/gitpod"
   }
 }
 
-variable "dns" {
-  type = object({
-    domain    = string
-    zone_name = string
-  })
+variable "domain" {
+  type = string
+}
+
+variable "zone_name" {
+  type    = string
+  default = ""
 }
 
 variable "cert_manager" {
@@ -59,6 +47,11 @@ variable "cert_manager" {
     email     = string
     namespace = string
   })
+  default = {
+    chart     = ""
+    email     = ""
+    namespace = ""
+  }
 }
 
 
@@ -95,13 +88,29 @@ variable "auth_providers" {
       type          = string
     })
   )
+  default = []
 }
 
-variable "vpc" {
-  type = object({
-    name = string
-  })
-  default = {
-    name = "gitpod-network"
-  }
+variable "vpc_name" {
+  type = string
+}
+
+variable "includeHTTPS" {
+  type    = bool
+  default = false
+}
+
+variable "includeExternalDB" {
+  type    = bool
+  default = false
+}
+
+variable "bringYourOwnDomain" {
+  type    = bool
+  default = false
+}
+
+variable "includeExternalStorage" {
+  type    = bool
+  default = false
 }
