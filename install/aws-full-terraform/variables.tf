@@ -92,7 +92,8 @@ variable "auth_providers" {
 }
 
 variable "vpc_name" {
-  type = string
+  type    = string
+  default = "gitpod-network"
 }
 
 variable "includeHTTPS" {

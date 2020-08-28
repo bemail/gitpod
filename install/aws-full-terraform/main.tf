@@ -42,20 +42,9 @@ module "kubernetes" {
   }]
 }
 
-resource "null_resource" "kubeconfig" {
-  provisioner "local-exec" {
-    command = "aws eks update-kubeconfig --name $CLUSTER"
-    environment = {
-      CLUSTER = var.kubernetes.cluster_name
-    }
-  }
-  depends_on = [
-    module.kubernetes
-  ]
-}
-
 module "cert-manager" {
   source           = "./modules/https"
+  count            = var.includeHTTPS ? 1 : 0
   gitpod-node-arn  = module.kubernetes.worker_iam_role_arn
   cluster_name     = module.kubernetes.cluster_id
   domain           = var.domain
@@ -74,6 +63,7 @@ module "cert-manager" {
 
 module "database" {
   source = "./modules/mysql"
+  count = var.includeExternalDB ? 1 : 0
 
   vpc_id            = module.vpc.vpc_id
   subnet_ids        = module.vpc.public_subnets
@@ -96,6 +86,7 @@ module "registry" {
 
 module "storage" {
   source               = "./modules/storage"
+  count                = var.includeExternalStorage ? 1 : 0
   project_name         = var.project
   region               = var.region
   worker_iam_role_name = module.kubernetes.worker_iam_role_name
@@ -133,8 +124,8 @@ module "gitpod" {
 
   values = [
     module.registry.values,
-    module.storage.values,
-    module.database.values
+    local.storage_vals,
+    local.db_vals
   ]
 
   depends_on = [
@@ -146,6 +137,8 @@ module "gitpod" {
 
 module "route53" {
   source       = "./modules/route53"
+  count        = var.bringYourOwnDomain ? 1 : 0 
+
   zone_name    = var.zone_name
   domain       = var.domain
   external_dns = module.gitpod.external_dns

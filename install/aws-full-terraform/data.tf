@@ -3,11 +3,6 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-data "aws_route53_zone" "selected" {
-  name         = var.zone_name
-  private_zone = false
-}
-
 # For the Kubernetes and Helm providers
 # https://www.terraform.io/docs/providers/aws/d/eks_cluster_auth.html
 data "aws_eks_cluster_auth" "default" {
