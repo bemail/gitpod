@@ -42,11 +42,12 @@ packages:
       - components/ws-sync:app
 scripts:
   - name: update-license-header
+    description: "ensures all files have proper license header"
     deps:
       - dev/addlicense:app
     script: |
+      set -e
       tmpdir=$(mktemp -d)
-      echo "Temp Dir: $tmpdir"
       
       leeway collect files               --format-string '{{ range . }}{{ .Name }}{{"\n"}}{{ end }}' | uniq > $tmpdir/all
       leeway collect files --variant oss --format-string '{{ range . }}{{ .Name }}{{"\n"}}{{ end }}' | uniq > $tmpdir/oss
@@ -57,9 +58,28 @@ scripts:
       grep -E "^install\/installer" $tmpdir/oss >> $tmpdir/agpl
       grep -v -f $tmpdir/agpl $tmpdir/oss > $tmpdir/mit
 
-      cat $tmpdir/ee   | while read f; do echo "$PWD/../$f"; done | addlicense -s -l gpshf .
-      cat $tmpdir/agpl | while read f; do echo "$PWD/../$f"; done | addlicense -s -l agpl  .
-      cat $tmpdir/mit  | while read f; do echo "$PWD/../$f"; done | addlicense -s -l mit   .
+      cat $tmpdir/ee   | while read f; do echo "$PWD/../$f"; done | addlicense $ADDLICENSE_PARAMS -s -l gpshf .
+      cat $tmpdir/agpl | while read f; do echo "$PWD/../$f"; done | addlicense $ADDLICENSE_PARAMS -s -l agpl  .
+      cat $tmpdir/mit  | while read f; do echo "$PWD/../$f"; done | addlicense $ADDLICENSE_PARAMS -s -l mit   .
+  - name: check-license-header
+    description: "checks if all files have proper license header"
+    deps:
+      - dev/addlicense:app
+    script: |
+      tmpdir=$(mktemp -d)
+      
+      leeway collect files               --format-string '{{ range . }}{{ .Name }}{{"\n"}}{{ end }}' | uniq > $tmpdir/all
+      leeway collect files --variant oss --format-string '{{ range . }}{{ .Name }}{{"\n"}}{{ end }}' | uniq > $tmpdir/oss
+      
+      grep -v -f $tmpdir/oss $tmpdir/all > $tmpdir/ee
+      grep -E "^components\/ee\/" $tmpdir/oss >> $tmpdir/ee
+      grep -v -E "^chart\/" $tmpdir/oss | grep -v -E "^install\/" > $tmpdir/agpl
+      grep -E "^install\/installer" $tmpdir/oss >> $tmpdir/agpl
+      grep -v -f $tmpdir/agpl $tmpdir/oss > $tmpdir/mit
+
+      cat $tmpdir/ee   | while read f; do echo "$PWD/../$f"; done | addlicense --check -s -l gpshf . || (echo "missing EE license header"; touch check_failed; exit 1)
+      cat $tmpdir/agpl | while read f; do echo "$PWD/../$f"; done | addlicense --check -s -l agpl  . || (echo "missing AGPL license header"; touch check_failed; exit 1)
+      cat $tmpdir/mit  | while read f; do echo "$PWD/../$f"; done | addlicense --check -s -l mit   . || (echo "missing MIT license header"; touch check_failed; exit 1)
   - name: dejson-log-output
     script: |-
       jq -Rr '. as $line |

@@ -57,6 +57,13 @@ async function build(context, version) {
         workspaceFeatureFlags,
     }));
 
+    werft.phase("check", "check licenses");
+    exec(`leeway run --werft components:check-license-header`);
+    // workaround for https://github.com/TypeFox/leeway/issues/35
+    if (fs.existsSync("components/check_failed")) {
+        werft.fail("check", "missing license header");
+    }
+
     /**
      * Build
      */
