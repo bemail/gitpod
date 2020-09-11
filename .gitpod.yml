@@ -1,5 +1,6 @@
 image: eu.gcr.io/gitpod-core-dev/dev/dev-environment:me-cercscheduler.3
 workspaceLocation: gitpod/gitpod-ws.theia-workspace
+ide: code
 checkoutLocation: gitpod
 ports:
   - port: 1337
