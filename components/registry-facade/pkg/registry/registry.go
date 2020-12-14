@@ -10,11 +10,13 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/content/local"
@@ -29,6 +31,7 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sys/unix"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -71,6 +74,7 @@ type Registry struct {
 	SpecProvider   map[string]ImageSpecProvider
 
 	metrics *metrics
+	srv     *http.Server
 }
 
 // NewRegistry creates a new registry
@@ -204,6 +208,11 @@ func (reg *Registry) Serve() error {
 	mux := http.NewServeMux()
 	mux.Handle("/", handler)
 
+	reg.srv = &http.Server{
+		Addr:    fmt.Sprintf(":%d", reg.Config.Port),
+		Handler: mux,
+	}
+
 	if addr := os.Getenv("REGFAC_NO_TLS_DEBUG"); addr != "" {
 		// Gitpod port-forwarding also does SSL termination. If we only served the HTTPS service
 		// when using telepresence we could not make any requests to the registry facade directly,
@@ -214,8 +223,37 @@ func (reg *Registry) Serve() error {
 		go http.ListenAndServe(addr, mux)
 	}
 
+	// enable socket and port re-use
+	lc := &net.ListenConfig{
+		Control: func(network, address string, c syscall.RawConn) (err error) {
+			c.Control(func(fd uintptr) {
+				err = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEADDR, 1)
+				if err != nil {
+					return
+				}
+
+				err = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+				if err != nil {
+					return
+				}
+			})
+
+			if err != nil {
+				log.WithError(err).Warn("failed to enable SO_REUSEADDR and/or SO_REUSEPORT")
+			} else {
+				log.Debug("enabled SO_REUSEADDR and SO_REUSEPORT")
+			}
+			return
+		},
+	}
+
+	l, err := lc.Listen(context.Background(), "tcp", reg.srv.Addr)
+	if err != nil {
+		return err
+	}
+
 	if reg.Config.TLS != nil {
-		log.WithField("addr", fmt.Sprintf(":%d", reg.Config.Port)).Info("HTTPS server listening")
+		log.WithField("addr", reg.srv.Addr).Info("HTTPS server listening")
 
 		cert, key := reg.Config.TLS.Certificate, reg.Config.TLS.PrivateKey
 		if tproot := os.Getenv("TELEPRESENCE_ROOT"); tproot != "" {
@@ -223,11 +261,11 @@ func (reg *Registry) Serve() error {
 			key = filepath.Join(tproot, key)
 		}
 
-		return http.ListenAndServeTLS(fmt.Sprintf(":%d", reg.Config.Port), cert, key, mux)
+		return reg.srv.ServeTLS(l, cert, key)
 	}
 
 	log.WithField("addr", fmt.Sprintf(":%d", reg.Config.Port)).Info("registry server listening")
-	return http.ListenAndServe(fmt.Sprintf(":%d", reg.Config.Port), mux)
+	return reg.srv.Serve(l)
 }
 
 // MustServe calls serve and logs any error as Fatal
@@ -236,6 +274,15 @@ func (reg *Registry) MustServe() {
 	if err != nil {
 		log.WithError(err).Fatal("cannot serve registry")
 	}
+}
+
+// Shutdown gracefully shuts down the registry-facade. It will finish
+// answering ongoing requests, but won't accept new ones.
+func (reg *Registry) Shutdown() error {
+	if reg.srv == nil {
+		return nil
+	}
+	return reg.srv.Shutdown(context.Background())
 }
 
 func (reg *Registry) requireAuthentication(h http.Handler) http.Handler {

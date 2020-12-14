@@ -83,6 +83,11 @@ var runCmd = &cobra.Command{
 				log.WithError(err).Fatal("cannot create registry")
 			}
 			go reg.MustServe()
+			defer func() {
+				log.Warn("shutting down registry-facade server")
+				reg.Shutdown()
+				log.Warn("registry-facade server shutdown complete")
+			}()
 		}
 		if cfg.BlobServe != nil {
 			srv, err := blobserve.NewServer(*cfg.BlobServe, resolverProvider)
