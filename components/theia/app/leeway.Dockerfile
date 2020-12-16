@@ -6,6 +6,10 @@
 ################ Alpine ####################
 # copy nodejs from the official alpine-based image because of https://github.com/TypeFox/gitpod/issues/2579
 FROM node:12.14.1-alpine AS node_installer
+
+# install keytar in order to fix several vscode extensions: https://github.com/gitpod-io/gitpod/issues/2169
+RUN npm install -g keytar
+
 RUN mkdir -p /theia/node/bin \
     /theia/node/include/node/ \
     /theia/node/lib/node_modules/npm/ \
