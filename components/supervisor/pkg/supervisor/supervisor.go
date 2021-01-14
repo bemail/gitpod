@@ -169,9 +169,15 @@ func Run(options ...RunOption) {
 	}
 	apiServices = append(apiServices, additionalServices...)
 
+	// The reaper can be turned into a terminating reaper by writing true to this channel.
+	// When in terminating mode, the reaper will send SIGTERM to each child that gets reparented
+	// to us and is still running. We use this mechanism to send SIGTERM to a shell child processes
+	// that get reparented once their parent shell terminates during shutdown.
+	terminatingReaper := make(chan bool, 1)
+
 	var wg sync.WaitGroup
 	wg.Add(6)
-	go reaper(ctx, &wg)
+	go reaper(ctx, &wg, terminatingReaper)
 	go startAndWatchIDE(ctx, cfg, &wg, ideReady)
 	go startContentInit(ctx, cfg, &wg, cstate)
 	go startAPIEndpoint(ctx, cfg, &wg, apiServices, apiEndpointOpts...)
@@ -203,6 +209,7 @@ func Run(options ...RunOption) {
 	}
 
 	log.Info("received SIGTERM - tearing down")
+	terminatingReaper <- true
 	err = termMux.Close()
 	if err != nil {
 		log.WithError(err).Error("terminal closure failed")
@@ -305,9 +312,10 @@ func hasMetadataAccess() bool {
 	return false
 }
 
-func reaper(ctx context.Context, wg *sync.WaitGroup) {
+func reaper(ctx context.Context, wg *sync.WaitGroup, terminatingReaper <-chan bool) {
 	defer wg.Done()
 
+	var terminating bool
 	sigs := make(chan os.Signal, 128)
 	signal.Notify(sigs, syscall.SIGCHLD)
 	for {
@@ -315,6 +323,8 @@ func reaper(ctx context.Context, wg *sync.WaitGroup) {
 		case <-ctx.Done():
 			return
 		case <-sigs:
+		case terminating = <-terminatingReaper:
+			continue
 		}
 
 		pid, err := unix.Wait4(-1, nil, 0, nil)
@@ -325,6 +335,21 @@ func reaper(ctx context.Context, wg *sync.WaitGroup) {
 		}
 		if err != nil {
 			log.WithField("pid", pid).WithError(err).Debug("cannot call waitpid() for re-parented child")
+			continue
+		}
+
+		if !terminating {
+			continue
+		}
+		proc, err := os.FindProcess(pid)
+		if err != nil {
+			log.WithField("pid", pid).WithError(err).Debug("cannot find re-parented process")
+			continue
+		}
+		err = proc.Signal(syscall.SIGTERM)
+		if err != nil {
+			log.WithField("pid", pid).WithError(err).Debug("cannot send SIGTERM to re-parented process")
+			continue
 		}
 	}
 }
