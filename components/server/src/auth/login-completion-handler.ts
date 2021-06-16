@@ -90,7 +90,21 @@ export class LoginCompletionHandler {
                 }
             });
         } 
-        response.redirect(returnTo);
+        // response.redirect(returnTo);
+        response.send(`<!DOCTYPE HTML>
+        <html lang="en-US">
+            <head>
+                <meta charset="UTF-8">
+                <meta http-equiv="refresh" content="0; url=${returnTo}">
+                <script type="text/javascript">
+                    window.location.href = "${returnTo}"
+                </script>
+                <title>Redirection</title>
+            </head>
+            <body>
+                Redirecting to: <a href='${returnTo}'>${returnTo}</a>
+            </body>
+        </html>`);
     }
 
     protected async updateAuthProviderAsVerified(hostname: string, user: User) {
