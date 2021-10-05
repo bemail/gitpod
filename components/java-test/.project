@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>supervisor-api</name>
-	<comment>Project java created by Buildship.</comment>
+	<name>java-test</name>
+	<comment>Project java-test created by Buildship.</comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -22,7 +22,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>0</id>
+			<id>1633438115134</id>
 			<name></name>
 			<type>30</type>
 			<matcher>

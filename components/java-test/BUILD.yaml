@@ -1,0 +1,19 @@
+packages:
+  - name: lib
+    type: generic
+    srcs:
+      - "**/*.java"
+      - "build.gradle"
+      - "gradle.properties"
+      - "gradle/wrapper/*"
+      - "gradlew"
+      - "settings.gradle"
+    env:
+      - JAVA_HOME=/home/gitpod/.sdkman/candidates/java/current
+    deps:
+      - components/supervisor-api/java:lib
+    config:
+      commands:
+        - ["ls", "-l", "components-supervisor-api-java--lib"]
+        - ["ls", "-l", "components-supervisor-api-java--lib/build/libs"]
+        - ["./gradlew", "-Plocal_lib=components-supervisor-api-java--lib/build/libs", "jar"]
