@@ -4,16 +4,13 @@ plugins {
 
 repositories {
     mavenCentral()
-    flatDir {
-        dirs "${local_lib}"
-    }
 }
 
 group 'io.gitpod.test'
 
 dependencies {
-    implementation 'org.gitpod.api:supervisor-api:1.0-SNAPSHOT'
-
+    implementation(project(":supervisor-api"))
+    
     implementation 'com.google.protobuf:protobuf-java:3.17.3'
     implementation 'com.google.protobuf:protobuf-java-util:3.17.3'
     implementation 'com.google.api.grpc:proto-google-common-protos:2.2.2'

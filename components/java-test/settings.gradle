@@ -9,3 +9,6 @@
 
 rootProject.name = 'java-test'
 include('app')
+
+include(':supervisor-api')
+project(':supervisor-api').projectDir = new File('../supervisor-api/java/')

@@ -66,6 +66,7 @@
       "go.lintTool": "golangci-lint",
       "gopls": {
          "allowModfileModifications": true
-      }
+      },
+      "java.configuration.updateBuildConfiguration": "automatic"
    }
 }
