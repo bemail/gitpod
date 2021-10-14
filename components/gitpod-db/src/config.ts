@@ -7,7 +7,6 @@
 import { injectable } from 'inversify';
 import { log } from '@gitpod/gitpod-protocol/lib/util/logging';
 import { getEnvVarParsed, getEnvVar } from '@gitpod/gitpod-protocol/lib/env';
-import { ConnectionConfig } from 'mysql';
 
 @injectable()
 export class Config {
@@ -24,17 +23,6 @@ export class Config {
         log.info(`Using DB: ${dbSetup.host}:${dbSetup.port}/${dbSetup.database}`);
 
         return dbSetup;
-    }
-
-    get mysqlConfig(): ConnectionConfig {
-        const dbConfig = this.dbConfig;
-        return {
-            host: dbConfig.host,
-            port: dbConfig.port,
-            user: dbConfig.username,
-            password: dbConfig.password,
-            database: dbConfig.database
-        };
     }
 
     get dbEncryptionKeys(): string {

@@ -9,34 +9,25 @@
  */
 import "reflect-metadata";
 import { Config } from "./config";
-import * as mysql from 'mysql';
+import { TypeORM } from ".";
 
 const retryPeriod = 5000; // [ms]
 const totalAttempts = 30;
-const connCfg = {
-    ...new Config().mysqlConfig,
-    timeout: retryPeriod
-};
 
-function connectOrReschedule(attempt: number) {
-    const con = mysql.createConnection(connCfg);
+async function connectOrReschedule(attempt: number) {
+    const config = new Config();
+    const typeorm = new TypeORM(config, { connectTimeoutMS: retryPeriod });
     try {
-        con.connect((err) => {
-            if (err) {
-                rescheduleConnectionAttempt(attempt, err);
-            } else {
-                console.log("DB is available");
-                con.destroy();
-                process.exit(0);
-            }
-        });
+        await typeorm.connect();
+        console.log("DB is available");
+        process.exit(0);
     } catch(err) {
         rescheduleConnectionAttempt(attempt, err);
     }
 
 }
 
-function rescheduleConnectionAttempt(attempt: number, err: Error) {
+function rescheduleConnectionAttempt(attempt: number, err: any) {
     if(attempt == totalAttempts) {
         console.log(`Could not connect within ${totalAttempts} attempts. Stopping.`)
         process.exit(1);

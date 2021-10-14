@@ -11,7 +11,7 @@ import * as opentracing from 'opentracing';
 export class DBWithTracing<T> {
     protected tracer: opentracing.Tracer;
     constructor(protected readonly db: any, manager: TracingManager) {
-        this.tracer = manager.getTracerForService("mysql");
+        this.tracer = manager.getTracerForService("db");
     }
 
     public trace(ctx: TraceContext): T {

@@ -26,13 +26,10 @@ export class TypeORM {
     static defaultOptions(dir: string): ConnectionOptions {
         console.log(`Loading TypeORM entities and migrations from ${dir}`);
         return {
-            type: "mysql",
+            type: "postgres",
             synchronize: false,
             migrationsRun: false,
             logging: false,
-            connectTimeout: 20000,
-            timezone: 'utc',
-            charset: 'utf8mb4',
             entities: [
                 dir + "/entity/**/*.js",
                 dir + "/entity/**/*.ts"
