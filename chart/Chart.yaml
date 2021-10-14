@@ -25,3 +25,7 @@ dependencies:
   version: 8.16.0
   repository: https://charts.bitnami.com/bitnami
   condition: rabbitmq.enabled
+- name: cockroachdb
+  version: 6.2.4
+  repository: https://charts.cockroachdb.com/
+  condition: cockroachdb.enabled

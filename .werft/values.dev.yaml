@@ -243,3 +243,27 @@ rabbitmq:
 
 cert-manager:
   enabled: true
+
+cockroachdb:
+  enabled: true
+  # allocate memory resources to CockroachDB pods in your cluster.
+  statefulset:
+    resources:
+      requests:
+        memory: 2Gi
+      limits:
+        memory: 2Gi
+  # are memory limits that we recommend setting to 1/4 of the above resource allocation. When running CockroachDB, you must set these limits explicitly to avoid running out of memory.
+  conf:
+    cache: 500Mi
+    max-sql-memory: 500Mi
+
+  storage:
+    persistentVolume:
+      # defaults to 100Gi of disk space per pod, which you may increase or decrease for your use case.
+      size: 1Gi
+      # uses the default storage class for your environment. We strongly recommend that you specify a storage class which uses an SSD.
+      storageClass: SSD
+  tls:
+    # must be set to yes/true to deploy in secure mode.
+    enabled: false
