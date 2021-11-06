@@ -281,6 +281,24 @@ func (c *Client) Fetch(ctx context.Context) (err error) {
 	return c.Git(ctx, "fetch")
 }
 
+// CloneDotfiles clones the dotfiles repository of the user
+func (c *Client) CloneDotfiles(ctx context.Context) (err error) {
+	if err := os.MkdirAll(c.Location, 0755); err != nil {
+		log.WithError(err).Error()
+	}
+
+	args := []string{"--depth=1", "--no-single-branch", c.RemoteURI}
+
+	for key, value := range c.Config {
+		args = append(args, "--config")
+		args = append(args, strings.TrimSpace(key)+"="+strings.TrimSpace(value))
+	}
+
+	args = append(args, "https://github.com/filiptronicek/dotfiles")
+
+	return c.Git(ctx, "clone", args...)
+}
+
 // UpdateRemote performs a git fetch on the upstream remote URI
 func (c *Client) UpdateRemote(ctx context.Context) (err error) {
 	//nolint:staticcheck,ineffassign
