@@ -38,3 +38,4 @@ variants:
     go:
       buildTags:
       - -tags oss
+
