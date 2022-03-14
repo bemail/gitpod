@@ -44,6 +44,12 @@ pod:
         werft job logs ${BUILD_ID} | werft log slice "cleanup"
       }
 
+      function updateDownloadUrl() {
+        data=$(curl -sSL "https://data.services.jetbrains.com/products?code=$1&fields=distributions%2Clink%2Cname%2Creleases&_=$(date +%s)000")
+        link=$(echo "$data" | jq -r '.[0].releases[0].downloads.linux.link')
+        yq w -i WORKSPACE.yaml "defaultArgs.$2DownloadUrl" "$link"
+      }
+
       echo "preparing config." | werft log slice prepare
       sudo chown -R gitpod:gitpod /workspace
       gcloud auth activate-service-account --key-file /mnt/secrets/gcp-sa/service-account.json
@@ -52,11 +58,18 @@ pod:
       go install github.com/csweichel/oci-tool@latest 2>&1 | werft log slice prepare
       werft log slice prepare --done
 
+      werft log phase "update JetBrains EAP version" "update"
+      updateDownloadUrl IIU intellij
+      updateDownloadUrl GO goland
+      updateDownloadUrl PCP pycharm
+      updateDownloadUrl PS phpstorm
+      werft log slice update --done
+
       werft log phase "build preview environment" "build preview environment"
       # this is because we don't want to increate gitpod-build-main number, we can choose a name
       cp .werft/build.yaml .werft/test.yaml
       # version is actual namespace that werft is build, --job-file should be same with above
-      VERSION=$(werft run github -j .werft/test.yaml -a version=gitpod-test-main github.com/gitpod-io/gitpod:main)
+      VERSION=$(werft run github -j .werft/test.yaml -a version=gitpod-test-main -s WORKSPACE.yaml github.com/gitpod-io/gitpod:main)
       echo "start build preview environment, job name: ${VERSION}, this will take long time" | werft log slice "build test environment"
       werft log result -d "build job" url "https://werft.gitpod-dev.com/job/${VERSION}"
 
