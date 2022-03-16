@@ -640,7 +640,7 @@ export interface PrebuiltWorkspace {
 
 export namespace PrebuiltWorkspace {
     export function isDone(pws: PrebuiltWorkspace) {
-        return pws.state === "available" || pws.state === "timeout" || pws.state === "aborted";
+        return ["available", "timeout", "aborted", "failed"].includes(pws.state);
     }
 
     export function isAvailable(pws: PrebuiltWorkspace) {
