@@ -112,6 +112,7 @@ import { ExtendedUser } from "@gitpod/ws-manager/lib/constraints";
 import { increaseFailedInstanceStartCounter, increaseSuccessfulInstanceStartCounter } from "../prometheus-metrics";
 import { ContextParser } from "./context-parser-service";
 import { GCloudAdcWorkspaceModifier, TailscaleWorkspaceModifier } from "./connections-workspace-modifier";
+import { ConnectionsProvider } from "./connections-provider";
 
 export interface StartWorkspaceOptions {
     rethrow?: boolean;
@@ -140,6 +141,7 @@ export class WorkspaceStarter {
     @inject(OneTimeSecretServer) protected readonly otsServer: OneTimeSecretServer;
     @inject(ProjectDB) protected readonly projectDB: ProjectDB;
     @inject(ContextParser) protected contextParser: ContextParser;
+    @inject(ConnectionsProvider) protected connectionProvider: ConnectionsProvider;
 
     public async startWorkspace(
         ctx: TraceContext,
@@ -1022,6 +1024,7 @@ export class WorkspaceStarter {
 
         const project = workspace.projectId ? await this.projectDB.findProjectById(workspace.projectId) : undefined;
         const connectionModifiers = (project?.connections || []).map((c) => {
+            // FIXME(at) inject the deps here
             switch (c.id) {
                 case "tailscale":
                     return new TailscaleWorkspaceModifier(c as TailscaleConnection);

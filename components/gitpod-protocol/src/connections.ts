@@ -17,3 +17,9 @@ export interface TailscaleConnection extends Connection {
 export interface GCloudAdcConnection extends Connection {
     serviceAccount: string;
 }
+export interface ConnectionType {
+    name: string;
+    attributes: string[];
+    envVars: { name: string; value: string }[];
+    tasks: { name: string; command: string }[];
+}
