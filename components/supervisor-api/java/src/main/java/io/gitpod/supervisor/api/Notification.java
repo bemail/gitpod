@@ -3972,7 +3972,7 @@ public final class Notification {
       "upervisor.NotifyRequest\"Q\n\016RespondReques" +
       "t\022\021\n\trequestId\030\001 \001(\004\022,\n\010response\030\002 \001(\0132\032" +
       ".supervisor.NotifyResponse\"\021\n\017RespondRes" +
-      "ponse2\315\002\n\023NotificationService\022`\n\006Notify\022" +
+      "ponse2\277\003\n\023NotificationService\022`\n\006Notify\022" +
       "\031.supervisor.NotifyRequest\032\032.supervisor." +
       "NotifyResponse\"\037\202\323\344\223\002\031\"\027/v1/notification" +
       "/notify\022n\n\tSubscribe\022\034.supervisor.Subscr" +
@@ -3980,9 +3980,12 @@ public final class Notification {
       "e\"\"\202\323\344\223\002\034\022\032/v1/notification/subscribe0\001\022" +
       "d\n\007Respond\022\032.supervisor.RespondRequest\032\033" +
       ".supervisor.RespondResponse\" \202\323\344\223\002\032\"\030/v1" +
-      "/notification/respondBF\n\030io.gitpod.super" +
-      "visor.apiZ*github.com/gitpod-io/gitpod/s" +
-      "upervisor/apib\006proto3"
+      "/notification/respond\022p\n\017SetActiveClient" +
+      "\022\031.supervisor.NotifyRequest\032\032.supervisor" +
+      ".NotifyResponse\"&\202\323\344\223\002 \"\036/v1/notificatio" +
+      "n/active-clientBF\n\030io.gitpod.supervisor." +
+      "apiZ*github.com/gitpod-io/gitpod/supervi" +
+      "sor/apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

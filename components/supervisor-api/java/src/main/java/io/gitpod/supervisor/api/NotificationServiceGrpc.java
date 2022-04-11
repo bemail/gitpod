@@ -8,7 +8,8 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
  * <pre>
- * Notification serivce allows external processes to notify the user and ask for decisions.
+ * Notification serivce allows external processes to notify the user and ask for
+ * decisions.
  * </pre>
  */
 @javax.annotation.Generated(
@@ -115,6 +116,37 @@ public final class NotificationServiceGrpc {
     return getRespondMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.NotifyRequest,
+      io.gitpod.supervisor.api.Notification.NotifyResponse> getSetActiveClientMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetActiveClient",
+      requestType = io.gitpod.supervisor.api.Notification.NotifyRequest.class,
+      responseType = io.gitpod.supervisor.api.Notification.NotifyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.NotifyRequest,
+      io.gitpod.supervisor.api.Notification.NotifyResponse> getSetActiveClientMethod() {
+    io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.NotifyRequest, io.gitpod.supervisor.api.Notification.NotifyResponse> getSetActiveClientMethod;
+    if ((getSetActiveClientMethod = NotificationServiceGrpc.getSetActiveClientMethod) == null) {
+      synchronized (NotificationServiceGrpc.class) {
+        if ((getSetActiveClientMethod = NotificationServiceGrpc.getSetActiveClientMethod) == null) {
+          NotificationServiceGrpc.getSetActiveClientMethod = getSetActiveClientMethod =
+              io.grpc.MethodDescriptor.<io.gitpod.supervisor.api.Notification.NotifyRequest, io.gitpod.supervisor.api.Notification.NotifyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetActiveClient"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  io.gitpod.supervisor.api.Notification.NotifyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  io.gitpod.supervisor.api.Notification.NotifyResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new NotificationServiceMethodDescriptorSupplier("SetActiveClient"))
+              .build();
+        }
+      }
+    }
+    return getSetActiveClientMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -161,15 +193,16 @@ public final class NotificationServiceGrpc {
 
   /**
    * <pre>
-   * Notification serivce allows external processes to notify the user and ask for decisions.
+   * Notification serivce allows external processes to notify the user and ask for
+   * decisions.
    * </pre>
    */
   public static abstract class NotificationServiceImplBase implements io.grpc.BindableService {
 
     /**
      * <pre>
-     * Prompts the user and asks for a decision. Typically called by some external process.
-     * If the list of actions is empty this service returns immediately,
+     * Prompts the user and asks for a decision. Typically called by some external
+     * process. If the list of actions is empty this service returns immediately,
      * otherwise it blocks until the user has made their choice.
      * </pre>
      */
@@ -190,12 +223,25 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Report a user's choice as a response to a notification. Typically called by the IDE.
+     * Report a user's choice as a response to a notification. Typically called by
+     * the IDE.
      * </pre>
      */
     public void respond(io.gitpod.supervisor.api.Notification.RespondRequest request,
         io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.RespondResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRespondMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Called by the notifications clients to inform supervisor about
+     * which is the latest client actively used by the user.
+     * Useful for gp open / gp preview to trigger actions in the right client
+     * </pre>
+     */
+    public void setActiveClient(io.gitpod.supervisor.api.Notification.NotifyRequest request,
+        io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.NotifyResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetActiveClientMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -221,13 +267,21 @@ public final class NotificationServiceGrpc {
                 io.gitpod.supervisor.api.Notification.RespondRequest,
                 io.gitpod.supervisor.api.Notification.RespondResponse>(
                   this, METHODID_RESPOND)))
+          .addMethod(
+            getSetActiveClientMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                io.gitpod.supervisor.api.Notification.NotifyRequest,
+                io.gitpod.supervisor.api.Notification.NotifyResponse>(
+                  this, METHODID_SET_ACTIVE_CLIENT)))
           .build();
     }
   }
 
   /**
    * <pre>
-   * Notification serivce allows external processes to notify the user and ask for decisions.
+   * Notification serivce allows external processes to notify the user and ask for
+   * decisions.
    * </pre>
    */
   public static final class NotificationServiceStub extends io.grpc.stub.AbstractAsyncStub<NotificationServiceStub> {
@@ -244,8 +298,8 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Prompts the user and asks for a decision. Typically called by some external process.
-     * If the list of actions is empty this service returns immediately,
+     * Prompts the user and asks for a decision. Typically called by some external
+     * process. If the list of actions is empty this service returns immediately,
      * otherwise it blocks until the user has made their choice.
      * </pre>
      */
@@ -268,7 +322,8 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Report a user's choice as a response to a notification. Typically called by the IDE.
+     * Report a user's choice as a response to a notification. Typically called by
+     * the IDE.
      * </pre>
      */
     public void respond(io.gitpod.supervisor.api.Notification.RespondRequest request,
@@ -276,11 +331,25 @@ public final class NotificationServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getRespondMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Called by the notifications clients to inform supervisor about
+     * which is the latest client actively used by the user.
+     * Useful for gp open / gp preview to trigger actions in the right client
+     * </pre>
+     */
+    public void setActiveClient(io.gitpod.supervisor.api.Notification.NotifyRequest request,
+        io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.NotifyResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetActiveClientMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
    * <pre>
-   * Notification serivce allows external processes to notify the user and ask for decisions.
+   * Notification serivce allows external processes to notify the user and ask for
+   * decisions.
    * </pre>
    */
   public static final class NotificationServiceBlockingStub extends io.grpc.stub.AbstractBlockingStub<NotificationServiceBlockingStub> {
@@ -297,8 +366,8 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Prompts the user and asks for a decision. Typically called by some external process.
-     * If the list of actions is empty this service returns immediately,
+     * Prompts the user and asks for a decision. Typically called by some external
+     * process. If the list of actions is empty this service returns immediately,
      * otherwise it blocks until the user has made their choice.
      * </pre>
      */
@@ -320,18 +389,32 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Report a user's choice as a response to a notification. Typically called by the IDE.
+     * Report a user's choice as a response to a notification. Typically called by
+     * the IDE.
      * </pre>
      */
     public io.gitpod.supervisor.api.Notification.RespondResponse respond(io.gitpod.supervisor.api.Notification.RespondRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getRespondMethod(), getCallOptions(), request);
     }
+
+    /**
+     * <pre>
+     * Called by the notifications clients to inform supervisor about
+     * which is the latest client actively used by the user.
+     * Useful for gp open / gp preview to trigger actions in the right client
+     * </pre>
+     */
+    public io.gitpod.supervisor.api.Notification.NotifyResponse setActiveClient(io.gitpod.supervisor.api.Notification.NotifyRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetActiveClientMethod(), getCallOptions(), request);
+    }
   }
 
   /**
    * <pre>
-   * Notification serivce allows external processes to notify the user and ask for decisions.
+   * Notification serivce allows external processes to notify the user and ask for
+   * decisions.
    * </pre>
    */
   public static final class NotificationServiceFutureStub extends io.grpc.stub.AbstractFutureStub<NotificationServiceFutureStub> {
@@ -348,8 +431,8 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Prompts the user and asks for a decision. Typically called by some external process.
-     * If the list of actions is empty this service returns immediately,
+     * Prompts the user and asks for a decision. Typically called by some external
+     * process. If the list of actions is empty this service returns immediately,
      * otherwise it blocks until the user has made their choice.
      * </pre>
      */
@@ -361,7 +444,8 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Report a user's choice as a response to a notification. Typically called by the IDE.
+     * Report a user's choice as a response to a notification. Typically called by
+     * the IDE.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<io.gitpod.supervisor.api.Notification.RespondResponse> respond(
@@ -369,11 +453,25 @@ public final class NotificationServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getRespondMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Called by the notifications clients to inform supervisor about
+     * which is the latest client actively used by the user.
+     * Useful for gp open / gp preview to trigger actions in the right client
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<io.gitpod.supervisor.api.Notification.NotifyResponse> setActiveClient(
+        io.gitpod.supervisor.api.Notification.NotifyRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetActiveClientMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_NOTIFY = 0;
   private static final int METHODID_SUBSCRIBE = 1;
   private static final int METHODID_RESPOND = 2;
+  private static final int METHODID_SET_ACTIVE_CLIENT = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -403,6 +501,10 @@ public final class NotificationServiceGrpc {
         case METHODID_RESPOND:
           serviceImpl.respond((io.gitpod.supervisor.api.Notification.RespondRequest) request,
               (io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.RespondResponse>) responseObserver);
+          break;
+        case METHODID_SET_ACTIVE_CLIENT:
+          serviceImpl.setActiveClient((io.gitpod.supervisor.api.Notification.NotifyRequest) request,
+              (io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.NotifyResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -468,6 +570,7 @@ public final class NotificationServiceGrpc {
               .addMethod(getNotifyMethod())
               .addMethod(getSubscribeMethod())
               .addMethod(getRespondMethod())
+              .addMethod(getSetActiveClientMethod())
               .build();
         }
       }

@@ -22,14 +22,19 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationServiceClient interface {
-	// Prompts the user and asks for a decision. Typically called by some external process.
-	// If the list of actions is empty this service returns immediately,
+	// Prompts the user and asks for a decision. Typically called by some external
+	// process. If the list of actions is empty this service returns immediately,
 	// otherwise it blocks until the user has made their choice.
 	Notify(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*NotifyResponse, error)
 	// Subscribe to notifications. Typically called by the IDE.
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (NotificationService_SubscribeClient, error)
-	// Report a user's choice as a response to a notification. Typically called by the IDE.
+	// Report a user's choice as a response to a notification. Typically called by
+	// the IDE.
 	Respond(ctx context.Context, in *RespondRequest, opts ...grpc.CallOption) (*RespondResponse, error)
+	// Called by the notifications clients to inform supervisor about
+	// which is the latest client actively used by the user.
+	// Useful for gp open / gp preview to trigger actions in the right client
+	SetActiveClient(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*NotifyResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -90,18 +95,32 @@ func (c *notificationServiceClient) Respond(ctx context.Context, in *RespondRequ
 	return out, nil
 }
 
+func (c *notificationServiceClient) SetActiveClient(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*NotifyResponse, error) {
+	out := new(NotifyResponse)
+	err := c.cc.Invoke(ctx, "/supervisor.NotificationService/SetActiveClient", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility
 type NotificationServiceServer interface {
-	// Prompts the user and asks for a decision. Typically called by some external process.
-	// If the list of actions is empty this service returns immediately,
+	// Prompts the user and asks for a decision. Typically called by some external
+	// process. If the list of actions is empty this service returns immediately,
 	// otherwise it blocks until the user has made their choice.
 	Notify(context.Context, *NotifyRequest) (*NotifyResponse, error)
 	// Subscribe to notifications. Typically called by the IDE.
 	Subscribe(*SubscribeRequest, NotificationService_SubscribeServer) error
-	// Report a user's choice as a response to a notification. Typically called by the IDE.
+	// Report a user's choice as a response to a notification. Typically called by
+	// the IDE.
 	Respond(context.Context, *RespondRequest) (*RespondResponse, error)
+	// Called by the notifications clients to inform supervisor about
+	// which is the latest client actively used by the user.
+	// Useful for gp open / gp preview to trigger actions in the right client
+	SetActiveClient(context.Context, *NotifyRequest) (*NotifyResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -117,6 +136,9 @@ func (UnimplementedNotificationServiceServer) Subscribe(*SubscribeRequest, Notif
 }
 func (UnimplementedNotificationServiceServer) Respond(context.Context, *RespondRequest) (*RespondResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Respond not implemented")
+}
+func (UnimplementedNotificationServiceServer) SetActiveClient(context.Context, *NotifyRequest) (*NotifyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetActiveClient not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 
@@ -188,6 +210,24 @@ func _NotificationService_Respond_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_SetActiveClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotifyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SetActiveClient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/supervisor.NotificationService/SetActiveClient",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SetActiveClient(ctx, req.(*NotifyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +242,10 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Respond",
 			Handler:    _NotificationService_Respond_Handler,
+		},
+		{
+			MethodName: "SetActiveClient",
+			Handler:    _NotificationService_SetActiveClient_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
