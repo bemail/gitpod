@@ -6,7 +6,6 @@ package supervisor
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -22,6 +21,8 @@ const (
 	NotifierMaxPendingNotifications   = 120
 	SubscriberMaxPendingNotifications = 100
 )
+
+var activeClient string
 
 // NewNotificationService creates a new notification service.
 func NewNotificationService() *NotificationService {
@@ -251,6 +252,12 @@ func isActionAllowed(action string, req *api.NotifyRequest) bool {
 }
 
 func (srv *NotificationService) SetActiveClient(ctx context.Context, req *api.SetActiveClientRequest) (*api.SetActiveClientResponse, error) {
-	fmt.Println("HELLOOOOO")
+	activeClient = req.ActiveClient
 	return &api.SetActiveClientResponse{}, nil
+}
+
+func (srv *NotificationService) GetActiveClient(ctx context.Context, req *api.GetActiveClientRequest) (*api.GetActiveClientResponse, error) {
+	return &api.GetActiveClientResponse{
+		ActiveClient: activeClient,
+	}, nil
 }

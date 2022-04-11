@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/gitpod-io/gitpod/common-go/log"
+	"github.com/gitpod-io/gitpod/supervisor/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/sys/unix"
 )
@@ -91,6 +92,12 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+
+	// experiment
+	client := api.NewNotificationServiceClient(dialSupervisor())
+	client.SetActiveClient()
+
+	// experiment end
 }
 
 func reaper(sigs <-chan os.Signal) {

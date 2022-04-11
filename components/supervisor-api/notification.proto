@@ -48,6 +48,12 @@ service NotificationService {
       post : "/v1/notification/active-client"
     };
   }
+
+  rpc GetAtiveClient(GetActiveClientRequest) returns (GetActiveClientResponse) {
+    option (google.api.http) = {
+      get : "/v1/notification/active-client"
+    };
+  }
 }
 
 message NotifyRequest {
@@ -81,10 +87,10 @@ message RespondRequest {
 
 message RespondResponse {}
 
-message SetActiveClientRequest {
-  string activeClient = 1;
-}
+message SetActiveClientRequest { string activeClient = 1; }
 
-message SetActiveClientResponse {
-  string action = 1;
-}
+message SetActiveClientResponse { string action = 1; }
+
+message GetActiveClientRequest {}
+
+message GetActiveClientResponse { string activeClient = 1; }
