@@ -6,8 +6,8 @@ package supervisor
 
 import (
 	"context"
-	"sync"
 	"fmt"
+	"sync"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
