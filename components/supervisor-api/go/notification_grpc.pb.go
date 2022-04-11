@@ -34,7 +34,7 @@ type NotificationServiceClient interface {
 	// Called by the notifications clients to inform supervisor about
 	// which is the latest client actively used by the user.
 	// Useful for gp open / gp preview to trigger actions in the right client
-	SetActiveClient(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*NotifyResponse, error)
+	SetActiveClient(ctx context.Context, in *SetActiveClientRequest, opts ...grpc.CallOption) (*SetActiveClientResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -95,8 +95,8 @@ func (c *notificationServiceClient) Respond(ctx context.Context, in *RespondRequ
 	return out, nil
 }
 
-func (c *notificationServiceClient) SetActiveClient(ctx context.Context, in *NotifyRequest, opts ...grpc.CallOption) (*NotifyResponse, error) {
-	out := new(NotifyResponse)
+func (c *notificationServiceClient) SetActiveClient(ctx context.Context, in *SetActiveClientRequest, opts ...grpc.CallOption) (*SetActiveClientResponse, error) {
+	out := new(SetActiveClientResponse)
 	err := c.cc.Invoke(ctx, "/supervisor.NotificationService/SetActiveClient", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ type NotificationServiceServer interface {
 	// Called by the notifications clients to inform supervisor about
 	// which is the latest client actively used by the user.
 	// Useful for gp open / gp preview to trigger actions in the right client
-	SetActiveClient(context.Context, *NotifyRequest) (*NotifyResponse, error)
+	SetActiveClient(context.Context, *SetActiveClientRequest) (*SetActiveClientResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -137,7 +137,7 @@ func (UnimplementedNotificationServiceServer) Subscribe(*SubscribeRequest, Notif
 func (UnimplementedNotificationServiceServer) Respond(context.Context, *RespondRequest) (*RespondResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Respond not implemented")
 }
-func (UnimplementedNotificationServiceServer) SetActiveClient(context.Context, *NotifyRequest) (*NotifyResponse, error) {
+func (UnimplementedNotificationServiceServer) SetActiveClient(context.Context, *SetActiveClientRequest) (*SetActiveClientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetActiveClient not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
@@ -211,7 +211,7 @@ func _NotificationService_Respond_Handler(srv interface{}, ctx context.Context, 
 }
 
 func _NotificationService_SetActiveClient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NotifyRequest)
+	in := new(SetActiveClientRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func _NotificationService_SetActiveClient_Handler(srv interface{}, ctx context.C
 		FullMethod: "/supervisor.NotificationService/SetActiveClient",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).SetActiveClient(ctx, req.(*NotifyRequest))
+		return srv.(NotificationServiceServer).SetActiveClient(ctx, req.(*SetActiveClientRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

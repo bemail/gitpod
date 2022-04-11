@@ -129,7 +129,7 @@ var (
 )
 
 func request_NotificationService_SetActiveClient_0(ctx context.Context, marshaler runtime.Marshaler, client NotificationServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotifyRequest
+	var protoReq SetActiveClientRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -145,7 +145,7 @@ func request_NotificationService_SetActiveClient_0(ctx context.Context, marshale
 }
 
 func local_request_NotificationService_SetActiveClient_0(ctx context.Context, marshaler runtime.Marshaler, server NotificationServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq NotifyRequest
+	var protoReq SetActiveClientRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {

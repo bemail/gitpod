@@ -7,6 +7,7 @@ package supervisor
 import (
 	"context"
 	"sync"
+	"fmt"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -247,4 +248,9 @@ func isActionAllowed(action string, req *api.NotifyRequest) bool {
 		}
 	}
 	return false
+}
+
+func (srv *NotificationService) SetActiveClient(ctx context.Context, req *api.SetActiveClientRequest) (*api.SetActiveClientResponse, error) {
+	fmt.Println("HELLOOOOO")
+	return &api.SetActiveClientResponse{}, nil
 }

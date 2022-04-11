@@ -42,7 +42,8 @@ service NotificationService {
   // Called by the notifications clients to inform supervisor about
   // which is the latest client actively used by the user.
   // Useful for gp open / gp preview to trigger actions in the right client
-  rpc SetActiveClient(NotifyRequest) returns (NotifyResponse) {
+  rpc SetActiveClient(SetActiveClientRequest)
+      returns (SetActiveClientResponse) {
     option (google.api.http) = {
       post : "/v1/notification/active-client"
     };
@@ -79,3 +80,11 @@ message RespondRequest {
 }
 
 message RespondResponse {}
+
+message SetActiveClientRequest {
+  string activeClient = 1;
+}
+
+message SetActiveClientResponse {
+  string action = 1;
+}
