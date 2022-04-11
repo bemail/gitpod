@@ -160,20 +160,20 @@ func local_request_NotificationService_SetActiveClient_0(ctx context.Context, ma
 
 }
 
-func request_NotificationService_GetAtiveClient_0(ctx context.Context, marshaler runtime.Marshaler, client NotificationServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_NotificationService_GetActiveClient_0(ctx context.Context, marshaler runtime.Marshaler, client NotificationServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetActiveClientRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetAtiveClient(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetActiveClient(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_NotificationService_GetAtiveClient_0(ctx context.Context, marshaler runtime.Marshaler, server NotificationServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_NotificationService_GetActiveClient_0(ctx context.Context, marshaler runtime.Marshaler, server NotificationServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetActiveClientRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetAtiveClient(ctx, &protoReq)
+	msg, err := server.GetActiveClient(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -260,18 +260,18 @@ func RegisterNotificationServiceHandlerServer(ctx context.Context, mux *runtime.
 
 	})
 
-	mux.Handle("GET", pattern_NotificationService_GetAtiveClient_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_NotificationService_GetActiveClient_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/supervisor.NotificationService/GetAtiveClient", runtime.WithHTTPPathPattern("/v1/notification/active-client"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/supervisor.NotificationService/GetActiveClient", runtime.WithHTTPPathPattern("/v1/notification/active-client"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NotificationService_GetAtiveClient_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NotificationService_GetActiveClient_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -279,7 +279,7 @@ func RegisterNotificationServiceHandlerServer(ctx context.Context, mux *runtime.
 			return
 		}
 
-		forward_NotificationService_GetAtiveClient_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_NotificationService_GetActiveClient_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -404,23 +404,23 @@ func RegisterNotificationServiceHandlerClient(ctx context.Context, mux *runtime.
 
 	})
 
-	mux.Handle("GET", pattern_NotificationService_GetAtiveClient_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_NotificationService_GetActiveClient_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/supervisor.NotificationService/GetAtiveClient", runtime.WithHTTPPathPattern("/v1/notification/active-client"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/supervisor.NotificationService/GetActiveClient", runtime.WithHTTPPathPattern("/v1/notification/active-client"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NotificationService_GetAtiveClient_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NotificationService_GetActiveClient_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_NotificationService_GetAtiveClient_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_NotificationService_GetActiveClient_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -436,7 +436,7 @@ var (
 
 	pattern_NotificationService_SetActiveClient_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "notification", "active-client"}, ""))
 
-	pattern_NotificationService_GetAtiveClient_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "notification", "active-client"}, ""))
+	pattern_NotificationService_GetActiveClient_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "notification", "active-client"}, ""))
 )
 
 var (
@@ -448,5 +448,5 @@ var (
 
 	forward_NotificationService_SetActiveClient_0 = runtime.ForwardResponseMessage
 
-	forward_NotificationService_GetAtiveClient_0 = runtime.ForwardResponseMessage
+	forward_NotificationService_GetActiveClient_0 = runtime.ForwardResponseMessage
 )

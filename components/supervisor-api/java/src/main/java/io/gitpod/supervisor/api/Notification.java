@@ -6118,7 +6118,7 @@ public final class Notification {
       "eClient\030\001 \001(\t\")\n\027SetActiveClientResponse" +
       "\022\016\n\006action\030\001 \001(\t\"\030\n\026GetActiveClientReque" +
       "st\"/\n\027GetActiveClientResponse\022\024\n\014activeC" +
-      "lient\030\001 \001(\t2\326\004\n\023NotificationService\022`\n\006N" +
+      "lient\030\001 \001(\t2\327\004\n\023NotificationService\022`\n\006N" +
       "otify\022\031.supervisor.NotifyRequest\032\032.super" +
       "visor.NotifyResponse\"\037\202\323\344\223\002\031\"\027/v1/notifi" +
       "cation/notify\022n\n\tSubscribe\022\034.supervisor." +
@@ -6130,12 +6130,12 @@ public final class Notification {
       "eClient\022\".supervisor.SetActiveClientRequ" +
       "est\032#.supervisor.SetActiveClientResponse" +
       "\"&\202\323\344\223\002 \"\036/v1/notification/active-client" +
-      "\022\201\001\n\016GetAtiveClient\022\".supervisor.GetActi" +
-      "veClientRequest\032#.supervisor.GetActiveCl" +
-      "ientResponse\"&\202\323\344\223\002 \022\036/v1/notification/a" +
-      "ctive-clientBF\n\030io.gitpod.supervisor.api" +
-      "Z*github.com/gitpod-io/gitpod/supervisor" +
-      "/apib\006proto3"
+      "\022\202\001\n\017GetActiveClient\022\".supervisor.GetAct" +
+      "iveClientRequest\032#.supervisor.GetActiveC" +
+      "lientResponse\"&\202\323\344\223\002 \022\036/v1/notification/" +
+      "active-clientBF\n\030io.gitpod.supervisor.ap" +
+      "iZ*github.com/gitpod-io/gitpod/superviso" +
+      "r/apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

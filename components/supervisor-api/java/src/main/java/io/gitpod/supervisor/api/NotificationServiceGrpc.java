@@ -148,34 +148,34 @@ public final class NotificationServiceGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.GetActiveClientRequest,
-      io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getGetAtiveClientMethod;
+      io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getGetActiveClientMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "GetAtiveClient",
+      fullMethodName = SERVICE_NAME + '/' + "GetActiveClient",
       requestType = io.gitpod.supervisor.api.Notification.GetActiveClientRequest.class,
       responseType = io.gitpod.supervisor.api.Notification.GetActiveClientResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.GetActiveClientRequest,
-      io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getGetAtiveClientMethod() {
-    io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.GetActiveClientRequest, io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getGetAtiveClientMethod;
-    if ((getGetAtiveClientMethod = NotificationServiceGrpc.getGetAtiveClientMethod) == null) {
+      io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getGetActiveClientMethod() {
+    io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Notification.GetActiveClientRequest, io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getGetActiveClientMethod;
+    if ((getGetActiveClientMethod = NotificationServiceGrpc.getGetActiveClientMethod) == null) {
       synchronized (NotificationServiceGrpc.class) {
-        if ((getGetAtiveClientMethod = NotificationServiceGrpc.getGetAtiveClientMethod) == null) {
-          NotificationServiceGrpc.getGetAtiveClientMethod = getGetAtiveClientMethod =
+        if ((getGetActiveClientMethod = NotificationServiceGrpc.getGetActiveClientMethod) == null) {
+          NotificationServiceGrpc.getGetActiveClientMethod = getGetActiveClientMethod =
               io.grpc.MethodDescriptor.<io.gitpod.supervisor.api.Notification.GetActiveClientRequest, io.gitpod.supervisor.api.Notification.GetActiveClientResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAtiveClient"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetActiveClient"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   io.gitpod.supervisor.api.Notification.GetActiveClientRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   io.gitpod.supervisor.api.Notification.GetActiveClientResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new NotificationServiceMethodDescriptorSupplier("GetAtiveClient"))
+              .setSchemaDescriptor(new NotificationServiceMethodDescriptorSupplier("GetActiveClient"))
               .build();
         }
       }
     }
-    return getGetAtiveClientMethod;
+    return getGetActiveClientMethod;
   }
 
   /**
@@ -277,9 +277,9 @@ public final class NotificationServiceGrpc {
 
     /**
      */
-    public void getAtiveClient(io.gitpod.supervisor.api.Notification.GetActiveClientRequest request,
+    public void getActiveClient(io.gitpod.supervisor.api.Notification.GetActiveClientRequest request,
         io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.GetActiveClientResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAtiveClientMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetActiveClientMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -313,12 +313,12 @@ public final class NotificationServiceGrpc {
                 io.gitpod.supervisor.api.Notification.SetActiveClientResponse>(
                   this, METHODID_SET_ACTIVE_CLIENT)))
           .addMethod(
-            getGetAtiveClientMethod(),
+            getGetActiveClientMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 io.gitpod.supervisor.api.Notification.GetActiveClientRequest,
                 io.gitpod.supervisor.api.Notification.GetActiveClientResponse>(
-                  this, METHODID_GET_ATIVE_CLIENT)))
+                  this, METHODID_GET_ACTIVE_CLIENT)))
           .build();
     }
   }
@@ -392,10 +392,10 @@ public final class NotificationServiceGrpc {
 
     /**
      */
-    public void getAtiveClient(io.gitpod.supervisor.api.Notification.GetActiveClientRequest request,
+    public void getActiveClient(io.gitpod.supervisor.api.Notification.GetActiveClientRequest request,
         io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.GetActiveClientResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getGetAtiveClientMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getGetActiveClientMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -465,9 +465,9 @@ public final class NotificationServiceGrpc {
 
     /**
      */
-    public io.gitpod.supervisor.api.Notification.GetActiveClientResponse getAtiveClient(io.gitpod.supervisor.api.Notification.GetActiveClientRequest request) {
+    public io.gitpod.supervisor.api.Notification.GetActiveClientResponse getActiveClient(io.gitpod.supervisor.api.Notification.GetActiveClientRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getGetAtiveClientMethod(), getCallOptions(), request);
+          getChannel(), getGetActiveClientMethod(), getCallOptions(), request);
     }
   }
 
@@ -529,10 +529,10 @@ public final class NotificationServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getAtiveClient(
+    public com.google.common.util.concurrent.ListenableFuture<io.gitpod.supervisor.api.Notification.GetActiveClientResponse> getActiveClient(
         io.gitpod.supervisor.api.Notification.GetActiveClientRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getGetAtiveClientMethod(), getCallOptions()), request);
+          getChannel().newCall(getGetActiveClientMethod(), getCallOptions()), request);
     }
   }
 
@@ -540,7 +540,7 @@ public final class NotificationServiceGrpc {
   private static final int METHODID_SUBSCRIBE = 1;
   private static final int METHODID_RESPOND = 2;
   private static final int METHODID_SET_ACTIVE_CLIENT = 3;
-  private static final int METHODID_GET_ATIVE_CLIENT = 4;
+  private static final int METHODID_GET_ACTIVE_CLIENT = 4;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -575,8 +575,8 @@ public final class NotificationServiceGrpc {
           serviceImpl.setActiveClient((io.gitpod.supervisor.api.Notification.SetActiveClientRequest) request,
               (io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.SetActiveClientResponse>) responseObserver);
           break;
-        case METHODID_GET_ATIVE_CLIENT:
-          serviceImpl.getAtiveClient((io.gitpod.supervisor.api.Notification.GetActiveClientRequest) request,
+        case METHODID_GET_ACTIVE_CLIENT:
+          serviceImpl.getActiveClient((io.gitpod.supervisor.api.Notification.GetActiveClientRequest) request,
               (io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Notification.GetActiveClientResponse>) responseObserver);
           break;
         default:
@@ -644,7 +644,7 @@ public final class NotificationServiceGrpc {
               .addMethod(getSubscribeMethod())
               .addMethod(getRespondMethod())
               .addMethod(getSetActiveClientMethod())
-              .addMethod(getGetAtiveClientMethod())
+              .addMethod(getGetActiveClientMethod())
               .build();
         }
       }
