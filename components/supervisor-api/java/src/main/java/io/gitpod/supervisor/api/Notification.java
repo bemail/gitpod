@@ -18,6 +18,123 @@ public final class Notification {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * Protobuf enum {@code supervisor.ActiveClient}
+   */
+  public enum ActiveClient
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>code = 0;</code>
+     */
+    code(0),
+    /**
+     * <code>code_desktop = 1;</code>
+     */
+    code_desktop(1),
+    /**
+     * <code>jetbrains_gateway = 2;</code>
+     */
+    jetbrains_gateway(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>code = 0;</code>
+     */
+    public static final int code_VALUE = 0;
+    /**
+     * <code>code_desktop = 1;</code>
+     */
+    public static final int code_desktop_VALUE = 1;
+    /**
+     * <code>jetbrains_gateway = 2;</code>
+     */
+    public static final int jetbrains_gateway_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static ActiveClient valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static ActiveClient forNumber(int value) {
+      switch (value) {
+        case 0: return code;
+        case 1: return code_desktop;
+        case 2: return jetbrains_gateway;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<ActiveClient>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        ActiveClient> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ActiveClient>() {
+            public ActiveClient findValueByNumber(int number) {
+              return ActiveClient.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return io.gitpod.supervisor.api.Notification.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final ActiveClient[] VALUES = values();
+
+    public static ActiveClient valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private ActiveClient(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:supervisor.ActiveClient)
+  }
+
   public interface NotifyRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:supervisor.NotifyRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -3927,16 +4044,15 @@ public final class Notification {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string activeClient = 1;</code>
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
+     * @return The enum numeric value on the wire for activeClient.
+     */
+    int getActiveClientValue();
+    /**
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
      * @return The activeClient.
      */
-    java.lang.String getActiveClient();
-    /**
-     * <code>string activeClient = 1;</code>
-     * @return The bytes for activeClient.
-     */
-    com.google.protobuf.ByteString
-        getActiveClientBytes();
+    io.gitpod.supervisor.api.Notification.ActiveClient getActiveClient();
   }
   /**
    * Protobuf type {@code supervisor.SetActiveClientRequest}
@@ -3951,7 +4067,7 @@ public final class Notification {
       super(builder);
     }
     private SetActiveClientRequest() {
-      activeClient_ = "";
+      activeClient_ = 0;
     }
 
     @java.lang.Override
@@ -3984,10 +4100,10 @@ public final class Notification {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 8: {
+              int rawValue = input.readEnum();
 
-              activeClient_ = s;
+              activeClient_ = rawValue;
               break;
             }
             default: {
@@ -4023,41 +4139,22 @@ public final class Notification {
     }
 
     public static final int ACTIVECLIENT_FIELD_NUMBER = 1;
-    private volatile java.lang.Object activeClient_;
+    private int activeClient_;
     /**
-     * <code>string activeClient = 1;</code>
-     * @return The activeClient.
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
+     * @return The enum numeric value on the wire for activeClient.
      */
-    @java.lang.Override
-    public java.lang.String getActiveClient() {
-      java.lang.Object ref = activeClient_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        activeClient_ = s;
-        return s;
-      }
+    @java.lang.Override public int getActiveClientValue() {
+      return activeClient_;
     }
     /**
-     * <code>string activeClient = 1;</code>
-     * @return The bytes for activeClient.
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
+     * @return The activeClient.
      */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getActiveClientBytes() {
-      java.lang.Object ref = activeClient_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        activeClient_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    @java.lang.Override public io.gitpod.supervisor.api.Notification.ActiveClient getActiveClient() {
+      @SuppressWarnings("deprecation")
+      io.gitpod.supervisor.api.Notification.ActiveClient result = io.gitpod.supervisor.api.Notification.ActiveClient.valueOf(activeClient_);
+      return result == null ? io.gitpod.supervisor.api.Notification.ActiveClient.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4074,8 +4171,8 @@ public final class Notification {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(activeClient_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, activeClient_);
+      if (activeClient_ != io.gitpod.supervisor.api.Notification.ActiveClient.code.getNumber()) {
+        output.writeEnum(1, activeClient_);
       }
       unknownFields.writeTo(output);
     }
@@ -4086,8 +4183,9 @@ public final class Notification {
       if (size != -1) return size;
 
       size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(activeClient_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, activeClient_);
+      if (activeClient_ != io.gitpod.supervisor.api.Notification.ActiveClient.code.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, activeClient_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4104,8 +4202,7 @@ public final class Notification {
       }
       io.gitpod.supervisor.api.Notification.SetActiveClientRequest other = (io.gitpod.supervisor.api.Notification.SetActiveClientRequest) obj;
 
-      if (!getActiveClient()
-          .equals(other.getActiveClient())) return false;
+      if (activeClient_ != other.activeClient_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4118,7 +4215,7 @@ public final class Notification {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ACTIVECLIENT_FIELD_NUMBER;
-      hash = (53 * hash) + getActiveClient().hashCode();
+      hash = (53 * hash) + activeClient_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4252,7 +4349,7 @@ public final class Notification {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        activeClient_ = "";
+        activeClient_ = 0;
 
         return this;
       }
@@ -4329,9 +4426,8 @@ public final class Notification {
 
       public Builder mergeFrom(io.gitpod.supervisor.api.Notification.SetActiveClientRequest other) {
         if (other == io.gitpod.supervisor.api.Notification.SetActiveClientRequest.getDefaultInstance()) return this;
-        if (!other.getActiveClient().isEmpty()) {
-          activeClient_ = other.activeClient_;
-          onChanged();
+        if (other.activeClient_ != 0) {
+          setActiveClientValue(other.getActiveClientValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4362,78 +4458,56 @@ public final class Notification {
         return this;
       }
 
-      private java.lang.Object activeClient_ = "";
+      private int activeClient_ = 0;
       /**
-       * <code>string activeClient = 1;</code>
-       * @return The activeClient.
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @return The enum numeric value on the wire for activeClient.
        */
-      public java.lang.String getActiveClient() {
-        java.lang.Object ref = activeClient_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          activeClient_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override public int getActiveClientValue() {
+        return activeClient_;
       }
       /**
-       * <code>string activeClient = 1;</code>
-       * @return The bytes for activeClient.
-       */
-      public com.google.protobuf.ByteString
-          getActiveClientBytes() {
-        java.lang.Object ref = activeClient_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          activeClient_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string activeClient = 1;</code>
-       * @param value The activeClient to set.
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @param value The enum numeric value on the wire for activeClient to set.
        * @return This builder for chaining.
        */
-      public Builder setActiveClient(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setActiveClientValue(int value) {
+        
         activeClient_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string activeClient = 1;</code>
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @return The activeClient.
+       */
+      @java.lang.Override
+      public io.gitpod.supervisor.api.Notification.ActiveClient getActiveClient() {
+        @SuppressWarnings("deprecation")
+        io.gitpod.supervisor.api.Notification.ActiveClient result = io.gitpod.supervisor.api.Notification.ActiveClient.valueOf(activeClient_);
+        return result == null ? io.gitpod.supervisor.api.Notification.ActiveClient.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @param value The activeClient to set.
+       * @return This builder for chaining.
+       */
+      public Builder setActiveClient(io.gitpod.supervisor.api.Notification.ActiveClient value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        activeClient_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearActiveClient() {
         
-        activeClient_ = getDefaultInstance().getActiveClient();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string activeClient = 1;</code>
-       * @param value The bytes for activeClient to set.
-       * @return This builder for chaining.
-       */
-      public Builder setActiveClientBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        activeClient_ = value;
+        activeClient_ = 0;
         onChanged();
         return this;
       }
@@ -4493,18 +4567,6 @@ public final class Notification {
   public interface SetActiveClientResponseOrBuilder extends
       // @@protoc_insertion_point(interface_extends:supervisor.SetActiveClientResponse)
       com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>string action = 1;</code>
-     * @return The action.
-     */
-    java.lang.String getAction();
-    /**
-     * <code>string action = 1;</code>
-     * @return The bytes for action.
-     */
-    com.google.protobuf.ByteString
-        getActionBytes();
   }
   /**
    * Protobuf type {@code supervisor.SetActiveClientResponse}
@@ -4519,7 +4581,6 @@ public final class Notification {
       super(builder);
     }
     private SetActiveClientResponse() {
-      action_ = "";
     }
 
     @java.lang.Override
@@ -4552,12 +4613,6 @@ public final class Notification {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              action_ = s;
-              break;
-            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -4590,44 +4645,6 @@ public final class Notification {
               io.gitpod.supervisor.api.Notification.SetActiveClientResponse.class, io.gitpod.supervisor.api.Notification.SetActiveClientResponse.Builder.class);
     }
 
-    public static final int ACTION_FIELD_NUMBER = 1;
-    private volatile java.lang.Object action_;
-    /**
-     * <code>string action = 1;</code>
-     * @return The action.
-     */
-    @java.lang.Override
-    public java.lang.String getAction() {
-      java.lang.Object ref = action_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        action_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string action = 1;</code>
-     * @return The bytes for action.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getActionBytes() {
-      java.lang.Object ref = action_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        action_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4642,9 +4659,6 @@ public final class Notification {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(action_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, action_);
-      }
       unknownFields.writeTo(output);
     }
 
@@ -4654,9 +4668,6 @@ public final class Notification {
       if (size != -1) return size;
 
       size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(action_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, action_);
-      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4672,8 +4683,6 @@ public final class Notification {
       }
       io.gitpod.supervisor.api.Notification.SetActiveClientResponse other = (io.gitpod.supervisor.api.Notification.SetActiveClientResponse) obj;
 
-      if (!getAction()
-          .equals(other.getAction())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4685,8 +4694,6 @@ public final class Notification {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ACTION_FIELD_NUMBER;
-      hash = (53 * hash) + getAction().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4820,8 +4827,6 @@ public final class Notification {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        action_ = "";
-
         return this;
       }
 
@@ -4848,7 +4853,6 @@ public final class Notification {
       @java.lang.Override
       public io.gitpod.supervisor.api.Notification.SetActiveClientResponse buildPartial() {
         io.gitpod.supervisor.api.Notification.SetActiveClientResponse result = new io.gitpod.supervisor.api.Notification.SetActiveClientResponse(this);
-        result.action_ = action_;
         onBuilt();
         return result;
       }
@@ -4897,10 +4901,6 @@ public final class Notification {
 
       public Builder mergeFrom(io.gitpod.supervisor.api.Notification.SetActiveClientResponse other) {
         if (other == io.gitpod.supervisor.api.Notification.SetActiveClientResponse.getDefaultInstance()) return this;
-        if (!other.getAction().isEmpty()) {
-          action_ = other.action_;
-          onChanged();
-        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -4927,82 +4927,6 @@ public final class Notification {
             mergeFrom(parsedMessage);
           }
         }
-        return this;
-      }
-
-      private java.lang.Object action_ = "";
-      /**
-       * <code>string action = 1;</code>
-       * @return The action.
-       */
-      public java.lang.String getAction() {
-        java.lang.Object ref = action_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          action_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string action = 1;</code>
-       * @return The bytes for action.
-       */
-      public com.google.protobuf.ByteString
-          getActionBytes() {
-        java.lang.Object ref = action_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          action_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string action = 1;</code>
-       * @param value The action to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAction(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        action_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string action = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAction() {
-        
-        action_ = getDefaultInstance().getAction();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string action = 1;</code>
-       * @param value The bytes for action to set.
-       * @return This builder for chaining.
-       */
-      public Builder setActionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        action_ = value;
-        onChanged();
         return this;
       }
       @java.lang.Override
@@ -5481,16 +5405,15 @@ public final class Notification {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string activeClient = 1;</code>
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
+     * @return The enum numeric value on the wire for activeClient.
+     */
+    int getActiveClientValue();
+    /**
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
      * @return The activeClient.
      */
-    java.lang.String getActiveClient();
-    /**
-     * <code>string activeClient = 1;</code>
-     * @return The bytes for activeClient.
-     */
-    com.google.protobuf.ByteString
-        getActiveClientBytes();
+    io.gitpod.supervisor.api.Notification.ActiveClient getActiveClient();
   }
   /**
    * Protobuf type {@code supervisor.GetActiveClientResponse}
@@ -5505,7 +5428,7 @@ public final class Notification {
       super(builder);
     }
     private GetActiveClientResponse() {
-      activeClient_ = "";
+      activeClient_ = 0;
     }
 
     @java.lang.Override
@@ -5538,10 +5461,10 @@ public final class Notification {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 8: {
+              int rawValue = input.readEnum();
 
-              activeClient_ = s;
+              activeClient_ = rawValue;
               break;
             }
             default: {
@@ -5577,41 +5500,22 @@ public final class Notification {
     }
 
     public static final int ACTIVECLIENT_FIELD_NUMBER = 1;
-    private volatile java.lang.Object activeClient_;
+    private int activeClient_;
     /**
-     * <code>string activeClient = 1;</code>
-     * @return The activeClient.
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
+     * @return The enum numeric value on the wire for activeClient.
      */
-    @java.lang.Override
-    public java.lang.String getActiveClient() {
-      java.lang.Object ref = activeClient_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        activeClient_ = s;
-        return s;
-      }
+    @java.lang.Override public int getActiveClientValue() {
+      return activeClient_;
     }
     /**
-     * <code>string activeClient = 1;</code>
-     * @return The bytes for activeClient.
+     * <code>.supervisor.ActiveClient activeClient = 1;</code>
+     * @return The activeClient.
      */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getActiveClientBytes() {
-      java.lang.Object ref = activeClient_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        activeClient_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    @java.lang.Override public io.gitpod.supervisor.api.Notification.ActiveClient getActiveClient() {
+      @SuppressWarnings("deprecation")
+      io.gitpod.supervisor.api.Notification.ActiveClient result = io.gitpod.supervisor.api.Notification.ActiveClient.valueOf(activeClient_);
+      return result == null ? io.gitpod.supervisor.api.Notification.ActiveClient.UNRECOGNIZED : result;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -5628,8 +5532,8 @@ public final class Notification {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(activeClient_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, activeClient_);
+      if (activeClient_ != io.gitpod.supervisor.api.Notification.ActiveClient.code.getNumber()) {
+        output.writeEnum(1, activeClient_);
       }
       unknownFields.writeTo(output);
     }
@@ -5640,8 +5544,9 @@ public final class Notification {
       if (size != -1) return size;
 
       size = 0;
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(activeClient_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, activeClient_);
+      if (activeClient_ != io.gitpod.supervisor.api.Notification.ActiveClient.code.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, activeClient_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -5658,8 +5563,7 @@ public final class Notification {
       }
       io.gitpod.supervisor.api.Notification.GetActiveClientResponse other = (io.gitpod.supervisor.api.Notification.GetActiveClientResponse) obj;
 
-      if (!getActiveClient()
-          .equals(other.getActiveClient())) return false;
+      if (activeClient_ != other.activeClient_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -5672,7 +5576,7 @@ public final class Notification {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ACTIVECLIENT_FIELD_NUMBER;
-      hash = (53 * hash) + getActiveClient().hashCode();
+      hash = (53 * hash) + activeClient_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5806,7 +5710,7 @@ public final class Notification {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        activeClient_ = "";
+        activeClient_ = 0;
 
         return this;
       }
@@ -5883,9 +5787,8 @@ public final class Notification {
 
       public Builder mergeFrom(io.gitpod.supervisor.api.Notification.GetActiveClientResponse other) {
         if (other == io.gitpod.supervisor.api.Notification.GetActiveClientResponse.getDefaultInstance()) return this;
-        if (!other.getActiveClient().isEmpty()) {
-          activeClient_ = other.activeClient_;
-          onChanged();
+        if (other.activeClient_ != 0) {
+          setActiveClientValue(other.getActiveClientValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -5916,78 +5819,56 @@ public final class Notification {
         return this;
       }
 
-      private java.lang.Object activeClient_ = "";
+      private int activeClient_ = 0;
       /**
-       * <code>string activeClient = 1;</code>
-       * @return The activeClient.
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @return The enum numeric value on the wire for activeClient.
        */
-      public java.lang.String getActiveClient() {
-        java.lang.Object ref = activeClient_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          activeClient_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override public int getActiveClientValue() {
+        return activeClient_;
       }
       /**
-       * <code>string activeClient = 1;</code>
-       * @return The bytes for activeClient.
-       */
-      public com.google.protobuf.ByteString
-          getActiveClientBytes() {
-        java.lang.Object ref = activeClient_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          activeClient_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string activeClient = 1;</code>
-       * @param value The activeClient to set.
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @param value The enum numeric value on the wire for activeClient to set.
        * @return This builder for chaining.
        */
-      public Builder setActiveClient(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setActiveClientValue(int value) {
+        
         activeClient_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string activeClient = 1;</code>
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @return The activeClient.
+       */
+      @java.lang.Override
+      public io.gitpod.supervisor.api.Notification.ActiveClient getActiveClient() {
+        @SuppressWarnings("deprecation")
+        io.gitpod.supervisor.api.Notification.ActiveClient result = io.gitpod.supervisor.api.Notification.ActiveClient.valueOf(activeClient_);
+        return result == null ? io.gitpod.supervisor.api.Notification.ActiveClient.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
+       * @param value The activeClient to set.
+       * @return This builder for chaining.
+       */
+      public Builder setActiveClient(io.gitpod.supervisor.api.Notification.ActiveClient value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        activeClient_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.supervisor.ActiveClient activeClient = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearActiveClient() {
         
-        activeClient_ = getDefaultInstance().getActiveClient();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string activeClient = 1;</code>
-       * @param value The bytes for activeClient to set.
-       * @return This builder for chaining.
-       */
-      public Builder setActiveClientBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        activeClient_ = value;
+        activeClient_ = 0;
         onChanged();
         return this;
       }
@@ -6114,28 +5995,30 @@ public final class Notification {
       "upervisor.NotifyRequest\"Q\n\016RespondReques" +
       "t\022\021\n\trequestId\030\001 \001(\004\022,\n\010response\030\002 \001(\0132\032" +
       ".supervisor.NotifyResponse\"\021\n\017RespondRes" +
-      "ponse\".\n\026SetActiveClientRequest\022\024\n\014activ" +
-      "eClient\030\001 \001(\t\")\n\027SetActiveClientResponse" +
-      "\022\016\n\006action\030\001 \001(\t\"\030\n\026GetActiveClientReque" +
-      "st\"/\n\027GetActiveClientResponse\022\024\n\014activeC" +
-      "lient\030\001 \001(\t2\327\004\n\023NotificationService\022`\n\006N" +
-      "otify\022\031.supervisor.NotifyRequest\032\032.super" +
-      "visor.NotifyResponse\"\037\202\323\344\223\002\031\"\027/v1/notifi" +
-      "cation/notify\022n\n\tSubscribe\022\034.supervisor." +
-      "SubscribeRequest\032\035.supervisor.SubscribeR" +
-      "esponse\"\"\202\323\344\223\002\034\022\032/v1/notification/subscr" +
-      "ibe0\001\022d\n\007Respond\022\032.supervisor.RespondReq" +
-      "uest\032\033.supervisor.RespondResponse\" \202\323\344\223\002" +
-      "\032\"\030/v1/notification/respond\022\202\001\n\017SetActiv" +
-      "eClient\022\".supervisor.SetActiveClientRequ" +
-      "est\032#.supervisor.SetActiveClientResponse" +
-      "\"&\202\323\344\223\002 \"\036/v1/notification/active-client" +
-      "\022\202\001\n\017GetActiveClient\022\".supervisor.GetAct" +
-      "iveClientRequest\032#.supervisor.GetActiveC" +
-      "lientResponse\"&\202\323\344\223\002 \022\036/v1/notification/" +
-      "active-clientBF\n\030io.gitpod.supervisor.ap" +
-      "iZ*github.com/gitpod-io/gitpod/superviso" +
-      "r/apib\006proto3"
+      "ponse\"H\n\026SetActiveClientRequest\022.\n\014activ" +
+      "eClient\030\001 \001(\0162\030.supervisor.ActiveClient\"" +
+      "\031\n\027SetActiveClientResponse\"\030\n\026GetActiveC" +
+      "lientRequest\"I\n\027GetActiveClientResponse\022" +
+      ".\n\014activeClient\030\001 \001(\0162\030.supervisor.Activ" +
+      "eClient*A\n\014ActiveClient\022\010\n\004code\020\000\022\020\n\014cod" +
+      "e_desktop\020\001\022\025\n\021jetbrains_gateway\020\0022\327\004\n\023N" +
+      "otificationService\022`\n\006Notify\022\031.superviso" +
+      "r.NotifyRequest\032\032.supervisor.NotifyRespo" +
+      "nse\"\037\202\323\344\223\002\031\"\027/v1/notification/notify\022n\n\t" +
+      "Subscribe\022\034.supervisor.SubscribeRequest\032" +
+      "\035.supervisor.SubscribeResponse\"\"\202\323\344\223\002\034\022\032" +
+      "/v1/notification/subscribe0\001\022d\n\007Respond\022" +
+      "\032.supervisor.RespondRequest\032\033.supervisor" +
+      ".RespondResponse\" \202\323\344\223\002\032\"\030/v1/notificati" +
+      "on/respond\022\202\001\n\017SetActiveClient\022\".supervi" +
+      "sor.SetActiveClientRequest\032#.supervisor." +
+      "SetActiveClientResponse\"&\202\323\344\223\002 \"\036/v1/not" +
+      "ification/active-client\022\202\001\n\017GetActiveCli" +
+      "ent\022\".supervisor.GetActiveClientRequest\032" +
+      "#.supervisor.GetActiveClientResponse\"&\202\323" +
+      "\344\223\002 \022\036/v1/notification/active-clientBF\n\030" +
+      "io.gitpod.supervisor.apiZ*github.com/git" +
+      "pod-io/gitpod/supervisor/apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -6189,7 +6072,7 @@ public final class Notification {
     internal_static_supervisor_SetActiveClientResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_supervisor_SetActiveClientResponse_descriptor,
-        new java.lang.String[] { "Action", });
+        new java.lang.String[] { });
     internal_static_supervisor_GetActiveClientRequest_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_supervisor_GetActiveClientRequest_fieldAccessorTable = new

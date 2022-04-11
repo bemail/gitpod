@@ -88,10 +88,16 @@ message RespondRequest {
 
 message RespondResponse {}
 
-message SetActiveClientRequest { string activeClient = 1; }
+enum ActiveClient {
+  code = 0;
+  code_desktop = 1;
+  jetbrains_gateway = 2;
+}
 
-message SetActiveClientResponse { string action = 1; }
+message SetActiveClientRequest { ActiveClient activeClient = 1; }
+
+message SetActiveClientResponse {}
 
 message GetActiveClientRequest {}
 
-message GetActiveClientResponse { string activeClient = 1; }
+message GetActiveClientResponse { ActiveClient activeClient = 1; }

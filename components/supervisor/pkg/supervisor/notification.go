@@ -22,7 +22,7 @@ const (
 	SubscriberMaxPendingNotifications = 100
 )
 
-var activeClient string
+var activeClient api.ActiveClient
 
 // NewNotificationService creates a new notification service.
 func NewNotificationService() *NotificationService {
