@@ -43,16 +43,9 @@ service NotificationService {
   // which is the latest client actively used by the user.
   // Useful for gp open / gp preview to trigger actions in the right client
   rpc SetActiveClient(SetActiveClientRequest)
-      returns (SetActiveClientResponse) {
+      returns (stream SetActiveClientResponse) {
     option (google.api.http) = {
       post : "/v1/notification/active-client"
-    };
-  }
-
-  rpc GetActiveClient(GetActiveClientRequest)
-      returns (GetActiveClientResponse) {
-    option (google.api.http) = {
-      get : "/v1/notification/active-client"
     };
   }
 }
@@ -88,16 +81,18 @@ message RespondRequest {
 
 message RespondResponse {}
 
-enum ActiveClient {
-  code = 0;
-  code_desktop = 1;
-  jetbrains_gateway = 2;
+enum ActionMethod {
+  open = 0;
+  preview = 1;
 }
 
-message SetActiveClientRequest { ActiveClient activeClient = 1; }
+message ActionRequest {
+  ActionMethod method = 1;
+}
 
-message SetActiveClientResponse {}
+message SetActiveClientRequest { string clientDesc = 1; }
 
-message GetActiveClientRequest {}
-
-message GetActiveClientResponse { ActiveClient activeClient = 1; }
+message SetActiveClientResponse {
+  uint64 requestId = 1;
+  ActionRequest request = 2;
+}

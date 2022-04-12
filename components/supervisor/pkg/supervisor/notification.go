@@ -255,9 +255,3 @@ func (srv *NotificationService) SetActiveClient(ctx context.Context, req *api.Se
 	activeClient = req.ActiveClient
 	return &api.SetActiveClientResponse{}, nil
 }
-
-func (srv *NotificationService) GetActiveClient(ctx context.Context, req *api.GetActiveClientRequest) (*api.GetActiveClientResponse, error) {
-	return &api.GetActiveClientResponse{
-		ActiveClient: activeClient,
-	}, nil
-}
