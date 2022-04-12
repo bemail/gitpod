@@ -1249,6 +1249,7 @@ export class WorkspaceStarter {
             spec.setTimeout(this.userService.workspaceTimeoutToDuration(await userTimeoutPromise));
         }
         spec.setAdmission(admissionLevel);
+        log.warn("createSpec", null, { spec });
         return spec;
     }
 
@@ -1372,16 +1373,21 @@ export class WorkspaceStarter {
         const disp = new DisposableCollection();
 
         if (mustHaveBackup) {
+            log.warn("mustHaveBackup");
             const backup = new FromBackupInitializer();
             if (CommitContext.is(context)) {
+                log.warn("is CommitContext", null, { setCheckoutLocation: context.checkoutLocation || "" });
                 backup.setCheckoutLocation(context.checkoutLocation || "");
             }
+            log.warn("backup", null, { backup });
             result.setBackup(backup);
         } else if (SnapshotContext.is(context)) {
+            log.warn("SnapshotContext");
             const snapshot = new SnapshotInitializer();
             snapshot.setSnapshot(context.snapshotBucketId);
             result.setSnapshot(snapshot);
         } else if (WithPrebuild.is(context)) {
+            log.warn("WithPrebuild");
             if (!CommitContext.is(context)) {
                 throw new Error("context is not a commit context");
             }
@@ -1404,6 +1410,7 @@ export class WorkspaceStarter {
         } else if (WorkspaceProbeContext.is(context)) {
             // workspace probes have no workspace initializer as they need no content
         } else if (CommitContext.is(context)) {
+            log.warn("CommitContext");
             const { initializer, disposable } = await this.createCommitInitializer(traceCtx, workspace, context, user);
             disp.push(disposable);
             if (initializer instanceof CompositeInitializer) {
@@ -1415,6 +1422,7 @@ export class WorkspaceStarter {
             throw new Error("cannot create initializer for unkown context type");
         }
         if (AdditionalContentContext.is(context)) {
+            log.warn("AdditionalContentContext");
             const additionalInit = new FileDownloadInitializer();
 
             const getDigest = (contents: string) => {
@@ -1449,6 +1457,7 @@ export class WorkspaceStarter {
             composite.addInitializer(wsInitializerForDownload);
             result = newRoot;
         }
+        log.warn("createInitializer", null, { result });
         return { initializer: result, disposable: disp };
     }
 
