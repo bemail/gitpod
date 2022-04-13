@@ -39,13 +39,26 @@ service NotificationService {
     };
   }
 
-  // Called by the notifications clients to inform supervisor about
+  // SetActiveClient to inform supervisor about
   // which is the latest client actively used by the user.
-  // Useful for gp open / gp preview to trigger actions in the right client
+  // Typically called by the IDE.
+  // Will response what client should do like `open` `preview`
   rpc SetActiveClient(SetActiveClientRequest)
       returns (stream SetActiveClientResponse) {
     option (google.api.http) = {
       post : "/v1/notification/active-client"
+    };
+  }
+
+  rpc Action(ActionRequest) returns (ActionResponse) {
+    option (google.api.http) = {
+      post : "/v1/notification/action"
+    };
+  }
+
+  rpc ActionRespond(ActionRespondRequest) returns (ActionRespondResponse) {
+    option (google.api.http) = {
+      post : "/v1/notification/action-respond"
     };
   }
 }
@@ -82,12 +95,23 @@ message RespondRequest {
 message RespondResponse {}
 
 enum ActionMethod {
-  open = 0;
-  preview = 1;
+  // open a file in editor
+  OPEN = 0;
+  // ask editor to open a URL in its preview
+  PREVIEW = 1;
 }
 
 message ActionRequest {
   ActionMethod method = 1;
+  // for method open - wait until all opened files are closed
+  bool await = 2;
+  // for method preview - open the URL in a new browser tab
+  bool external = 3;
+}
+
+message ActionResponse {
+  uint64 code = 1;
+  string message = 2;
 }
 
 message SetActiveClientRequest { string clientDesc = 1; }
@@ -96,3 +120,10 @@ message SetActiveClientResponse {
   uint64 requestId = 1;
   ActionRequest request = 2;
 }
+
+message ActionRespondRequest {
+  uint64 requestId = 1;
+  ActionResponse response = 2;
+}
+
+message ActionRespondResponse {}
