@@ -236,7 +236,7 @@ func Test(t *testing.T) {
 			subscriber.slow = true
 
 			// send messages to stress the subscriber
-			for i := 1; i < NotifierMaxPendingNotifications+1; i++ {
+			for i := 1; i < MaxPending+1; i++ {
 				_, err := notificationService.Notify(context.Background(), &api.NotifyRequest{
 					Level:   api.NotifyRequest_INFO,
 					Message: fmt.Sprintf("Notification %d", i),
@@ -249,7 +249,7 @@ func Test(t *testing.T) {
 			// send message to stress the notifier
 			_, err := notificationService.Notify(context.Background(), &api.NotifyRequest{
 				Level:   api.NotifyRequest_INFO,
-				Message: fmt.Sprintf("Notification %d", NotifierMaxPendingNotifications+1),
+				Message: fmt.Sprintf("Notification %d", MaxPending+1),
 			})
 			if err == nil {
 				t.Errorf("Expected error on notifier backpressure")
