@@ -4062,24 +4062,34 @@ public final class Notification {
     io.gitpod.supervisor.api.Notification.ActionMethod getMethod();
 
     /**
-     * <pre>
-     * for method open - wait until all opened files are closed
-     * </pre>
-     *
-     * <code>bool await = 2;</code>
-     * @return The await.
+     * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+     * @return Whether the open field is set.
      */
-    boolean getAwait();
+    boolean hasOpen();
+    /**
+     * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+     * @return The open.
+     */
+    io.gitpod.supervisor.api.Notification.ActionRequest.OpenData getOpen();
+    /**
+     * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+     */
+    io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder getOpenOrBuilder();
 
     /**
-     * <pre>
-     * for method preview - open the URL in a new browser tab
-     * </pre>
-     *
-     * <code>bool external = 3;</code>
-     * @return The external.
+     * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+     * @return Whether the preview field is set.
      */
-    boolean getExternal();
+    boolean hasPreview();
+    /**
+     * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+     * @return The preview.
+     */
+    io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData getPreview();
+    /**
+     * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+     */
+    io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder getPreviewOrBuilder();
   }
   /**
    * Protobuf type {@code supervisor.ActionRequest}
@@ -4133,14 +4143,30 @@ public final class Notification {
               method_ = rawValue;
               break;
             }
-            case 16: {
+            case 18: {
+              io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder subBuilder = null;
+              if (open_ != null) {
+                subBuilder = open_.toBuilder();
+              }
+              open_ = input.readMessage(io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(open_);
+                open_ = subBuilder.buildPartial();
+              }
 
-              await_ = input.readBool();
               break;
             }
-            case 24: {
+            case 26: {
+              io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder subBuilder = null;
+              if (preview_ != null) {
+                subBuilder = preview_.toBuilder();
+              }
+              preview_ = input.readMessage(io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(preview_);
+                preview_ = subBuilder.buildPartial();
+              }
 
-              external_ = input.readBool();
               break;
             }
             default: {
@@ -4175,6 +4201,1394 @@ public final class Notification {
               io.gitpod.supervisor.api.Notification.ActionRequest.class, io.gitpod.supervisor.api.Notification.ActionRequest.Builder.class);
     }
 
+    public interface OpenDataOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:supervisor.ActionRequest.OpenData)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @return A list containing the urls.
+       */
+      java.util.List<java.lang.String>
+          getUrlsList();
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @return The count of urls.
+       */
+      int getUrlsCount();
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @param index The index of the element to return.
+       * @return The urls at the given index.
+       */
+      java.lang.String getUrls(int index);
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the urls at the given index.
+       */
+      com.google.protobuf.ByteString
+          getUrlsBytes(int index);
+
+      /**
+       * <pre>
+       * wait until all opened files are closed
+       * </pre>
+       *
+       * <code>bool await = 2;</code>
+       * @return The await.
+       */
+      boolean getAwait();
+    }
+    /**
+     * Protobuf type {@code supervisor.ActionRequest.OpenData}
+     */
+    public static final class OpenData extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:supervisor.ActionRequest.OpenData)
+        OpenDataOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use OpenData.newBuilder() to construct.
+      private OpenData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private OpenData() {
+        urls_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new OpenData();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private OpenData(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                  urls_ = new com.google.protobuf.LazyStringArrayList();
+                  mutable_bitField0_ |= 0x00000001;
+                }
+                urls_.add(s);
+                break;
+              }
+              case 16: {
+
+                await_ = input.readBool();
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000001) != 0)) {
+            urls_ = urls_.getUnmodifiableView();
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_OpenData_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_OpenData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.class, io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder.class);
+      }
+
+      public static final int URLS_FIELD_NUMBER = 1;
+      private com.google.protobuf.LazyStringList urls_;
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @return A list containing the urls.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getUrlsList() {
+        return urls_;
+      }
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @return The count of urls.
+       */
+      public int getUrlsCount() {
+        return urls_.size();
+      }
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @param index The index of the element to return.
+       * @return The urls at the given index.
+       */
+      public java.lang.String getUrls(int index) {
+        return urls_.get(index);
+      }
+      /**
+       * <code>repeated string urls = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the urls at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getUrlsBytes(int index) {
+        return urls_.getByteString(index);
+      }
+
+      public static final int AWAIT_FIELD_NUMBER = 2;
+      private boolean await_;
+      /**
+       * <pre>
+       * wait until all opened files are closed
+       * </pre>
+       *
+       * <code>bool await = 2;</code>
+       * @return The await.
+       */
+      @java.lang.Override
+      public boolean getAwait() {
+        return await_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        for (int i = 0; i < urls_.size(); i++) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, urls_.getRaw(i));
+        }
+        if (await_ != false) {
+          output.writeBool(2, await_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        {
+          int dataSize = 0;
+          for (int i = 0; i < urls_.size(); i++) {
+            dataSize += computeStringSizeNoTag(urls_.getRaw(i));
+          }
+          size += dataSize;
+          size += 1 * getUrlsList().size();
+        }
+        if (await_ != false) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(2, await_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof io.gitpod.supervisor.api.Notification.ActionRequest.OpenData)) {
+          return super.equals(obj);
+        }
+        io.gitpod.supervisor.api.Notification.ActionRequest.OpenData other = (io.gitpod.supervisor.api.Notification.ActionRequest.OpenData) obj;
+
+        if (!getUrlsList()
+            .equals(other.getUrlsList())) return false;
+        if (getAwait()
+            != other.getAwait()) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (getUrlsCount() > 0) {
+          hash = (37 * hash) + URLS_FIELD_NUMBER;
+          hash = (53 * hash) + getUrlsList().hashCode();
+        }
+        hash = (37 * hash) + AWAIT_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getAwait());
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(io.gitpod.supervisor.api.Notification.ActionRequest.OpenData prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code supervisor.ActionRequest.OpenData}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:supervisor.ActionRequest.OpenData)
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_OpenData_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_OpenData_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.class, io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder.class);
+        }
+
+        // Construct using io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          urls_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          await_ = false;
+
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_OpenData_descriptor;
+        }
+
+        @java.lang.Override
+        public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData getDefaultInstanceForType() {
+          return io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData build() {
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenData result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData buildPartial() {
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenData result = new io.gitpod.supervisor.api.Notification.ActionRequest.OpenData(this);
+          int from_bitField0_ = bitField0_;
+          if (((bitField0_ & 0x00000001) != 0)) {
+            urls_ = urls_.getUnmodifiableView();
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.urls_ = urls_;
+          result.await_ = await_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof io.gitpod.supervisor.api.Notification.ActionRequest.OpenData) {
+            return mergeFrom((io.gitpod.supervisor.api.Notification.ActionRequest.OpenData)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(io.gitpod.supervisor.api.Notification.ActionRequest.OpenData other) {
+          if (other == io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.getDefaultInstance()) return this;
+          if (!other.urls_.isEmpty()) {
+            if (urls_.isEmpty()) {
+              urls_ = other.urls_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureUrlsIsMutable();
+              urls_.addAll(other.urls_);
+            }
+            onChanged();
+          }
+          if (other.getAwait() != false) {
+            setAwait(other.getAwait());
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenData parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (io.gitpod.supervisor.api.Notification.ActionRequest.OpenData) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private com.google.protobuf.LazyStringList urls_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        private void ensureUrlsIsMutable() {
+          if (!((bitField0_ & 0x00000001) != 0)) {
+            urls_ = new com.google.protobuf.LazyStringArrayList(urls_);
+            bitField0_ |= 0x00000001;
+           }
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @return A list containing the urls.
+         */
+        public com.google.protobuf.ProtocolStringList
+            getUrlsList() {
+          return urls_.getUnmodifiableView();
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @return The count of urls.
+         */
+        public int getUrlsCount() {
+          return urls_.size();
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @param index The index of the element to return.
+         * @return The urls at the given index.
+         */
+        public java.lang.String getUrls(int index) {
+          return urls_.get(index);
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @param index The index of the value to return.
+         * @return The bytes of the urls at the given index.
+         */
+        public com.google.protobuf.ByteString
+            getUrlsBytes(int index) {
+          return urls_.getByteString(index);
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @param index The index to set the value at.
+         * @param value The urls to set.
+         * @return This builder for chaining.
+         */
+        public Builder setUrls(
+            int index, java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUrlsIsMutable();
+          urls_.set(index, value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @param value The urls to add.
+         * @return This builder for chaining.
+         */
+        public Builder addUrls(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUrlsIsMutable();
+          urls_.add(value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @param values The urls to add.
+         * @return This builder for chaining.
+         */
+        public Builder addAllUrls(
+            java.lang.Iterable<java.lang.String> values) {
+          ensureUrlsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, urls_);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearUrls() {
+          urls_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated string urls = 1;</code>
+         * @param value The bytes of the urls to add.
+         * @return This builder for chaining.
+         */
+        public Builder addUrlsBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+          ensureUrlsIsMutable();
+          urls_.add(value);
+          onChanged();
+          return this;
+        }
+
+        private boolean await_ ;
+        /**
+         * <pre>
+         * wait until all opened files are closed
+         * </pre>
+         *
+         * <code>bool await = 2;</code>
+         * @return The await.
+         */
+        @java.lang.Override
+        public boolean getAwait() {
+          return await_;
+        }
+        /**
+         * <pre>
+         * wait until all opened files are closed
+         * </pre>
+         *
+         * <code>bool await = 2;</code>
+         * @param value The await to set.
+         * @return This builder for chaining.
+         */
+        public Builder setAwait(boolean value) {
+          
+          await_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * wait until all opened files are closed
+         * </pre>
+         *
+         * <code>bool await = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearAwait() {
+          
+          await_ = false;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:supervisor.ActionRequest.OpenData)
+      }
+
+      // @@protoc_insertion_point(class_scope:supervisor.ActionRequest.OpenData)
+      private static final io.gitpod.supervisor.api.Notification.ActionRequest.OpenData DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new io.gitpod.supervisor.api.Notification.ActionRequest.OpenData();
+      }
+
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.OpenData getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      private static final com.google.protobuf.Parser<OpenData>
+          PARSER = new com.google.protobuf.AbstractParser<OpenData>() {
+        @java.lang.Override
+        public OpenData parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new OpenData(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<OpenData> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<OpenData> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
+    public interface PreviewDataOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:supervisor.ActionRequest.PreviewData)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>string url = 1;</code>
+       * @return The url.
+       */
+      java.lang.String getUrl();
+      /**
+       * <code>string url = 1;</code>
+       * @return The bytes for url.
+       */
+      com.google.protobuf.ByteString
+          getUrlBytes();
+
+      /**
+       * <pre>
+       * open the URL in a new browser tab
+       * </pre>
+       *
+       * <code>bool external = 2;</code>
+       * @return The external.
+       */
+      boolean getExternal();
+    }
+    /**
+     * Protobuf type {@code supervisor.ActionRequest.PreviewData}
+     */
+    public static final class PreviewData extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:supervisor.ActionRequest.PreviewData)
+        PreviewDataOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use PreviewData.newBuilder() to construct.
+      private PreviewData(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private PreviewData() {
+        url_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new PreviewData();
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private PreviewData(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+
+                url_ = s;
+                break;
+              }
+              case 16: {
+
+                external_ = input.readBool();
+                break;
+              }
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_PreviewData_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_PreviewData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.class, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder.class);
+      }
+
+      public static final int URL_FIELD_NUMBER = 1;
+      private volatile java.lang.Object url_;
+      /**
+       * <code>string url = 1;</code>
+       * @return The url.
+       */
+      @java.lang.Override
+      public java.lang.String getUrl() {
+        java.lang.Object ref = url_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          url_ = s;
+          return s;
+        }
+      }
+      /**
+       * <code>string url = 1;</code>
+       * @return The bytes for url.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getUrlBytes() {
+        java.lang.Object ref = url_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          url_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int EXTERNAL_FIELD_NUMBER = 2;
+      private boolean external_;
+      /**
+       * <pre>
+       * open the URL in a new browser tab
+       * </pre>
+       *
+       * <code>bool external = 2;</code>
+       * @return The external.
+       */
+      @java.lang.Override
+      public boolean getExternal() {
+        return external_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, url_);
+        }
+        if (external_ != false) {
+          output.writeBool(2, external_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, url_);
+        }
+        if (external_ != false) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(2, external_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData)) {
+          return super.equals(obj);
+        }
+        io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData other = (io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData) obj;
+
+        if (!getUrl()
+            .equals(other.getUrl())) return false;
+        if (getExternal()
+            != other.getExternal()) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        hash = (37 * hash) + URL_FIELD_NUMBER;
+        hash = (53 * hash) + getUrl().hashCode();
+        hash = (37 * hash) + EXTERNAL_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getExternal());
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code supervisor.ActionRequest.PreviewData}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:supervisor.ActionRequest.PreviewData)
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_PreviewData_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_PreviewData_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.class, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder.class);
+        }
+
+        // Construct using io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          url_ = "";
+
+          external_ = false;
+
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return io.gitpod.supervisor.api.Notification.internal_static_supervisor_ActionRequest_PreviewData_descriptor;
+        }
+
+        @java.lang.Override
+        public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData getDefaultInstanceForType() {
+          return io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData build() {
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData buildPartial() {
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData result = new io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData(this);
+          result.url_ = url_;
+          result.external_ = external_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData) {
+            return mergeFrom((io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData other) {
+          if (other == io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.getDefaultInstance()) return this;
+          if (!other.getUrl().isEmpty()) {
+            url_ = other.url_;
+            onChanged();
+          }
+          if (other.getExternal() != false) {
+            setExternal(other.getExternal());
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+
+        private java.lang.Object url_ = "";
+        /**
+         * <code>string url = 1;</code>
+         * @return The url.
+         */
+        public java.lang.String getUrl() {
+          java.lang.Object ref = url_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            url_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>string url = 1;</code>
+         * @return The bytes for url.
+         */
+        public com.google.protobuf.ByteString
+            getUrlBytes() {
+          java.lang.Object ref = url_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            url_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>string url = 1;</code>
+         * @param value The url to set.
+         * @return This builder for chaining.
+         */
+        public Builder setUrl(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  
+          url_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>string url = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearUrl() {
+          
+          url_ = getDefaultInstance().getUrl();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>string url = 1;</code>
+         * @param value The bytes for url to set.
+         * @return This builder for chaining.
+         */
+        public Builder setUrlBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+          
+          url_ = value;
+          onChanged();
+          return this;
+        }
+
+        private boolean external_ ;
+        /**
+         * <pre>
+         * open the URL in a new browser tab
+         * </pre>
+         *
+         * <code>bool external = 2;</code>
+         * @return The external.
+         */
+        @java.lang.Override
+        public boolean getExternal() {
+          return external_;
+        }
+        /**
+         * <pre>
+         * open the URL in a new browser tab
+         * </pre>
+         *
+         * <code>bool external = 2;</code>
+         * @param value The external to set.
+         * @return This builder for chaining.
+         */
+        public Builder setExternal(boolean value) {
+          
+          external_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <pre>
+         * open the URL in a new browser tab
+         * </pre>
+         *
+         * <code>bool external = 2;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearExternal() {
+          
+          external_ = false;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:supervisor.ActionRequest.PreviewData)
+      }
+
+      // @@protoc_insertion_point(class_scope:supervisor.ActionRequest.PreviewData)
+      private static final io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData();
+      }
+
+      public static io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      private static final com.google.protobuf.Parser<PreviewData>
+          PARSER = new com.google.protobuf.AbstractParser<PreviewData>() {
+        @java.lang.Override
+        public PreviewData parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new PreviewData(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<PreviewData> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<PreviewData> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
     public static final int METHOD_FIELD_NUMBER = 1;
     private int method_;
     /**
@@ -4194,34 +5608,56 @@ public final class Notification {
       return result == null ? io.gitpod.supervisor.api.Notification.ActionMethod.UNRECOGNIZED : result;
     }
 
-    public static final int AWAIT_FIELD_NUMBER = 2;
-    private boolean await_;
+    public static final int OPEN_FIELD_NUMBER = 2;
+    private io.gitpod.supervisor.api.Notification.ActionRequest.OpenData open_;
     /**
-     * <pre>
-     * for method open - wait until all opened files are closed
-     * </pre>
-     *
-     * <code>bool await = 2;</code>
-     * @return The await.
+     * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+     * @return Whether the open field is set.
      */
     @java.lang.Override
-    public boolean getAwait() {
-      return await_;
+    public boolean hasOpen() {
+      return open_ != null;
+    }
+    /**
+     * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+     * @return The open.
+     */
+    @java.lang.Override
+    public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData getOpen() {
+      return open_ == null ? io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.getDefaultInstance() : open_;
+    }
+    /**
+     * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+     */
+    @java.lang.Override
+    public io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder getOpenOrBuilder() {
+      return getOpen();
     }
 
-    public static final int EXTERNAL_FIELD_NUMBER = 3;
-    private boolean external_;
+    public static final int PREVIEW_FIELD_NUMBER = 3;
+    private io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData preview_;
     /**
-     * <pre>
-     * for method preview - open the URL in a new browser tab
-     * </pre>
-     *
-     * <code>bool external = 3;</code>
-     * @return The external.
+     * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+     * @return Whether the preview field is set.
      */
     @java.lang.Override
-    public boolean getExternal() {
-      return external_;
+    public boolean hasPreview() {
+      return preview_ != null;
+    }
+    /**
+     * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+     * @return The preview.
+     */
+    @java.lang.Override
+    public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData getPreview() {
+      return preview_ == null ? io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.getDefaultInstance() : preview_;
+    }
+    /**
+     * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+     */
+    @java.lang.Override
+    public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder getPreviewOrBuilder() {
+      return getPreview();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4241,11 +5677,11 @@ public final class Notification {
       if (method_ != io.gitpod.supervisor.api.Notification.ActionMethod.OPEN.getNumber()) {
         output.writeEnum(1, method_);
       }
-      if (await_ != false) {
-        output.writeBool(2, await_);
+      if (open_ != null) {
+        output.writeMessage(2, getOpen());
       }
-      if (external_ != false) {
-        output.writeBool(3, external_);
+      if (preview_ != null) {
+        output.writeMessage(3, getPreview());
       }
       unknownFields.writeTo(output);
     }
@@ -4260,13 +5696,13 @@ public final class Notification {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, method_);
       }
-      if (await_ != false) {
+      if (open_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, await_);
+          .computeMessageSize(2, getOpen());
       }
-      if (external_ != false) {
+      if (preview_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(3, external_);
+          .computeMessageSize(3, getPreview());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4284,10 +5720,16 @@ public final class Notification {
       io.gitpod.supervisor.api.Notification.ActionRequest other = (io.gitpod.supervisor.api.Notification.ActionRequest) obj;
 
       if (method_ != other.method_) return false;
-      if (getAwait()
-          != other.getAwait()) return false;
-      if (getExternal()
-          != other.getExternal()) return false;
+      if (hasOpen() != other.hasOpen()) return false;
+      if (hasOpen()) {
+        if (!getOpen()
+            .equals(other.getOpen())) return false;
+      }
+      if (hasPreview() != other.hasPreview()) return false;
+      if (hasPreview()) {
+        if (!getPreview()
+            .equals(other.getPreview())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4301,12 +5743,14 @@ public final class Notification {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + METHOD_FIELD_NUMBER;
       hash = (53 * hash) + method_;
-      hash = (37 * hash) + AWAIT_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getAwait());
-      hash = (37 * hash) + EXTERNAL_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getExternal());
+      if (hasOpen()) {
+        hash = (37 * hash) + OPEN_FIELD_NUMBER;
+        hash = (53 * hash) + getOpen().hashCode();
+      }
+      if (hasPreview()) {
+        hash = (37 * hash) + PREVIEW_FIELD_NUMBER;
+        hash = (53 * hash) + getPreview().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4442,10 +5886,18 @@ public final class Notification {
         super.clear();
         method_ = 0;
 
-        await_ = false;
-
-        external_ = false;
-
+        if (openBuilder_ == null) {
+          open_ = null;
+        } else {
+          open_ = null;
+          openBuilder_ = null;
+        }
+        if (previewBuilder_ == null) {
+          preview_ = null;
+        } else {
+          preview_ = null;
+          previewBuilder_ = null;
+        }
         return this;
       }
 
@@ -4473,8 +5925,16 @@ public final class Notification {
       public io.gitpod.supervisor.api.Notification.ActionRequest buildPartial() {
         io.gitpod.supervisor.api.Notification.ActionRequest result = new io.gitpod.supervisor.api.Notification.ActionRequest(this);
         result.method_ = method_;
-        result.await_ = await_;
-        result.external_ = external_;
+        if (openBuilder_ == null) {
+          result.open_ = open_;
+        } else {
+          result.open_ = openBuilder_.build();
+        }
+        if (previewBuilder_ == null) {
+          result.preview_ = preview_;
+        } else {
+          result.preview_ = previewBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -4526,11 +5986,11 @@ public final class Notification {
         if (other.method_ != 0) {
           setMethodValue(other.getMethodValue());
         }
-        if (other.getAwait() != false) {
-          setAwait(other.getAwait());
+        if (other.hasOpen()) {
+          mergeOpen(other.getOpen());
         }
-        if (other.getExternal() != false) {
-          setExternal(other.getExternal());
+        if (other.hasPreview()) {
+          mergePreview(other.getPreview());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4615,90 +6075,242 @@ public final class Notification {
         return this;
       }
 
-      private boolean await_ ;
+      private io.gitpod.supervisor.api.Notification.ActionRequest.OpenData open_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenData, io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder, io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder> openBuilder_;
       /**
-       * <pre>
-       * for method open - wait until all opened files are closed
-       * </pre>
-       *
-       * <code>bool await = 2;</code>
-       * @return The await.
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       * @return Whether the open field is set.
        */
-      @java.lang.Override
-      public boolean getAwait() {
-        return await_;
+      public boolean hasOpen() {
+        return openBuilder_ != null || open_ != null;
       }
       /**
-       * <pre>
-       * for method open - wait until all opened files are closed
-       * </pre>
-       *
-       * <code>bool await = 2;</code>
-       * @param value The await to set.
-       * @return This builder for chaining.
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       * @return The open.
        */
-      public Builder setAwait(boolean value) {
-        
-        await_ = value;
-        onChanged();
+      public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData getOpen() {
+        if (openBuilder_ == null) {
+          return open_ == null ? io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.getDefaultInstance() : open_;
+        } else {
+          return openBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       */
+      public Builder setOpen(io.gitpod.supervisor.api.Notification.ActionRequest.OpenData value) {
+        if (openBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          open_ = value;
+          onChanged();
+        } else {
+          openBuilder_.setMessage(value);
+        }
+
         return this;
       }
       /**
-       * <pre>
-       * for method open - wait until all opened files are closed
-       * </pre>
-       *
-       * <code>bool await = 2;</code>
-       * @return This builder for chaining.
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
        */
-      public Builder clearAwait() {
-        
-        await_ = false;
-        onChanged();
+      public Builder setOpen(
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder builderForValue) {
+        if (openBuilder_ == null) {
+          open_ = builderForValue.build();
+          onChanged();
+        } else {
+          openBuilder_.setMessage(builderForValue.build());
+        }
+
         return this;
+      }
+      /**
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       */
+      public Builder mergeOpen(io.gitpod.supervisor.api.Notification.ActionRequest.OpenData value) {
+        if (openBuilder_ == null) {
+          if (open_ != null) {
+            open_ =
+              io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.newBuilder(open_).mergeFrom(value).buildPartial();
+          } else {
+            open_ = value;
+          }
+          onChanged();
+        } else {
+          openBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       */
+      public Builder clearOpen() {
+        if (openBuilder_ == null) {
+          open_ = null;
+          onChanged();
+        } else {
+          open_ = null;
+          openBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       */
+      public io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder getOpenBuilder() {
+        
+        onChanged();
+        return getOpenFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       */
+      public io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder getOpenOrBuilder() {
+        if (openBuilder_ != null) {
+          return openBuilder_.getMessageOrBuilder();
+        } else {
+          return open_ == null ?
+              io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.getDefaultInstance() : open_;
+        }
+      }
+      /**
+       * <code>.supervisor.ActionRequest.OpenData open = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.gitpod.supervisor.api.Notification.ActionRequest.OpenData, io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder, io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder> 
+          getOpenFieldBuilder() {
+        if (openBuilder_ == null) {
+          openBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              io.gitpod.supervisor.api.Notification.ActionRequest.OpenData, io.gitpod.supervisor.api.Notification.ActionRequest.OpenData.Builder, io.gitpod.supervisor.api.Notification.ActionRequest.OpenDataOrBuilder>(
+                  getOpen(),
+                  getParentForChildren(),
+                  isClean());
+          open_ = null;
+        }
+        return openBuilder_;
       }
 
-      private boolean external_ ;
+      private io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData preview_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder> previewBuilder_;
       /**
-       * <pre>
-       * for method preview - open the URL in a new browser tab
-       * </pre>
-       *
-       * <code>bool external = 3;</code>
-       * @return The external.
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       * @return Whether the preview field is set.
        */
-      @java.lang.Override
-      public boolean getExternal() {
-        return external_;
+      public boolean hasPreview() {
+        return previewBuilder_ != null || preview_ != null;
       }
       /**
-       * <pre>
-       * for method preview - open the URL in a new browser tab
-       * </pre>
-       *
-       * <code>bool external = 3;</code>
-       * @param value The external to set.
-       * @return This builder for chaining.
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       * @return The preview.
        */
-      public Builder setExternal(boolean value) {
-        
-        external_ = value;
-        onChanged();
+      public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData getPreview() {
+        if (previewBuilder_ == null) {
+          return preview_ == null ? io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.getDefaultInstance() : preview_;
+        } else {
+          return previewBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       */
+      public Builder setPreview(io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData value) {
+        if (previewBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          preview_ = value;
+          onChanged();
+        } else {
+          previewBuilder_.setMessage(value);
+        }
+
         return this;
       }
       /**
-       * <pre>
-       * for method preview - open the URL in a new browser tab
-       * </pre>
-       *
-       * <code>bool external = 3;</code>
-       * @return This builder for chaining.
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
        */
-      public Builder clearExternal() {
-        
-        external_ = false;
-        onChanged();
+      public Builder setPreview(
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder builderForValue) {
+        if (previewBuilder_ == null) {
+          preview_ = builderForValue.build();
+          onChanged();
+        } else {
+          previewBuilder_.setMessage(builderForValue.build());
+        }
+
         return this;
+      }
+      /**
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       */
+      public Builder mergePreview(io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData value) {
+        if (previewBuilder_ == null) {
+          if (preview_ != null) {
+            preview_ =
+              io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.newBuilder(preview_).mergeFrom(value).buildPartial();
+          } else {
+            preview_ = value;
+          }
+          onChanged();
+        } else {
+          previewBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       */
+      public Builder clearPreview() {
+        if (previewBuilder_ == null) {
+          preview_ = null;
+          onChanged();
+        } else {
+          preview_ = null;
+          previewBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       */
+      public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder getPreviewBuilder() {
+        
+        onChanged();
+        return getPreviewFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       */
+      public io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder getPreviewOrBuilder() {
+        if (previewBuilder_ != null) {
+          return previewBuilder_.getMessageOrBuilder();
+        } else {
+          return preview_ == null ?
+              io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.getDefaultInstance() : preview_;
+        }
+      }
+      /**
+       * <code>.supervisor.ActionRequest.PreviewData preview = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder> 
+          getPreviewFieldBuilder() {
+        if (previewBuilder_ == null) {
+          previewBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewData.Builder, io.gitpod.supervisor.api.Notification.ActionRequest.PreviewDataOrBuilder>(
+                  getPreview(),
+                  getParentForChildren(),
+                  isClean());
+          preview_ = null;
+        }
+        return previewBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -7798,6 +9410,16 @@ public final class Notification {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_supervisor_ActionRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_supervisor_ActionRequest_OpenData_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_supervisor_ActionRequest_OpenData_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_supervisor_ActionRequest_PreviewData_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_supervisor_ActionRequest_PreviewData_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_supervisor_ActionResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -7842,37 +9464,41 @@ public final class Notification {
       "upervisor.NotifyRequest\"Q\n\016RespondReques" +
       "t\022\021\n\trequestId\030\001 \001(\004\022,\n\010response\030\002 \001(\0132\032" +
       ".supervisor.NotifyResponse\"\021\n\017RespondRes" +
-      "ponse\"Z\n\rActionRequest\022(\n\006method\030\001 \001(\0162\030" +
-      ".supervisor.ActionMethod\022\r\n\005await\030\002 \001(\010\022" +
-      "\020\n\010external\030\003 \001(\010\"/\n\016ActionResponse\022\014\n\004c" +
-      "ode\030\001 \001(\004\022\017\n\007message\030\002 \001(\t\",\n\026SetActiveC" +
-      "lientRequest\022\022\n\nclientDesc\030\001 \001(\t\"X\n\027SetA" +
-      "ctiveClientResponse\022\021\n\trequestId\030\001 \001(\004\022*" +
-      "\n\007request\030\002 \001(\0132\031.supervisor.ActionReque" +
-      "st\"W\n\024ActionRespondRequest\022\021\n\trequestId\030" +
-      "\001 \001(\004\022,\n\010response\030\002 \001(\0132\032.supervisor.Act" +
-      "ionResponse\"\027\n\025ActionRespondResponse*%\n\014" +
-      "ActionMethod\022\010\n\004OPEN\020\000\022\013\n\007PREVIEW\020\0012\265\005\n\023" +
-      "NotificationService\022`\n\006Notify\022\031.supervis" +
-      "or.NotifyRequest\032\032.supervisor.NotifyResp" +
-      "onse\"\037\202\323\344\223\002\031\"\027/v1/notification/notify\022n\n" +
-      "\tSubscribe\022\034.supervisor.SubscribeRequest" +
-      "\032\035.supervisor.SubscribeResponse\"\"\202\323\344\223\002\034\022" +
-      "\032/v1/notification/subscribe0\001\022d\n\007Respond" +
-      "\022\032.supervisor.RespondRequest\032\033.superviso" +
-      "r.RespondResponse\" \202\323\344\223\002\032\"\030/v1/notificat" +
-      "ion/respond\022\204\001\n\017SetActiveClient\022\".superv" +
-      "isor.SetActiveClientRequest\032#.supervisor" +
-      ".SetActiveClientResponse\"&\202\323\344\223\002 \"\036/v1/no" +
-      "tification/active-client0\001\022`\n\006Action\022\031.s" +
-      "upervisor.ActionRequest\032\032.supervisor.Act" +
-      "ionResponse\"\037\202\323\344\223\002\031\"\027/v1/notification/ac" +
-      "tion\022}\n\rActionRespond\022 .supervisor.Actio" +
-      "nRespondRequest\032!.supervisor.ActionRespo" +
-      "ndResponse\"\'\202\323\344\223\002!\"\037/v1/notification/act" +
-      "ion-respondBF\n\030io.gitpod.supervisor.apiZ" +
-      "*github.com/gitpod-io/gitpod/supervisor/" +
-      "apib\006proto3"
+      "ponse\"\372\001\n\rActionRequest\022(\n\006method\030\001 \001(\0162" +
+      "\030.supervisor.ActionMethod\0220\n\004open\030\002 \001(\0132" +
+      "\".supervisor.ActionRequest.OpenData\0226\n\007p" +
+      "review\030\003 \001(\0132%.supervisor.ActionRequest." +
+      "PreviewData\032\'\n\010OpenData\022\014\n\004urls\030\001 \003(\t\022\r\n" +
+      "\005await\030\002 \001(\010\032,\n\013PreviewData\022\013\n\003url\030\001 \001(\t" +
+      "\022\020\n\010external\030\002 \001(\010\"/\n\016ActionResponse\022\014\n\004" +
+      "code\030\001 \001(\004\022\017\n\007message\030\002 \001(\t\",\n\026SetActive" +
+      "ClientRequest\022\022\n\nclientDesc\030\001 \001(\t\"X\n\027Set" +
+      "ActiveClientResponse\022\021\n\trequestId\030\001 \001(\004\022" +
+      "*\n\007request\030\002 \001(\0132\031.supervisor.ActionRequ" +
+      "est\"W\n\024ActionRespondRequest\022\021\n\trequestId" +
+      "\030\001 \001(\004\022,\n\010response\030\002 \001(\0132\032.supervisor.Ac" +
+      "tionResponse\"\027\n\025ActionRespondResponse*%\n" +
+      "\014ActionMethod\022\010\n\004OPEN\020\000\022\013\n\007PREVIEW\020\0012\265\005\n" +
+      "\023NotificationService\022`\n\006Notify\022\031.supervi" +
+      "sor.NotifyRequest\032\032.supervisor.NotifyRes" +
+      "ponse\"\037\202\323\344\223\002\031\"\027/v1/notification/notify\022n" +
+      "\n\tSubscribe\022\034.supervisor.SubscribeReques" +
+      "t\032\035.supervisor.SubscribeResponse\"\"\202\323\344\223\002\034" +
+      "\022\032/v1/notification/subscribe0\001\022d\n\007Respon" +
+      "d\022\032.supervisor.RespondRequest\032\033.supervis" +
+      "or.RespondResponse\" \202\323\344\223\002\032\"\030/v1/notifica" +
+      "tion/respond\022\204\001\n\017SetActiveClient\022\".super" +
+      "visor.SetActiveClientRequest\032#.superviso" +
+      "r.SetActiveClientResponse\"&\202\323\344\223\002 \"\036/v1/n" +
+      "otification/active-client0\001\022`\n\006Action\022\031." +
+      "supervisor.ActionRequest\032\032.supervisor.Ac" +
+      "tionResponse\"\037\202\323\344\223\002\031\"\027/v1/notification/a" +
+      "ction\022}\n\rActionRespond\022 .supervisor.Acti" +
+      "onRespondRequest\032!.supervisor.ActionResp" +
+      "ondResponse\"\'\202\323\344\223\002!\"\037/v1/notification/ac" +
+      "tion-respondBF\n\030io.gitpod.supervisor.api" +
+      "Z*github.com/gitpod-io/gitpod/supervisor" +
+      "/apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7920,7 +9546,19 @@ public final class Notification {
     internal_static_supervisor_ActionRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_supervisor_ActionRequest_descriptor,
-        new java.lang.String[] { "Method", "Await", "External", });
+        new java.lang.String[] { "Method", "Open", "Preview", });
+    internal_static_supervisor_ActionRequest_OpenData_descriptor =
+      internal_static_supervisor_ActionRequest_descriptor.getNestedTypes().get(0);
+    internal_static_supervisor_ActionRequest_OpenData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_supervisor_ActionRequest_OpenData_descriptor,
+        new java.lang.String[] { "Urls", "Await", });
+    internal_static_supervisor_ActionRequest_PreviewData_descriptor =
+      internal_static_supervisor_ActionRequest_descriptor.getNestedTypes().get(1);
+    internal_static_supervisor_ActionRequest_PreviewData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_supervisor_ActionRequest_PreviewData_descriptor,
+        new java.lang.String[] { "Url", "External", });
     internal_static_supervisor_ActionResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_supervisor_ActionResponse_fieldAccessorTable = new

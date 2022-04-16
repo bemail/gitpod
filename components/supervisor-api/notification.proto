@@ -103,10 +103,20 @@ enum ActionMethod {
 
 message ActionRequest {
   ActionMethod method = 1;
-  // for method open - wait until all opened files are closed
-  bool await = 2;
-  // for method preview - open the URL in a new browser tab
-  bool external = 3;
+
+  message OpenData {
+    repeated string urls = 1;
+    // wait until all opened files are closed
+    bool await = 2;
+  }
+  OpenData open = 2;
+
+  message PreviewData {
+    string url = 1;
+    // open the URL in a new browser tab
+    bool external = 2;
+  }
+  PreviewData preview = 3;
 }
 
 message ActionResponse {
