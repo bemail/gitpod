@@ -48,6 +48,32 @@ func NewSubscribeServer() *TestNotificationService_SubscribeServer {
 	}
 }
 
+type testDoActionService_SetActiveClientServer struct {
+	resps  chan *api.SetActiveClientResponse
+	ctx    context.Context
+	cancel context.CancelFunc
+
+	grpc.ServerStream
+}
+
+func newSetActiveClientServer() *testDoActionService_SetActiveClientServer {
+	context, cancel := context.WithCancel(context.Background())
+	return &testDoActionService_SetActiveClientServer{
+		ctx:    context,
+		cancel: cancel,
+		resps:  make(chan *api.SetActiveClientResponse, 1),
+	}
+}
+
+func (s *testDoActionService_SetActiveClientServer) Send(resp *api.SetActiveClientResponse) error {
+	s.resps <- resp
+	return nil
+}
+
+func (s *testDoActionService_SetActiveClientServer) Context() context.Context {
+	return s.ctx
+}
+
 func Test(t *testing.T) {
 	t.Run("Test happy path", func(t *testing.T) {
 		notificationService := NewNotificationService()
@@ -213,6 +239,7 @@ func Test(t *testing.T) {
 			t.Errorf("expected error on stale response")
 		}
 	})
+
 	t.Run("Backpressure", func(t *testing.T) {
 		notificationService := NewNotificationService()
 
@@ -261,5 +288,84 @@ func Test(t *testing.T) {
 			t.Errorf("Expected unresponsive subscriber to be cancelled")
 		}
 		wg.Wait()
+	})
+}
+
+func TestAction(t *testing.T) {
+	t.Run("Test happy action", func(t *testing.T) {
+		notificationService := NewNotificationService()
+		subscriber := newSetActiveClientServer()
+		defer subscriber.cancel()
+		go func() {
+			notification := <-subscriber.resps
+			notificationService.ActionRespond(subscriber.ctx, &api.ActionRespondRequest{
+				RequestId: notification.RequestId,
+				Response: &api.ActionResponse{
+					Code:    0,
+					Message: "Happy message",
+				},
+			})
+		}()
+		go func() {
+			err := notificationService.SetActiveClient(&api.SetActiveClientRequest{
+				ClientDesc: "code",
+			}, subscriber)
+			if err != nil {
+				t.Errorf("error receiving user action %s", err)
+			}
+		}()
+		resp, err := notificationService.Action(subscriber.ctx, &api.ActionRequest{
+			Method: api.ActionMethod_OPEN,
+			Open: &api.ActionRequest_OpenData{
+				Urls:  []string{"./notification.go"},
+				Await: false,
+			},
+		})
+
+		if err != nil {
+			t.Errorf("error receiving user action %s", err)
+		}
+		if resp.Message != "Happy message" {
+			t.Errorf("expected response message 'Happy message' but was '%s'", resp.Message)
+		}
+	})
+
+	t.Run("Multiple client with latest get response only", func(t *testing.T) {
+
+		notificationService := NewNotificationService()
+
+		// add a first subscriber
+		firstSubscriber := newSetActiveClientServer()
+		defer firstSubscriber.cancel()
+		go func() {
+			notificationService.SetActiveClient(&api.SetActiveClientRequest{
+				ClientDesc: "first",
+			}, firstSubscriber)
+			firstSubscriber.cancel()
+		}()
+
+		// add a second subscriber after 200ms
+		secondSubscriber := newSetActiveClientServer()
+		defer secondSubscriber.cancel()
+		go func() {
+			time.Sleep(200 * time.Millisecond)
+			notificationService.SetActiveClient(&api.SetActiveClientRequest{
+				ClientDesc: "second",
+			}, secondSubscriber)
+		}()
+
+		go func() {
+			<-firstSubscriber.ctx.Done()
+			notificationService.Action(context.Background(), &api.ActionRequest{
+				Method: api.ActionMethod_PREVIEW,
+			})
+		}()
+		req, ok := <-secondSubscriber.resps
+		if !ok {
+			t.Errorf("notification stream closed")
+		}
+		if req.Request.Method != api.ActionMethod_PREVIEW {
+			t.Errorf("late subscriber should receive do preview action")
+		}
 	})
 }
