@@ -115,12 +115,13 @@ func isActionAllowed(action string, req *api.NotifyRequest) bool {
 func (srv *NotificationService) SetActiveClient(req *api.SetActiveClientRequest, resp api.NotificationService_SetActiveClientServer) error {
 	log.WithField("SetActiveClientRequest", req).Info("SetActiveClient entered")
 	defer log.WithField("SetActiveClientRequest", req).Info("SetActiveClient exited")
-	subscriber := srv.helper.Subscribe(resp.Context(), SubscriptionTypeAction)
 	srv.m.Lock()
-	if srv.latestActiveClientID != 0 && subscriber.id != srv.latestActiveClientID {
+	if srv.latestActiveClientID != 0 {
+		log.WithField("lastClientID", srv.latestActiveClientID).Info("SetActiveClient unsubscribe")
 		srv.helper.Unsubscribe(srv.latestActiveClientID)
-		srv.latestActiveClientID = subscriber.id
 	}
+	subscriber := srv.helper.Subscribe(resp.Context(), SubscriptionTypeAction)
+	srv.latestActiveClientID = subscriber.id
 	srv.m.Unlock()
 	return srv.helper.Wait(resp.Context(), subscriber, func(d interface{}) error {
 		t, ok := d.(*api.SetActiveClientResponse)
