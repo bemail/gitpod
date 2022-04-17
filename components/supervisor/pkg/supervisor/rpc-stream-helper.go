@@ -226,6 +226,7 @@ type checkRespHandler func(msg interface{}) error
 
 // Respond result as request data to respond the client that ask to DoAction.
 func (srv *RPCStreamHelper) Respond(ctx context.Context, requestID uint64, reqResp interface{}, checkRespHandler checkRespHandler) error {
+	log.WithField("requestID", requestID).WithField("reqResp", reqResp).Debug("Receive Respond")
 	srv.mutex.Lock()
 	defer srv.mutex.Unlock()
 	pending, ok := srv.pendingRequests[requestID]
