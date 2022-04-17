@@ -391,6 +391,15 @@ func TestAction(t *testing.T) {
 			if req.Request.Method != api.ActionMethod_OPEN {
 				t.Errorf("client should receive do preview action")
 			}
+			// // You can uncomment this if you want to see what should client do
+			// // Client will not executes command directly,
+			// // they will run some built-in functions
+			// args := []string{"--wait"} // need to close the txt file
+			// args = append(args, req.Request.Open.Urls...)
+			// cmd := exec.Command("/ide/bin/remote-cli/code", args...)
+			// if err := cmd.Run(); err != nil {
+			// 	t.Errorf("code open file should not got error")
+			// }
 			notificationService.ActionRespond(context.Background(), &api.ActionRespondRequest{
 				RequestId: req.RequestId,
 				Response: &api.ActionResponse{
