@@ -181,21 +181,24 @@ func (srv *RPCStreamHelper) Unsubscribe(subscriberID uint64) {
 func (srv *RPCStreamHelper) subscribeLocked(ctx context.Context, subType int) *subscription {
 	srv.mutex.Lock()
 	defer srv.mutex.Unlock()
+	pendingLen := len(srv.pendingRequests)
 	// account for some back pressure
-	capacity := len(srv.pendingRequests)
+	capacity := pendingLen
 	if MaxSuber > capacity {
 		capacity = MaxSuber
 	}
 	channel := make(chan interface{}, capacity)
-	log.WithField("pending", len(srv.pendingRequests)).Info("Sending pending DoAction requests")
-	for id, pending := range srv.pendingRequests {
-		channel <- pending.message
-		if !pending.wait {
-			delete(srv.pendingRequests, id)
+	if pendingLen != 0 {
+		log.WithField("pending", pendingLen).Info("Sending pending DoAction requests")
+		for id, pending := range srv.pendingRequests {
+			channel <- pending.message
+			if !pending.wait {
+				delete(srv.pendingRequests, id)
+			}
 		}
 	}
-	id := srv.nextSubscriptionID
 	srv.nextSubscriptionID++
+	id := srv.nextSubscriptionID
 	_, cancel := context.WithCancel(ctx)
 	subscription := &subscription{
 		subType: subType,
@@ -212,7 +215,7 @@ func (srv *RPCStreamHelper) unsubscribeLocked(subscriptionID uint64) {
 	defer srv.mutex.Unlock()
 	subscription, ok := srv.subscriptions[subscriptionID]
 	if !ok {
-		log.Errorf("Could not unsubscribe subscriber")
+		log.WithField("id", subscriptionID).Debug("Subscriber has been unsubscribed")
 		return
 	}
 	delete(srv.subscriptions, subscription.id)
