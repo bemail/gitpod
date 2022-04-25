@@ -654,6 +654,7 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
             await projectEnvVarsPromise,
             {
                 forceDefaultImage: !!options.forceDefaultImage,
+                ideSettings: options.ideSettings,
             },
         );
         traceWI(ctx, { instanceId: result.instanceID });
@@ -1123,6 +1124,9 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
                 user,
                 await envVars,
                 await projectEnvVarsPromise,
+                {
+                    ideSettings: options.ideSettings,
+                },
             );
             ctx.span?.log({ event: "startWorkspaceComplete", ...startWorkspaceResult });
 

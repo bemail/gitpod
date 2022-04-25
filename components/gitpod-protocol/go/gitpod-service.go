@@ -1682,7 +1682,8 @@ type WorkspaceInstanceStatus struct {
 
 // StartWorkspaceOptions is the StartWorkspaceOptions message type
 type StartWorkspaceOptions struct {
-	ForceDefaultImage bool `json:"forceDefaultImage,omitempty"`
+	ForceDefaultImage bool         `json:"forceDefaultImage,omitempty"`
+	IdeSettings       *IDESettings `json:"ideSettings,omitempty"`
 }
 
 // GetWorkspaceTimeoutResult is the GetWorkspaceTimeoutResult message type
@@ -1817,8 +1818,9 @@ type UpdateOwnAuthProviderParams struct {
 
 // CreateWorkspaceOptions is the CreateWorkspaceOptions message type
 type CreateWorkspaceOptions struct {
-	ContextURL string `json:"contextUrl,omitempty"`
-	Mode       string `json:"mode,omitempty"`
+	ContextURL  string       `json:"contextUrl,omitempty"`
+	Mode        string       `json:"mode,omitempty"`
+	IdeSettings *IDESettings `json:"ideSettings,omitempty"`
 }
 
 // DeleteOwnAuthProviderParams is the DeleteOwnAuthProviderParams message type

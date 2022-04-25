@@ -115,6 +115,7 @@ export interface StartWorkspaceOptions {
     rethrow?: boolean;
     forceDefaultImage?: boolean;
     excludeFeatureFlags?: NamedWorkspaceFeatureFlag[];
+    ideSettings?: IDESettings;
 }
 
 const MAX_INSTANCE_START_RETRIES = 2;
@@ -266,7 +267,14 @@ export class WorkspaceStarter {
             let instance = await this.workspaceDb
                 .trace({ span })
                 .storeInstance(
-                    await this.newInstance(ctx, workspace, user, options.excludeFeatureFlags || [], ideConfig),
+                    await this.newInstance(
+                        ctx,
+                        workspace,
+                        user,
+                        options.excludeFeatureFlags || [],
+                        ideConfig,
+                        options.ideSettings,
+                    ),
                 );
             span.log({ newInstance: instance.id });
 
@@ -601,6 +609,7 @@ export class WorkspaceStarter {
         user: User,
         excludeFeatureFlags: NamedWorkspaceFeatureFlag[],
         ideConfig: IDEConfig,
+        customIdeSettings?: IDESettings,
     ): Promise<WorkspaceInstance> {
         //#endregion IDE resolution TODO(ak) move to IDE service
         // TODO: Compatible with ide-config not deployed, need revert after ide-config deployed
@@ -612,8 +621,12 @@ export class WorkspaceStarter {
             user.additionalData.ideSettings = migratted;
         }
 
-        const ideChoice = user.additionalData?.ideSettings?.defaultIde;
-        const useLatest = !!user.additionalData?.ideSettings?.useLatestVersion;
+        const preferenceIDE = user.additionalData?.ideSettings?.defaultIde;
+        const perferenceUseLatest = !!user.additionalData?.ideSettings?.useLatestVersion;
+
+        // referrer > custom via API > user setting
+        const ideChoice = customIdeSettings?.defaultIde ?? preferenceIDE;
+        const useLatest = customIdeSettings?.useLatestVersion ?? perferenceUseLatest;
 
         // TODO(cw): once we allow changing the IDE in the workspace config (i.e. .gitpod.yml), we must
         //           give that value precedence over the default choice.
@@ -623,7 +636,7 @@ export class WorkspaceStarter {
             ideConfig: {
                 // We only check user setting because if code(insider) but desktopIde has no latestImage
                 // it still need to notice user that this workspace is using latest IDE
-                useLatest: user.additionalData?.ideSettings?.useLatestVersion,
+                useLatest,
             },
         };
 
@@ -640,9 +653,10 @@ export class WorkspaceStarter {
 
         const referrerIde = this.resolveReferrerIDE(workspace, user, ideConfig);
         if (referrerIde) {
-            configuration.desktopIdeImage = useLatest
+            configuration.desktopIdeImage = perferenceUseLatest
                 ? referrerIde.option.latestImage ?? referrerIde.option.image
                 : referrerIde.option.image;
+            configuration.ideConfig!.useLatest = perferenceUseLatest;
             if (!user.additionalData?.ideSettings) {
                 // A user does not have IDE settings configured yet configure it with a referrer ide as default.
                 const additionalData = user?.additionalData || {};

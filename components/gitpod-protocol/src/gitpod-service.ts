@@ -24,6 +24,7 @@ import {
     GuessGitTokenScopesParams,
     GuessedGitTokenScopes,
     ProjectEnvVar,
+    IDESettings,
 } from "./protocol";
 import {
     Team,
@@ -388,9 +389,11 @@ export namespace GitpodServer {
         contextUrl: string;
         mode?: CreateWorkspaceMode;
         forceDefaultConfig?: boolean;
+        ideSettings?: IDESettings;
     }
     export interface StartWorkspaceOptions {
         forceDefaultImage: boolean;
+        ideSettings?: IDESettings;
     }
     export interface TakeSnapshotOptions {
         workspaceId: string;
