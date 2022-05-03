@@ -121,6 +121,7 @@ type WorkspaceConfig struct {
 	} `json:"contentService"`
 
 	EnableProtectedSecrets bool `json:"enableProtectedSecrets"`
+	UseWsmanagerMk2 bool `json:"useWsmanagerMk2,omitempty"`
 }
 
 type PersistentVolumeClaim struct {

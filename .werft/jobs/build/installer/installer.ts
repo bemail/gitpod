@@ -36,6 +36,7 @@ export type InstallerOptions = {
     gitpodDaemonsetPorts: GitpodDaemonsetPorts;
     smithToken: string;
     withPayment: boolean;
+    useWsManagerMk2: boolean;
 };
 
 export class Installer {
@@ -75,6 +76,13 @@ export class Installer {
             this.configureConfigCat(slice);
 
             this.configureDefaultTemplate(slice);
+
+            if (this.options.useWsManagerMk2) {
+                exec(
+                    `yq w -i ${this.options.installerConfigPath} experimental.workspace.useWsmanagerMk2 true`,
+                    { slice: slice },
+                );
+            }
 
             if (this.options.analytics) {
                 this.includeAnalytics(slice);

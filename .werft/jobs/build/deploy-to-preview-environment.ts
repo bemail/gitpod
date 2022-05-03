@@ -77,6 +77,7 @@ export async function deployToPreviewEnvironment(werft: Werft, jobConfig: JobCon
         installEELicense,
         workspaceFeatureFlags,
         storage,
+        useWsManagerMk2,
     } = jobConfig;
 
     const { destname, namespace } = jobConfig.previewEnvironment;
@@ -104,6 +105,7 @@ export async function deployToPreviewEnvironment(werft: Werft, jobConfig: JobCon
         imagePullAuth,
         withPayment,
         withObservability,
+        useWsManagerMk2,
     };
 
     exec(
@@ -343,6 +345,7 @@ async function deployToDevWithInstaller(
         gitpodDaemonsetPorts: { registryFacade: registryNodePortMeta, wsDaemon: wsdaemonPortMeta },
         smithToken: token,
         withPayment: deploymentConfig.withPayment,
+        useWsManagerMk2: deploymentConfig.useWsManagerMk2,
     });
     try {
         werft.log(phases.DEPLOY, "deploying using installer");
@@ -406,6 +409,7 @@ interface DeploymentConfig {
     imagePullAuth: string;
     withPayment: boolean;
     withObservability: boolean;
+    useWsManagerMk2: boolean;
 }
 
 async function addVMDNSRecord(werft: Werft, name: string, domain: string) {
