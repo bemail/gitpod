@@ -54,7 +54,7 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 	}
 
 	classes := map[string]*config.WorkspaceClass{
-		"": {
+		config.DefaultWorkspaceClass: {
 			Container: config.ContainerConfiguration{
 				Requests: &config.ResourceConfiguration{
 					CPU:              quantityString(ctx.Config.Workspace.Resources.Requests, corev1.ResourceCPU),
@@ -68,6 +68,11 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 				},
 			},
 			Templates: templatesCfg,
+			PVC: config.PVCConfiguration{
+				Size:          ctx.Config.Workspace.PVC.Size,
+				StorageClass:  ctx.Config.Workspace.PVC.StorageClass,
+				SnapshotClass: ctx.Config.Workspace.PVC.SnapshotClass,
+			},
 		},
 	}
 	err = ctx.WithExperimental(func(ucfg *experimental.Config) error {
@@ -98,6 +103,7 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 					},
 				},
 				Templates: tplsCfg,
+				PVC:       config.PVCConfiguration(c.PVC),
 			}
 			tpls = append(tpls, ctpls...)
 		}
