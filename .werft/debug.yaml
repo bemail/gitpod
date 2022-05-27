@@ -45,7 +45,7 @@ pod:
   #     secretName: gitpod-test-tokens
   containers:
   - name: testdb
-    image: mysql:5.7
+    image: mysql:8
     env:
     - name: MYSQL_ROOT_PASSWORD
       value: test
