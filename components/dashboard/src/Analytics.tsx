@@ -9,6 +9,7 @@ import { log } from "@gitpod/gitpod-protocol/lib/util/logging";
 import Cookies from "js-cookie";
 import { v4 } from "uuid";
 import { Experiment } from "./experiments";
+import { StartWorkspaceError } from "./start/StartPage";
 
 export type Event = "invite_url_requested" | "organisation_authorised" | "dotfile_repo_changed" | "feedback_submitted";
 type InternalEvent = Event | "path_changed" | "dashboard_clicked";
@@ -35,6 +36,7 @@ export interface TrackFeedback {
     feedback: string;
     href: string;
     path: string;
+    error_rendered?: string | StartWorkspaceError | undefined;
 }
 interface TrackDashboardClick {
     dnt?: boolean;
