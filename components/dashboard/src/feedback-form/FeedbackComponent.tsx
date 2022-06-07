@@ -3,7 +3,7 @@
  * Licensed under the GNU Affero General Public License (AGPL).
  * See License-AGPL.txt in the project root for license information.
  */
-
+// @ts-nocheck
 import { useState } from "react";
 import starry from "../images/feedback/starry-emoji.svg";
 import happy from "../images/feedback/happy-emoji.svg";
