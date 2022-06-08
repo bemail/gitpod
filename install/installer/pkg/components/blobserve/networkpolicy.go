@@ -8,7 +8,6 @@ import (
 	"github.com/gitpod-io/gitpod/installer/pkg/common"
 	ideproxy "github.com/gitpod-io/gitpod/installer/pkg/components/ide-proxy"
 	"github.com/gitpod-io/gitpod/installer/pkg/components/proxy"
-	wsproxy "github.com/gitpod-io/gitpod/installer/pkg/components/ws-proxy"
 
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,11 +36,6 @@ func networkpolicy(ctx *common.RenderContext) ([]runtime.Object, error) {
 				From: []networkingv1.NetworkPolicyPeer{{
 					PodSelector: &metav1.LabelSelector{MatchLabels: map[string]string{
 						"component": proxy.Component,
-					}},
-				}, {
-					// TODO: (pd) delete this after all workspace cluster deployed
-					PodSelector: &metav1.LabelSelector{MatchLabels: map[string]string{
-						"component": wsproxy.Component,
 					}},
 				}, {
 					PodSelector: &metav1.LabelSelector{MatchLabels: map[string]string{
