@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
 	Short: "This acts as reverse-proxy for all workspace-bound requests",
 	Args:  cobra.MinimumNArgs(1),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		log.Init(ServiceName, Version, jsonLog, verbose)
+		log.Init(ServiceName, Version, jsonLog, true)
 	},
 }
 

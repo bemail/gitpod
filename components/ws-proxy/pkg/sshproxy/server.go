@@ -313,11 +313,13 @@ func (s *Server) HandleConn(c net.Conn) {
 	}()
 
 	go func() {
-		clientConn.Wait()
+		err := clientConn.Wait()
+		log.WithError(err).Info("client conn close error")
 		cancel()
 	}()
 	go func() {
-		workspaceConn.Wait()
+		err := workspaceConn.Wait()
+		log.WithError(err).Info("workspaceConn conn close error")
 		cancel()
 	}()
 	<-ctx.Done()
