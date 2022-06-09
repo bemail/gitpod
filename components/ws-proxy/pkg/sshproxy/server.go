@@ -288,6 +288,7 @@ func (s *Server) HandleConn(c net.Conn) {
 
 	forwardRequests := func(reqs <-chan *ssh.Request, targetConn ssh.Conn) {
 		for req := range reqs {
+			log.WithField("req.type", req.Type).WithField("req.payload", string(req.Payload)).Info("global forwardRequests")
 			result, payload, err := targetConn.SendRequest(req.Type, req.WantReply, req.Payload)
 			if err != nil {
 				continue

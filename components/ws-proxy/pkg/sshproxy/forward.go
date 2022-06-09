@@ -37,6 +37,8 @@ func (s *Server) ChannelForward(ctx context.Context, session *Session, targetCon
 
 	go func() {
 		for req := range originReqs {
+			log.WithField("req.type", req.Type).WithField("req.payload", string(req.Payload)).Info("session forwardRequests " + originChannel.ChannelType())
+
 			switch req.Type {
 			case "pty-req", "shell":
 				log.WithFields(log.OWI("", session.WorkspaceID, session.InstanceID)).Debugf("forwarding %s request", req.Type)
@@ -97,6 +99,7 @@ func startHeartbeatingChannel(c ssh.Channel, heartbeat Heartbeat, instanceID str
 		cancel:  cancel,
 	}
 	go func() {
+		log.Info("start heartbeat thread")
 		for {
 			select {
 			case <-res.t.C:
@@ -140,6 +143,7 @@ func (c *heartbeatingChannel) Read(data []byte) (written int, err error) {
 }
 
 func (c *heartbeatingChannel) Close() error {
+	log.Info("heartbeat thread stop")
 	c.t.Stop()
 	c.cancel()
 	return c.Channel.Close()
