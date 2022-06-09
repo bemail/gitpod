@@ -17,6 +17,9 @@ service ControlService {
 
   // CreateSSHKeyPair Create a pair of SSH Keys and put them in ~/.ssh/authorized_keys, this will only be generated once in the entire workspace lifecycle
   rpc CreateSSHKeyPair(CreateSSHKeyPairRequest) returns (CreateSSHKeyPairResponse) {}
+
+  // VerifyKeyPair Send the public to supervisor then check with ~/.ssh/authorized_keys
+  rpc VerifyKeyPair(VerifyPublicKeyRequest) returns (VerifyPublicKeyResponse) {}
 }
 
 message ExposePortRequest {
@@ -31,4 +34,11 @@ message CreateSSHKeyPairRequest {}
 message CreateSSHKeyPairResponse {
     // Return privateKey for ws-proxy
     string private_key = 1;
+}
+
+message VerifyPublicKeyRequest {
+    string public_key = 1;
+}
+message VerifyPublicKeyResponse {
+    bool ok = 1;
 }

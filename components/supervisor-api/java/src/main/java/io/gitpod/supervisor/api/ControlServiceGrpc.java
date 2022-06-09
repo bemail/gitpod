@@ -84,6 +84,37 @@ public final class ControlServiceGrpc {
     return getCreateSSHKeyPairMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest,
+      io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse> getVerifyKeyPairMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "VerifyKeyPair",
+      requestType = io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest.class,
+      responseType = io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest,
+      io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse> getVerifyKeyPairMethod() {
+    io.grpc.MethodDescriptor<io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest, io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse> getVerifyKeyPairMethod;
+    if ((getVerifyKeyPairMethod = ControlServiceGrpc.getVerifyKeyPairMethod) == null) {
+      synchronized (ControlServiceGrpc.class) {
+        if ((getVerifyKeyPairMethod = ControlServiceGrpc.getVerifyKeyPairMethod) == null) {
+          ControlServiceGrpc.getVerifyKeyPairMethod = getVerifyKeyPairMethod =
+              io.grpc.MethodDescriptor.<io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest, io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "VerifyKeyPair"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new ControlServiceMethodDescriptorSupplier("VerifyKeyPair"))
+              .build();
+        }
+      }
+    }
+    return getVerifyKeyPairMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -155,6 +186,16 @@ public final class ControlServiceGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateSSHKeyPairMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * VerifyKeyPair Send the public to supervisor then check with ~/.ssh/authorized_keys
+     * </pre>
+     */
+    public void verifyKeyPair(io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyKeyPairMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -171,6 +212,13 @@ public final class ControlServiceGrpc {
                 io.gitpod.supervisor.api.Control.CreateSSHKeyPairRequest,
                 io.gitpod.supervisor.api.Control.CreateSSHKeyPairResponse>(
                   this, METHODID_CREATE_SSHKEY_PAIR)))
+          .addMethod(
+            getVerifyKeyPairMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest,
+                io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse>(
+                  this, METHODID_VERIFY_KEY_PAIR)))
           .build();
     }
   }
@@ -213,6 +261,17 @@ public final class ControlServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getCreateSSHKeyPairMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * VerifyKeyPair Send the public to supervisor then check with ~/.ssh/authorized_keys
+     * </pre>
+     */
+    public void verifyKeyPair(io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getVerifyKeyPairMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -250,6 +309,16 @@ public final class ControlServiceGrpc {
     public io.gitpod.supervisor.api.Control.CreateSSHKeyPairResponse createSSHKeyPair(io.gitpod.supervisor.api.Control.CreateSSHKeyPairRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getCreateSSHKeyPairMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * VerifyKeyPair Send the public to supervisor then check with ~/.ssh/authorized_keys
+     * </pre>
+     */
+    public io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse verifyKeyPair(io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getVerifyKeyPairMethod(), getCallOptions(), request);
     }
   }
 
@@ -291,10 +360,22 @@ public final class ControlServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getCreateSSHKeyPairMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * VerifyKeyPair Send the public to supervisor then check with ~/.ssh/authorized_keys
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse> verifyKeyPair(
+        io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getVerifyKeyPairMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_EXPOSE_PORT = 0;
   private static final int METHODID_CREATE_SSHKEY_PAIR = 1;
+  private static final int METHODID_VERIFY_KEY_PAIR = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -320,6 +401,10 @@ public final class ControlServiceGrpc {
         case METHODID_CREATE_SSHKEY_PAIR:
           serviceImpl.createSSHKeyPair((io.gitpod.supervisor.api.Control.CreateSSHKeyPairRequest) request,
               (io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Control.CreateSSHKeyPairResponse>) responseObserver);
+          break;
+        case METHODID_VERIFY_KEY_PAIR:
+          serviceImpl.verifyKeyPair((io.gitpod.supervisor.api.Control.VerifyPublicKeyRequest) request,
+              (io.grpc.stub.StreamObserver<io.gitpod.supervisor.api.Control.VerifyPublicKeyResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -384,6 +469,7 @@ public final class ControlServiceGrpc {
               .setSchemaDescriptor(new ControlServiceFileDescriptorSupplier())
               .addMethod(getExposePortMethod())
               .addMethod(getCreateSSHKeyPairMethod())
+              .addMethod(getVerifyKeyPairMethod())
               .build();
         }
       }
