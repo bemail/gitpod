@@ -7,6 +7,7 @@ package supervisor
 import (
 	"bytes"
 	"context"
+	"crypto/subtle"
 	"errors"
 	"io"
 	"os"
@@ -16,6 +17,7 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -770,6 +772,37 @@ func (ss *ControlService) CreateSSHKeyPair(context.Context, *api.CreateSSHKeyPai
 	return &api.CreateSSHKeyPairResponse{
 		PrivateKey: ss.privateKey,
 	}, err
+}
+
+// VerifyKeyPair Send the public to supervisor then check with ~/.ssh/authorized_keys
+func (ss *ControlService) VerifyKeyPair(ctx context.Context, req *api.VerifyPublicKeyRequest) (response *api.VerifyPublicKeyResponse, err error) {
+	response = &api.VerifyPublicKeyResponse{
+		Ok: false,
+	}
+	pk, _, _, _, err := ssh.ParseAuthorizedKey([]byte(req.PublicKey))
+	if err != nil {
+		return nil, err
+	}
+	home, _ := os.UserHomeDir()
+	data, err := os.ReadFile(filepath.Join(home, ".ssh/authorized_keys"))
+	if err != nil {
+		return response, nil
+	}
+	authorizedKeys := bytes.Split(data, []byte("\n"))
+	for _, keyData := range authorizedKeys {
+		key, _, _, _, err := ssh.ParseAuthorizedKey(keyData)
+		if err != nil {
+			continue
+		}
+		keyData = key.Marshal()
+		pkd := pk.Marshal()
+		if len(keyData) == len(pkd) &&
+			subtle.ConstantTimeCompare(keyData, pkd) == 1 {
+			response.Ok = true
+			return response, nil
+		}
+	}
+	return response, nil
 }
 
 // ContentState signals the workspace content state.
