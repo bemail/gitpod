@@ -254,6 +254,28 @@ function deserialize_wsman_TakeSnapshotResponse(buffer_arg) {
   return core_pb.TakeSnapshotResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_wsman_UpdateSSHKeyRequest(arg) {
+  if (!(arg instanceof core_pb.UpdateSSHKeyRequest)) {
+    throw new Error('Expected argument of type wsman.UpdateSSHKeyRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_wsman_UpdateSSHKeyRequest(buffer_arg) {
+  return core_pb.UpdateSSHKeyRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_wsman_UpdateSSHKeyResponse(arg) {
+  if (!(arg instanceof core_pb.UpdateSSHKeyResponse)) {
+    throw new Error('Expected argument of type wsman.UpdateSSHKeyResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_wsman_UpdateSSHKeyResponse(buffer_arg) {
+  return core_pb.UpdateSSHKeyResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var WorkspaceManagerService = exports.WorkspaceManagerService = {
   // getWorkspaces produces a list of running workspaces and their status
@@ -387,6 +409,18 @@ controlAdmission: {
     requestDeserialize: deserialize_wsman_ControlAdmissionRequest,
     responseSerialize: serialize_wsman_ControlAdmissionResponse,
     responseDeserialize: deserialize_wsman_ControlAdmissionResponse,
+  },
+  // UpdateSSHKey update ssh keys
+updateSSHKey: {
+    path: '/wsman.WorkspaceManager/UpdateSSHKey',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_pb.UpdateSSHKeyRequest,
+    responseType: core_pb.UpdateSSHKeyResponse,
+    requestSerialize: serialize_wsman_UpdateSSHKeyRequest,
+    requestDeserialize: deserialize_wsman_UpdateSSHKeyRequest,
+    responseSerialize: serialize_wsman_UpdateSSHKeyResponse,
+    responseDeserialize: deserialize_wsman_UpdateSSHKeyResponse,
   },
 };
 

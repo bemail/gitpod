@@ -62,6 +62,9 @@ const (
 
 	// WorkspaceExposedPorts contains the exposed ports in the workspace
 	WorkspaceExposedPorts = "gitpod/exposedPorts"
+
+	// WorkspaceSSHPublicKeys contains all authorized ssh public keys that can be connected to the workspace
+	WorkspaceSSHPublicKeys = "gitpod.io/sshPublicKeys"
 )
 
 // WorkspaceSupervisorEndpoint produces the supervisor endpoint of a workspace.

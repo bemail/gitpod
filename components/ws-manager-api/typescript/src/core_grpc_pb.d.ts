@@ -27,6 +27,7 @@ interface IWorkspaceManagerService extends grpc.ServiceDefinition<grpc.UntypedSe
     controlPort: IWorkspaceManagerService_IControlPort;
     takeSnapshot: IWorkspaceManagerService_ITakeSnapshot;
     controlAdmission: IWorkspaceManagerService_IControlAdmission;
+    updateSSHKey: IWorkspaceManagerService_IUpdateSSHKey;
 }
 
 interface IWorkspaceManagerService_IGetWorkspaces extends grpc.MethodDefinition<core_pb.GetWorkspacesRequest, core_pb.GetWorkspacesResponse> {
@@ -128,6 +129,15 @@ interface IWorkspaceManagerService_IControlAdmission extends grpc.MethodDefiniti
     responseSerialize: grpc.serialize<core_pb.ControlAdmissionResponse>;
     responseDeserialize: grpc.deserialize<core_pb.ControlAdmissionResponse>;
 }
+interface IWorkspaceManagerService_IUpdateSSHKey extends grpc.MethodDefinition<core_pb.UpdateSSHKeyRequest, core_pb.UpdateSSHKeyResponse> {
+    path: "/wsman.WorkspaceManager/UpdateSSHKey";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<core_pb.UpdateSSHKeyRequest>;
+    requestDeserialize: grpc.deserialize<core_pb.UpdateSSHKeyRequest>;
+    responseSerialize: grpc.serialize<core_pb.UpdateSSHKeyResponse>;
+    responseDeserialize: grpc.deserialize<core_pb.UpdateSSHKeyResponse>;
+}
 
 export const WorkspaceManagerService: IWorkspaceManagerService;
 
@@ -143,6 +153,7 @@ export interface IWorkspaceManagerServer extends grpc.UntypedServiceImplementati
     controlPort: grpc.handleUnaryCall<core_pb.ControlPortRequest, core_pb.ControlPortResponse>;
     takeSnapshot: grpc.handleUnaryCall<core_pb.TakeSnapshotRequest, core_pb.TakeSnapshotResponse>;
     controlAdmission: grpc.handleUnaryCall<core_pb.ControlAdmissionRequest, core_pb.ControlAdmissionResponse>;
+    updateSSHKey: grpc.handleUnaryCall<core_pb.UpdateSSHKeyRequest, core_pb.UpdateSSHKeyResponse>;
 }
 
 export interface IWorkspaceManagerClient {
@@ -178,6 +189,9 @@ export interface IWorkspaceManagerClient {
     controlAdmission(request: core_pb.ControlAdmissionRequest, callback: (error: grpc.ServiceError | null, response: core_pb.ControlAdmissionResponse) => void): grpc.ClientUnaryCall;
     controlAdmission(request: core_pb.ControlAdmissionRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: core_pb.ControlAdmissionResponse) => void): grpc.ClientUnaryCall;
     controlAdmission(request: core_pb.ControlAdmissionRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: core_pb.ControlAdmissionResponse) => void): grpc.ClientUnaryCall;
+    updateSSHKey(request: core_pb.UpdateSSHKeyRequest, callback: (error: grpc.ServiceError | null, response: core_pb.UpdateSSHKeyResponse) => void): grpc.ClientUnaryCall;
+    updateSSHKey(request: core_pb.UpdateSSHKeyRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: core_pb.UpdateSSHKeyResponse) => void): grpc.ClientUnaryCall;
+    updateSSHKey(request: core_pb.UpdateSSHKeyRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: core_pb.UpdateSSHKeyResponse) => void): grpc.ClientUnaryCall;
 }
 
 export class WorkspaceManagerClient extends grpc.Client implements IWorkspaceManagerClient {
@@ -214,4 +228,7 @@ export class WorkspaceManagerClient extends grpc.Client implements IWorkspaceMan
     public controlAdmission(request: core_pb.ControlAdmissionRequest, callback: (error: grpc.ServiceError | null, response: core_pb.ControlAdmissionResponse) => void): grpc.ClientUnaryCall;
     public controlAdmission(request: core_pb.ControlAdmissionRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: core_pb.ControlAdmissionResponse) => void): grpc.ClientUnaryCall;
     public controlAdmission(request: core_pb.ControlAdmissionRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: core_pb.ControlAdmissionResponse) => void): grpc.ClientUnaryCall;
+    public updateSSHKey(request: core_pb.UpdateSSHKeyRequest, callback: (error: grpc.ServiceError | null, response: core_pb.UpdateSSHKeyResponse) => void): grpc.ClientUnaryCall;
+    public updateSSHKey(request: core_pb.UpdateSSHKeyRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: core_pb.UpdateSSHKeyResponse) => void): grpc.ClientUnaryCall;
+    public updateSSHKey(request: core_pb.UpdateSSHKeyRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: core_pb.UpdateSSHKeyResponse) => void): grpc.ClientUnaryCall;
 }
