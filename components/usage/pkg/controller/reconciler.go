@@ -95,7 +95,7 @@ func (u *UsageReconciler) ReconcileTimeRange(ctx context.Context, from, to time.
 		StartTime: from,
 		EndTime:   to,
 	}
-	instances, invalidInstances, err := u.loadWorkspaceInstances(ctx, from, to)
+	instances, invalidInstances, err := u.loadWorkspaceInstances(ctx, from, to, now)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load workspace instances: %w", err)
 	}
@@ -242,7 +242,7 @@ func (u *UsageReconciler) loadWorkspaces(ctx context.Context, instances []db.Wor
 	return workspacesWithInstances, nil
 }
 
-func (u *UsageReconciler) loadWorkspaceInstances(ctx context.Context, from, to time.Time) ([]db.WorkspaceInstance, []invalidWorkspaceInstance, error) {
+func (u *UsageReconciler) loadWorkspaceInstances(ctx context.Context, from, to, now time.Time) ([]db.WorkspaceInstance, []invalidWorkspaceInstance, error) {
 	log.Infof("Gathering usage data from %s to %s", from, to)
 	instances, err := db.ListWorkspaceInstancesInRange(ctx, u.conn, from, to)
 	if err != nil {
@@ -251,7 +251,7 @@ func (u *UsageReconciler) loadWorkspaceInstances(ctx context.Context, from, to t
 	log.Infof("Identified %d instances between %s and %s", len(instances), from, to)
 
 	valid, invalid := validateInstances(instances)
-	trimmed := trimStartStopTime(valid, from, to)
+	trimmed := trimStartStopTime(valid, from, now)
 	return trimmed, invalid, nil
 }
 
