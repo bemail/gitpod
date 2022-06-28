@@ -73,6 +73,7 @@ type Session struct {
 
 	WorkspaceID string
 	InstanceID  string
+	OwnerUserId string
 
 	PublicKey           ssh.PublicKey
 	WorkspacePrivateKey ssh.Signer
@@ -250,6 +251,7 @@ func (s *Server) HandleConn(c net.Conn) {
 		Conn:                clientConn,
 		WorkspaceID:         workspaceId,
 		InstanceID:          wsInfo.InstanceID,
+		OwnerUserId:         wsInfo.OwnerUserId,
 		WorkspacePrivateKey: key,
 	}
 	remoteAddr := wsInfo.IPAddress + ":23001"
