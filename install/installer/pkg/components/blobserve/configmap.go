@@ -92,6 +92,10 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 					PrePull: []string{},
 					Workdir: "/.supervisor/frontend",
 				},
+				ctx.RepoName("registry.hub.docker.com", "filiptronicek/xterm-ide"): {
+					PrePull: []string{},
+					Workdir: "/ide",
+				},
 			},
 			BlobSpace: blobserve.BlobSpace{
 				Location: "/mnt/cache/blobserve",
