@@ -127,10 +127,10 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 				},
 				xterm: {
 					OrderKey:           pointer.String("08"),
-					Title:              "Xterm.js",
+					Title:              "Terminal",
 					Type:               typeBrowser,
-					Logo:               getIdeLogoPath("vscodeInsiders"),
-					Tooltip:            pointer.String("A terminal in the browser"),
+					Logo:               getIdeLogoPath("xterm"),
+					Tooltip:            pointer.String("A terminal in the browser with Xterm.js"),
 					Label:              pointer.String("Insiders"),
 					Image:              ctx.ImageName("registry.hub.docker.com", "filiptronicek/xterm-ide", "latest"),
 					ResolveImageDigest: pointer.Bool(true),
