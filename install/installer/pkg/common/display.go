@@ -149,8 +149,20 @@ func YamlToRuntimeObject(objects []string) ([]RuntimeObject, error) {
 				return nil, err
 			}
 
+			var m map[string]interface{}
+			err = yaml.Unmarshal([]byte(p), &m)
+			if err != nil {
+				return nil, err
+			}
+
+			delete(m, "status")
+
+			b, err := yaml.Marshal(m)
+			if err != nil {
+				return nil, err
+			}
 			// remove any empty charts
-			ctnt := strings.Trim(p, "\n")
+			ctnt := strings.Trim(string(b), "\n")
 			if len(strings.TrimSpace(ctnt)) == 0 {
 				continue
 			}
