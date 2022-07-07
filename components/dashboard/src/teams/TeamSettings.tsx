@@ -15,8 +15,8 @@ import { getGitpodService, gitpodHostUrl } from "../service/service";
 import { UserContext } from "../user-context";
 import { getCurrentTeam, TeamsContext } from "./teams-context";
 
-export function getTeamSettingsMenu(params: { team?: Team; showPaymentUI?: boolean }) {
-    const { team, showPaymentUI } = params;
+export function getTeamSettingsMenu(params: { team?: Team; showPaymentUI?: boolean; showUsageBasedUI?: boolean }) {
+    const { team, showPaymentUI, showUsageBasedUI } = params;
     return [
         {
             title: "General",
@@ -27,6 +27,14 @@ export function getTeamSettingsMenu(params: { team?: Team; showPaymentUI?: boole
                   {
                       title: "Billing",
                       link: [`/t/${team?.slug}/billing`],
+                  },
+              ]
+            : []),
+        ...(showUsageBasedUI
+            ? [
+                  {
+                      title: "Usage",
+                      link: [`/t/${team?.slug}/usage`],
                   },
               ]
             : []),
