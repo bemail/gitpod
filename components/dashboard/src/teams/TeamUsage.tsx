@@ -13,13 +13,13 @@ import { PaymentContext } from "../payment-context";
 
 function TeamUsage() {
     const { teams } = useContext(TeamsContext);
-    const { showUsageBasedUI } = useContext(PaymentContext);
+    const { showPaymentUI } = useContext(PaymentContext);
     const location = useLocation();
     const team = getCurrentTeam(location, teams);
 
     return (
         <PageWithSubMenu
-            subMenu={getTeamSettingsMenu({ team, showUsageBasedUI })}
+            subMenu={getTeamSettingsMenu({ team, showPaymentUI })}
             title="Usage"
             subtitle="Manage team usage."
         >
