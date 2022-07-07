@@ -215,12 +215,12 @@ func (h *InWorkspaceHandler) Mount(req *libseccomp.ScmpNotifReq) (val uint64, er
 		"id":               req.ID,
 	})
 
-	memFile, err := readarg.OpenMem(req.Pid)
+	memfd, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return Errno(unix.EPERM)
 	}
-	defer memFile.Close()
+	defer unix.Close(memfd)
 
 	err = libseccomp.NotifIDValid(h.FD, req.ID)
 	if err != nil {
@@ -228,21 +228,26 @@ func (h *InWorkspaceHandler) Mount(req *libseccomp.ScmpNotifReq) (val uint64, er
 		return Errno(unix.EPERM)
 	}
 
-	source, err := readarg.ReadString(memFile, int64(req.Data.Args[0]))
+	log.WithField("req", req).Info("sec req ===")
+
+	source, err := readarg.ReadString(memfd, int64(req.Data.Args[0]))
 	if err != nil {
 		log.WithField("arg", 0).WithError(err).Error("cannot read argument")
 		return Errno(unix.EFAULT)
 	}
-	dest, err := readarg.ReadString(memFile, int64(req.Data.Args[1]))
+	log.WithField("arg", 0).WithField("source", source).Info("get arg")
+	dest, err := readarg.ReadString(memfd, int64(req.Data.Args[1]))
 	if err != nil {
 		log.WithField("arg", 1).WithError(err).Error("cannot read argument")
 		return Errno(unix.EFAULT)
 	}
-	filesystem, err := readarg.ReadString(memFile, int64(req.Data.Args[2]))
+	log.WithField("arg", 1).WithField("dest", dest).Info("get arg")
+	filesystem, err := readarg.ReadString(memfd, int64(req.Data.Args[2]))
 	if err != nil {
 		log.WithField("arg", 2).WithError(err).Error("cannot read argument")
 		return Errno(unix.EFAULT)
 	}
+	log.WithField("arg", 2).WithField("filesystem", filesystem).Info("get arg")
 
 	log.WithFields(map[string]interface{}{
 		"source": source,
@@ -321,14 +326,14 @@ func (h *InWorkspaceHandler) Umount(req *libseccomp.ScmpNotifReq) (val uint64, e
 		"id":               req.ID,
 	})
 
-	memFile, err := readarg.OpenMem(req.Pid)
+	memfd, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return Errno(unix.EPERM)
 	}
-	defer memFile.Close()
+	defer unix.Close(memfd)
 
-	target, err := readarg.ReadString(memFile, int64(req.Data.Args[0]))
+	target, err := readarg.ReadString(memfd, int64(req.Data.Args[0]))
 	if err != nil {
 		log.WithField("arg", 0).WithError(err).Error("cannot read argument")
 		return Errno(unix.EFAULT)
@@ -408,12 +413,12 @@ func (h *InWorkspaceHandler) Bind(req *libseccomp.ScmpNotifReq) (val uint64, err
 		flags = libseccomp.NotifRespFlagContinue
 	}()
 
-	memFile, err := readarg.OpenMem(req.Pid)
+	memfd, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return
 	}
-	defer memFile.Close()
+	defer unix.Close(memfd)
 
 	// TODO(cw): find why this breaks
 	// err = libseccomp.NotifIDValid(fd, req.ID)
@@ -447,14 +452,14 @@ func (h *InWorkspaceHandler) Chown(req *libseccomp.ScmpNotifReq) (val uint64, er
 		"id":               req.ID,
 	})
 
-	memFile, err := readarg.OpenMem(req.Pid)
+	memfd, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return
 	}
-	defer memFile.Close()
+	defer unix.Close(memfd)
 
-	pth, err := readarg.ReadString(memFile, int64(req.Data.Args[0]))
+	pth, err := readarg.ReadString(memfd, int64(req.Data.Args[0]))
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return

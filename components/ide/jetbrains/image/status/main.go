@@ -68,10 +68,10 @@ func main() {
 		return
 	}
 
-	// wait until content ready
+	// wait until content
 	contentStatus, wsInfo, err := resolveWorkspaceInfo(context.Background())
 	if err != nil || wsInfo == nil || contentStatus == nil || !contentStatus.Available {
-		log.WithError(err).WithField("wsInfo", wsInfo).WithField("cstate", contentStatus).Error("resolve workspace info failed")
+		log.WithError(err).WithField("wsInfoready", wsInfo).WithField("cstate", contentStatus).Error("resolve workspace info failed")
 		return
 	}
 	log.WithField("cost", time.Now().Local().Sub(startTime).Milliseconds()).Info("content available")
