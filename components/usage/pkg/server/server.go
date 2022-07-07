@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gitpod-io/gitpod/common-go/baseserver"
 	"github.com/gitpod-io/gitpod/common-go/log"
+	v1 "github.com/gitpod-io/gitpod/usage-api/v1"
 	"github.com/gitpod-io/gitpod/usage/pkg/controller"
 	"github.com/gitpod-io/gitpod/usage/pkg/db"
 	"github.com/gitpod-io/gitpod/usage/pkg/stripe"
@@ -87,6 +88,13 @@ func Start(cfg Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to listen and server: %w", err)
 	}
+
+	return nil
+}
+
+func register(srv *baseserver.Server) error {
+	// v1.RegisterWorkspacesServiceServer(srv.GRPC(), apiv1.NewWorkspaceService(connPool))
+	// v1.RegisterPrebuildsServiceServer(srv.GRPC(), v1.UnimplementedPrebuildsServiceServer{})
 
 	return nil
 }
