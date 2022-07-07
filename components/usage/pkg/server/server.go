@@ -93,8 +93,5 @@ func Start(cfg Config) error {
 }
 
 func register(srv *baseserver.Server) error {
-	// v1.RegisterWorkspacesServiceServer(srv.GRPC(), apiv1.NewWorkspaceService(connPool))
-	// v1.RegisterPrebuildsServiceServer(srv.GRPC(), v1.UnimplementedPrebuildsServiceServer{})
-
 	return nil
 }

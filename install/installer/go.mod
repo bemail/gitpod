@@ -326,6 +326,8 @@ replace github.com/gitpod-io/gitpod/supervisor/api => ../../components/superviso
 
 replace github.com/gitpod-io/gitpod/usage => ../../components/usage // leeway
 
+replace github.com/gitpod-io/gitpod/usage-api => ../../components/usage-api/go // leeway
+
 replace github.com/gitpod-io/gitpod/ws-daemon => ../../components/ws-daemon // leeway
 
 replace github.com/gitpod-io/gitpod/ws-daemon/api => ../../components/ws-daemon-api/go // leeway
