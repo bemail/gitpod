@@ -70,7 +70,7 @@ import { BlockedRepository } from "@gitpod/gitpod-protocol/lib/blocked-repositor
 import { EligibilityService } from "../user/eligibility-service";
 import { AccountStatementProvider } from "../user/account-statement-provider";
 import { GithubUpgradeURL, PlanCoupon } from "@gitpod/gitpod-protocol/lib/payment-protocol";
-import { Usage, usageDummyData } from "@gitpod/gitpod-protocol/src/usage";
+import { BillableSession, billableSessionDummyData } from "@gitpod/gitpod-protocol/src/usage";
 import {
     AssigneeIdentityIdentifier,
     TeamSubscription,
@@ -2057,8 +2057,8 @@ export class GitpodServerEEImpl extends GitpodServerImpl {
         }
     }
 
-    async getTeamUsage(ctx: TraceContext, usageAttributionId: string, month: string): Promise<Usage[]> {
-        return usageDummyData;
+    async getBilledUsage(ctx: TraceContext, attributionId: string): Promise<BillableSession[]> {
+        return billableSessionDummyData;
     }
 
     // (SaaS) – admin
