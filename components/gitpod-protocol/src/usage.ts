@@ -4,7 +4,7 @@
  * See License-AGPL.txt in the project root for license information.
  */
 
-import { WorkspaceType } from "@gitpod/gitpod-protocol";
+import { WorkspaceType } from "./protocol";
 
 export interface BillableSession {
     // The id of the one paying the bill
