@@ -4,18 +4,32 @@
  * See License-AGPL.txt in the project root for license information.
  */
 
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { PageWithSubMenu } from "../components/PageWithSubMenu";
 import { getCurrentTeam, TeamsContext } from "./teams-context";
 import { getTeamSettingsMenu } from "./TeamSettings";
 import { PaymentContext } from "../payment-context";
+import { getGitpodService } from "../service/service";
+import { BillableSession } from "@gitpod/gitpod-protocol/lib/usage";
+import { Item, ItemField, ItemsList } from "../components/ItemsList";
 
 function TeamUsage() {
     const { teams } = useContext(TeamsContext);
     const { showPaymentUI } = useContext(PaymentContext);
     const location = useLocation();
     const team = getCurrentTeam(location, teams);
+    const [billedUsage, setBilledUsage] = useState<BillableSession[]>([]);
+
+    useEffect(() => {
+        if (!team) {
+            return;
+        }
+        (async () => {
+            const billedUsageResult = await getGitpodService().server.getBilledUsage("some-attribution-id");
+            setBilledUsage(billedUsageResult);
+        })();
+    }, [team]);
 
     return (
         <PageWithSubMenu
@@ -23,13 +37,20 @@ function TeamUsage() {
             title="Usage"
             subtitle="Manage team usage."
         >
-            <div className="flex flex-col space-y-2">
-                <div className="px-6 py-3 flex justify-between text-sm text-gray-400 border-t border-b border-gray-200 dark:border-gray-800 mb-2">
-                    <div className="w-7/12">Workspace</div>
-                    <div className="w-5/12">Usage duration</div>
-                    <div className="w-5/12">Credits used</div>
-                    <div className="w-5/12">Last used</div>
-                </div>
+            <div className="app-container">
+                <ItemsList className="mt-2">
+                    <Item header={true} className="grid grid-cols-3">
+                        <ItemField className="my-auto">
+                            <span className="pl-14">Workspace</span>
+                        </ItemField>
+                        <ItemField className="my-auto">
+                            <span className="pl-14">Class</span>
+                        </ItemField>
+                        <ItemField className="my-auto">
+                            <span className="pl-14">Credits Used</span>
+                        </ItemField>
+                    </Item>
+                </ItemsList>
             </div>
         </PageWithSubMenu>
     );
