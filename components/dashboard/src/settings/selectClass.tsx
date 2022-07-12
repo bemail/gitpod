@@ -19,11 +19,11 @@ export default function SelectWorkspaceClass(props: SelectWorkspaceClassProps) {
     const { user } = useContext(UserContext);
 
     const [workspaceClass, setWorkspaceClass] = useState<string>(
-        user?.additionalData?.workspaceClasses?.regular || "standard",
+        user?.additionalData?.workspaceClasses?.regular || "g1-standard",
     );
     const actuallySetWorkspaceClass = async (value: string) => {
         const additionalData = user?.additionalData || {};
-        const prevWorkspaceClass = additionalData?.workspaceClasses?.regular || "standard";
+        const prevWorkspaceClass = additionalData?.workspaceClasses?.regular || "g1-standard";
         const workspaceClasses = (additionalData?.workspaceClasses || {}) as WorkspaceClasses;
         workspaceClasses.regular = value;
         workspaceClasses.prebuild = value;
@@ -51,8 +51,8 @@ export default function SelectWorkspaceClass(props: SelectWorkspaceClassProps) {
                     <SelectableCardSolid
                         className="w-36 h-32"
                         title="Standard"
-                        selected={workspaceClass === "standard"}
-                        onClick={() => actuallySetWorkspaceClass("standard")}
+                        selected={workspaceClass === "g1-standard"}
+                        onClick={() => actuallySetWorkspaceClass("g1-standard")}
                     >
                         <div className="flex-grow flex items-end p-1">
                             <svg width="112" height="64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,9 +65,9 @@ export default function SelectWorkspaceClass(props: SelectWorkspaceClassProps) {
                     </SelectableCardSolid>
                     <SelectableCardSolid
                         className="w-36 h-32"
-                        title="XL"
-                        selected={workspaceClass === "XL"}
-                        onClick={() => actuallySetWorkspaceClass("XL")}
+                        title="Large"
+                        selected={workspaceClass === "g1-large"}
+                        onClick={() => actuallySetWorkspaceClass("g1-large")}
                     >
                         <div className="flex-grow flex items-end p-1">
                             <svg width="112" height="64" fill="none" xmlns="http://www.w3.org/2000/svg">
