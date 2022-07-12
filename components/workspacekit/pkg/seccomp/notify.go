@@ -215,12 +215,12 @@ func (h *InWorkspaceHandler) Mount(req *libseccomp.ScmpNotifReq) (val uint64, er
 		"id":               req.ID,
 	})
 
-	memfd, err := readarg.OpenMem(req.Pid)
+	memFile, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return Errno(unix.EPERM)
 	}
-	defer unix.Close(memfd)
+	defer memFile.Close()
 
 	err = libseccomp.NotifIDValid(h.FD, req.ID)
 	if err != nil {
@@ -228,32 +228,27 @@ func (h *InWorkspaceHandler) Mount(req *libseccomp.ScmpNotifReq) (val uint64, er
 		return Errno(unix.EPERM)
 	}
 
-	log.WithField("req", req).Info("sec req ===")
-
-	source, err := readarg.ReadString(memfd, int64(req.Data.Args[0]))
+	source, err := readarg.ReadString(memFile, int64(req.Data.Args[0]))
 	if err != nil {
-		log.WithField("arg", 0).WithError(err).Error("cannot read argument")
+		log.WithError(err).Error("cannot read argument: source")
 		return Errno(unix.EFAULT)
 	}
-	log.WithField("arg", 0).WithField("source", source).Info("get arg")
-	dest, err := readarg.ReadString(memfd, int64(req.Data.Args[1]))
+	dest, err := readarg.ReadString(memFile, int64(req.Data.Args[1]))
 	if err != nil {
-		log.WithField("arg", 1).WithError(err).Error("cannot read argument")
+		log.WithError(err).Error("cannot read argument: dest")
 		return Errno(unix.EFAULT)
 	}
-	log.WithField("arg", 1).WithField("dest", dest).Info("get arg")
-	filesystem, err := readarg.ReadString(memfd, int64(req.Data.Args[2]))
+	filesystem, err := readarg.ReadString(memFile, int64(req.Data.Args[2]))
 	if err != nil {
-		log.WithField("arg", 2).WithError(err).Error("cannot read argument")
+		log.WithError(err).Error("cannot read argument: filesystem")
 		return Errno(unix.EFAULT)
 	}
-	log.WithField("arg", 2).WithField("filesystem", filesystem).Info("get arg")
 
 	log.WithFields(map[string]interface{}{
 		"source": source,
 		"dest":   dest,
 		"fstype": filesystem,
-	}).Debug("handling mount syscall")
+	}).Info("handling mount syscall")
 
 	if filesystem == "proc" || filesystem == "sysfs" {
 		// When a process wants to mount proc relative to `/proc/self` that path has no meaning outside of the processes' context.
@@ -326,14 +321,14 @@ func (h *InWorkspaceHandler) Umount(req *libseccomp.ScmpNotifReq) (val uint64, e
 		"id":               req.ID,
 	})
 
-	memfd, err := readarg.OpenMem(req.Pid)
+	memFile, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return Errno(unix.EPERM)
 	}
-	defer unix.Close(memfd)
+	defer memFile.Close()
 
-	target, err := readarg.ReadString(memfd, int64(req.Data.Args[0]))
+	target, err := readarg.ReadString(memFile, int64(req.Data.Args[0]))
 	if err != nil {
 		log.WithField("arg", 0).WithError(err).Error("cannot read argument")
 		return Errno(unix.EFAULT)
@@ -413,12 +408,12 @@ func (h *InWorkspaceHandler) Bind(req *libseccomp.ScmpNotifReq) (val uint64, err
 		flags = libseccomp.NotifRespFlagContinue
 	}()
 
-	memfd, err := readarg.OpenMem(req.Pid)
+	memFile, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return
 	}
-	defer unix.Close(memfd)
+	defer memFile.Close()
 
 	// TODO(cw): find why this breaks
 	// err = libseccomp.NotifIDValid(fd, req.ID)
@@ -452,14 +447,14 @@ func (h *InWorkspaceHandler) Chown(req *libseccomp.ScmpNotifReq) (val uint64, er
 		"id":               req.ID,
 	})
 
-	memfd, err := readarg.OpenMem(req.Pid)
+	memFile, err := readarg.OpenMem(req.Pid)
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return
 	}
-	defer unix.Close(memfd)
+	defer memFile.Close()
 
-	pth, err := readarg.ReadString(memfd, int64(req.Data.Args[0]))
+	pth, err := readarg.ReadString(memFile, int64(req.Data.Args[0]))
 	if err != nil {
 		log.WithError(err).Error("cannot open mem")
 		return

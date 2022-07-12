@@ -21,25 +21,29 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 
 	"golang.org/x/sys/unix"
 )
 
 // OpenMem opens the memory file for the target process. It is done separately,
 // so that the caller can call libseccomp.NotifIDValid() in between.
-func OpenMem(pid uint32) (int, error) {
+func OpenMem(pid uint32) (*os.File, error) {
 	if pid == 0 {
 		// This can happen if the seccomp agent is in a pid namespace
 		// where the target pid is not mapped.
-		return 0, errors.New("unknown pid")
+		return nil, errors.New("unknown pid")
 	}
-	return unix.Open(fmt.Sprintf("/proc/%d/mem", pid), unix.O_RDONLY, 0o777)
+	return os.OpenFile(fmt.Sprintf("/proc/%d/mem", pid), os.O_RDONLY, 0)
 }
 
-func ReadString(memfd int, offset int64) (string, error) {
+func ReadString(memFile *os.File, offset int64) (string, error) {
+	if offset == 0 {
+		return "", nil
+	}
 	var buffer = make([]byte, 4096) // PATH_MAX
 
-	_, err := unix.Pread(memfd, buffer, offset)
+	_, err := unix.Pread(int(memFile.Fd()), buffer, offset)
 	if err != nil {
 		return "", err
 	}
@@ -56,11 +60,11 @@ func ReadString(memfd int, offset int64) (string, error) {
 	return string(s), nil
 }
 
-func ReadBytes(memfd int, offset int64, len int) ([]byte, error) {
+func ReadBytes(memFile *os.File, offset int64, len int) ([]byte, error) {
 	var buffer = make([]byte, len)
 
 	// pread() will always return the size of the buffer
-	_, err := unix.Pread(memfd, buffer, offset)
+	_, err := unix.Pread(int(memFile.Fd()), buffer, offset)
 	if err != nil {
 		return nil, err
 	}

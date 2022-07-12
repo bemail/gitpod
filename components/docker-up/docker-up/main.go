@@ -256,14 +256,16 @@ func adaptSubid(oldfile string, id int) error {
 
 	mappingFmt := func(username string, id int, size int) string { return fmt.Sprintf("%s:%d:%d\n", username, id, size) }
 
-	if id != 0 {
-		newfile.WriteString(mappingFmt("gitpod", 1, id))
-		newfile.WriteString(mappingFmt("gitpod", gitpodUserId, 1))
-	} else {
-		newfile.WriteString(mappingFmt("gitpod", gitpodUserId, 1))
-		newfile.WriteString(mappingFmt("gitpod", 1, gitpodUserId-1))
-		newfile.WriteString(mappingFmt("gitpod", gitpodUserId+1, 32200)) // map rest of user ids in the user namespace
-	}
+	// if id != 0 {
+	// 	newfile.WriteString(mappingFmt("gitpod", 1, id))
+	// 	newfile.WriteString(mappingFmt("gitpod", gitpodUserId, 1))
+	// } else {
+	// 	newfile.WriteString(mappingFmt("gitpod", gitpodUserId, 1))
+	// 	newfile.WriteString(mappingFmt("gitpod", 1, gitpodUserId-1))
+	// 	newfile.WriteString(mappingFmt("gitpod", gitpodUserId+1, 32200)) // map rest of user ids in the user namespace
+	// }
+
+	newfile.WriteString(mappingFmt("gitpod", gitpodUserId, 65536))
 
 	uidScanner := bufio.NewScanner(uid)
 	for uidScanner.Scan() {
