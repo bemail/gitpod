@@ -237,9 +237,21 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 			// default limit for all cloneURLs
 			"*": 50,
 		},
-		WorkspaceClasses: WorkspaceClasses{
-			Default:              "g1-standard",
-			DefaultMoreResources: "g1-large",
+		WorkspaceClasses: []WorkspaceClass{
+			{
+				Id:               "g1-standard",
+				DisplayName:      "Standard",
+				IsDefault:        true,
+				Deprecated:       false,
+				CreditsPerMinute: 10,
+			},
+			{
+				Id:               "g1-large",
+				DisplayName:      "Large",
+				IsDefault:        false,
+				Deprecated:       false,
+				CreditsPerMinute: 20,
+			},
 		},
 	}
 
