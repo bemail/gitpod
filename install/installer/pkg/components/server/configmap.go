@@ -238,19 +238,36 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 			"*": 50,
 		},
 		WorkspaceClasses: []WorkspaceClass{
+			// NEVER delete entries from this list - they are billing-relevant.
 			{
-				Id:               "g1-standard",
-				DisplayName:      "Standard",
-				IsDefault:        true,
-				Deprecated:       false,
-				CreditsPerMinute: 10,
+				Id:          "g1-standard",
+				DisplayName: "Standard",
+				IsDefault:   true,
+				Deprecated:  false,
 			},
 			{
-				Id:               "g1-large",
-				DisplayName:      "Large",
-				IsDefault:        false,
-				Deprecated:       false,
-				CreditsPerMinute: 20,
+				Id:          "g1-large",
+				DisplayName: "Large",
+				IsDefault:   false,
+				Deprecated:  false,
+				Marker: map[string]bool{
+					"moreResources": true,
+				},
+			},
+			// old classes that we are already deprecated. Keep them here for billing purposes
+			{
+				Id:          "default",
+				DisplayName: "Standard (old)",
+				IsDefault:   false,
+				Deprecated:  true,
+				Marker:      map[string]bool{},
+			},
+			{
+				Id:          "gitpodio-internal-xl",
+				DisplayName: "XL",
+				IsDefault:   false,
+				Deprecated:  true,
+				Marker:      map[string]bool{},
 			},
 		},
 	}
