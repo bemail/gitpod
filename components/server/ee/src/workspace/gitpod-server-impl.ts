@@ -110,6 +110,7 @@ import { getExperimentsClientForBackend } from "@gitpod/gitpod-protocol/lib/expe
 import { AttributionId } from "@gitpod/gitpod-protocol/lib/attribution";
 import { CachingUsageServiceClientProvider } from "@gitpod/usage-api/lib/usage/v1/sugar";
 import * as usage from "@gitpod/usage-api/lib/usage/v1/usage_pb";
+import { Timestamp } from "google-protobuf/google/protobuf/timestamp_pb";
 
 @injectable()
 export class GitpodServerEEImpl extends GitpodServerImpl {
@@ -2075,34 +2076,19 @@ export class GitpodServerEEImpl extends GitpodServerImpl {
         });
     }
 
-    async getNotifications(ctx: TraceContext): Promise<string[]> {
-        const result = await super.getNotifications(ctx);
-        const user = this.checkAndBlockUser("getNotifications");
-        if (user.usageAttributionId) {
-            const allSessions = await this.listBilledUsage(ctx, user.usageAttributionId);
-            const totalUsage = allSessions.map((s) => s.credits).reduce((a, b) => a + b, 0);
-            const costCenter = await this.costCenterDB.findById(user.usageAttributionId);
-            if (costCenter) {
-                if (totalUsage > costCenter.spendingLimit) {
-                    result.unshift("The spending limit is reached.");
-                } else if (totalUsage > 0.8 * costCenter.spendingLimit * 0.8) {
-                    result.unshift("The spending limit is almost reached.");
-                }
-            } else {
-                log.warn("No costcenter found.", { userId: user.id, attributionId: user.usageAttributionId });
-            }
-        }
-        return result;
-    }
-
-    async listBilledUsage(ctx: TraceContext, attributionId: string): Promise<BillableSession[]> {
+    async listBilledUsage(
+        ctx: TraceContext,
+        attributionId: string,
+        from?: Timestamp,
+        to?: Timestamp,
+    ): Promise<BillableSession[]> {
         traceAPIParams(ctx, { attributionId });
         const user = this.checkAndBlockUser("listBilledUsage");
 
         await this.guardCostCenterAccess(ctx, user.id, attributionId, "get");
 
         const usageClient = this.usageServiceClientProvider.getDefault();
-        const response = await usageClient.listBilledUsage(ctx, attributionId);
+        const response = await usageClient.listBilledUsage(ctx, attributionId, from, to);
         const sessions = response.getSessionsList().map((s) => this.mapBilledSession(s));
 
         return sessions;
