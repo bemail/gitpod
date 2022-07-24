@@ -2079,8 +2079,8 @@ export class GitpodServerEEImpl extends GitpodServerImpl {
     async listBilledUsage(
         ctx: TraceContext,
         attributionId: string,
-        from?: Timestamp,
-        to?: Timestamp,
+        from?: any | undefined,
+        to?: any | undefined,
     ): Promise<BillableSession[]> {
         traceAPIParams(ctx, { attributionId });
         const user = this.checkAndBlockUser("listBilledUsage");
