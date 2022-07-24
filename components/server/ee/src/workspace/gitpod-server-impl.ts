@@ -110,7 +110,6 @@ import { getExperimentsClientForBackend } from "@gitpod/gitpod-protocol/lib/expe
 import { AttributionId } from "@gitpod/gitpod-protocol/lib/attribution";
 import { CachingUsageServiceClientProvider } from "@gitpod/usage-api/lib/usage/v1/sugar";
 import * as usage from "@gitpod/usage-api/lib/usage/v1/usage_pb";
-import { Timestamp } from "google-protobuf/google/protobuf/timestamp_pb";
 
 @injectable()
 export class GitpodServerEEImpl extends GitpodServerImpl {
