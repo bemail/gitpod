@@ -6,7 +6,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -27,8 +26,8 @@ type WorkspaceInstanceUsage struct {
 
 	CreditsUsed float64 `gorm:"column:creditsUsed;type:double;" json:"creditsUsed"`
 
-	StartedAt time.Time    `gorm:"column:startedAt;type:timestamp;" json:"startedAt"`
-	StoppedAt sql.NullTime `gorm:"column:stoppedAt;type:timestamp;" json:"stoppedAt"`
+	StartedAt time.Time  `gorm:"column:startedAt;type:timestamp;" json:"startedAt"`
+	StoppedAt *time.Time `gorm:"column:stoppedAt;type:timestamp;" json:"stoppedAt,omitempty"`
 
 	GenerationID int `gorm:"column:generationId;type:int;" json:"generationId"`
 

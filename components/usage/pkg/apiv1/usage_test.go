@@ -6,7 +6,6 @@ package apiv1
 
 import (
 	"context"
-	"database/sql"
 	"github.com/gitpod-io/gitpod/common-go/baseserver"
 	v1 "github.com/gitpod-io/gitpod/usage-api/v1"
 	"github.com/gitpod-io/gitpod/usage/pkg/db"
@@ -74,10 +73,7 @@ func TestUsageService_ListBilledUsage(t *testing.T) {
 				instance := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 					AttributionID: attrID,
 					StartedAt:     start.Add(time.Duration(i) * 24 * time.Hour),
-					StoppedAt: sql.NullTime{
-						Time:  start.Add(time.Duration(i)*24*time.Hour + time.Hour),
-						Valid: true,
-					},
+					StoppedAt:     timePtr(start.Add(time.Duration(i)*24*time.Hour + time.Hour)),
 				})
 				instances = append(instances, instance)
 			}
@@ -106,10 +102,7 @@ func TestUsageService_ListBilledUsage(t *testing.T) {
 				instance := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 					AttributionID: attrID,
 					StartedAt:     start.Add(time.Duration(i) * 24 * time.Hour),
-					StoppedAt: sql.NullTime{
-						Time:  start.Add(time.Duration(i)*24*time.Hour + time.Hour),
-						Valid: true,
-					},
+					StoppedAt:     timePtr(start.Add(time.Duration(i)*24*time.Hour + time.Hour)),
 				})
 				instances = append(instances, instance)
 
@@ -165,4 +158,8 @@ func TestUsageService_ListBilledUsage(t *testing.T) {
 			require.Equal(t, scenario.Expect.InstanceIds, instanceIds)
 		})
 	}
+}
+
+func timePtr(t time.Time) *time.Time {
+	return &t
 }

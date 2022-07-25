@@ -65,8 +65,8 @@ func (us *UsageService) ListBilledUsage(ctx context.Context, in *v1.ListBilledUs
 	var billedSessions []*v1.BilledSession
 	for _, usageRecord := range usageRecords {
 		var endTime *timestamppb.Timestamp
-		if usageRecord.StoppedAt.Valid {
-			endTime = timestamppb.New(usageRecord.StoppedAt.Time)
+		if usageRecord.StoppedAt != nil {
+			endTime = timestamppb.New(*usageRecord.StoppedAt)
 		}
 		billedSession := &v1.BilledSession{
 			AttributionId:  string(usageRecord.AttributionID),

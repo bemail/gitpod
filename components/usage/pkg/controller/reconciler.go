@@ -6,7 +6,6 @@ package controller
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -249,9 +248,10 @@ func usageReportToUsageRecords(report UsageReport, pricer *WorkspacePricer, now 
 
 	for attributionId, instances := range report {
 		for _, instance := range instances {
-			var stoppedAt sql.NullTime
+			var stoppedAt *time.Time
 			if instance.StoppedTime.IsSet() {
-				stoppedAt = sql.NullTime{Time: instance.StoppedTime.Time(), Valid: true}
+				t := instance.StoppedTime.Time()
+				stoppedAt = &t
 			}
 
 			projectID := ""

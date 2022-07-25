@@ -6,7 +6,6 @@ package db_test
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -28,10 +27,7 @@ func TestCreateUsageRecords_Updates(t *testing.T) {
 		InstanceID:    instanceID,
 		AttributionID: teamAttributionID,
 		StartedAt:     start,
-		StoppedAt: sql.NullTime{
-			Time:  stop,
-			Valid: true,
-		},
+		StoppedAt:     &stop,
 	})
 
 	require.NoError(t, db.CreateUsageRecords(context.Background(), conn, []db.WorkspaceInstanceUsage{record}))
@@ -49,10 +45,7 @@ func TestCreateUsageRecords_Updates(t *testing.T) {
 		WorkspaceClass: db.WorkspaceClass_Default,
 		CreditsUsed:    9,
 		StartedAt:      updatedStart,
-		StoppedAt: sql.NullTime{
-			Time:  updatedStop,
-			Valid: true,
-		},
+		StoppedAt:      &updatedStop,
 	})
 
 	require.NoError(t, db.CreateUsageRecords(context.Background(), conn, []db.WorkspaceInstanceUsage{update}))
@@ -78,10 +71,7 @@ func TestListUsage_Ordering(t *testing.T) {
 	oldest := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: teamAttributionID,
 		StartedAt:     time.Date(2022, 7, 14, 10, 30, 30, 5000, time.UTC),
-		StoppedAt: sql.NullTime{
-			Time:  time.Date(2022, 7, 15, 15, 30, 30, 5000, time.UTC),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(time.Date(2022, 7, 15, 15, 30, 30, 5000, time.UTC)),
 	})
 
 	instances := []db.WorkspaceInstanceUsage{newest, oldest}
@@ -109,59 +99,41 @@ func TestListUsageInRange(t *testing.T) {
 	startBeforeFinishBefore := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: attributionID,
 		StartedAt:     start.Add(-1 * 24 * time.Hour),
-		StoppedAt: sql.NullTime{
-			Time:  start.Add(-1 * 23 * time.Hour),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(start.Add(-1 * 23 * time.Hour)),
 	})
 
 	// started before, but finished inside our query range
 	startBeforeFinishInside := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: attributionID,
 		StartedAt:     start.Add(-1 * time.Hour),
-		StoppedAt: sql.NullTime{
-			Time:  start.Add(2 * time.Hour),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(start.Add(2 * time.Hour)),
 	})
 
 	// started inside query range, and also finished inside query range
 	startInsideFinishInside := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: attributionID,
 		StartedAt:     start.Add(3 * time.Hour),
-		StoppedAt: sql.NullTime{
-			Time:  start.Add(5 * time.Hour),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(start.Add(5 * time.Hour)),
 	})
 
 	// started inside query range, and also finished inside query range
 	startInsideFinishInsideButDifferentAttributionID := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: db.NewTeamAttributionID(uuid.New().String()),
 		StartedAt:     start.Add(3 * time.Hour),
-		StoppedAt: sql.NullTime{
-			Time:  start.Add(5 * time.Hour),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(start.Add(5 * time.Hour)),
 	})
 
 	// started inside query range, and finished after
 	startedInsideFinishedOutside := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: attributionID,
 		StartedAt:     end.Add(-1 * time.Hour),
-		StoppedAt: sql.NullTime{
-			Time:  end.Add(2 * time.Hour),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(end.Add(2 * time.Hour)),
 	})
 	// started after query range, finished after - should be excluded
 	startedOutsideFinishedOutside := dbtest.NewWorkspaceInstanceUsage(t, db.WorkspaceInstanceUsage{
 		AttributionID: attributionID,
 		StartedAt:     end.Add(time.Hour),
-		StoppedAt: sql.NullTime{
-			Time:  end.Add(2 * time.Hour),
-			Valid: true,
-		},
+		StoppedAt:     timePtr(end.Add(2 * time.Hour)),
 	})
 
 	// started before query, still running
@@ -185,4 +157,8 @@ func TestListUsageInRange(t *testing.T) {
 	require.Equal(t, []db.WorkspaceInstanceUsage{
 		startedInsideFinishedOutside, startedInsideAndStillRunning, startInsideFinishInside, startBeforeFinishInside, startedBeforeAndStillRunning,
 	}, results)
+}
+
+func timePtr(t time.Time) *time.Time {
+	return &t
 }
