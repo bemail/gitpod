@@ -134,6 +134,8 @@ func (o *OpenVSXProxy) ModifyResponse(r *http.Response) error {
 		log.WithFields(logFields).Debugf("response is not JSON but '%s', skipping replacing '%s' in response body", contentType, o.Config.URLUpstream)
 	}
 
+	r.Header.Add("access-control-allow-headers", r.Header.Get("access-control-allow-headers")+",vscode-sessionid")
+
 	cacheObj := &CacheObject{
 		Header:     r.Header,
 		Body:       body,
