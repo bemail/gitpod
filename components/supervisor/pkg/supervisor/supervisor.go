@@ -309,6 +309,9 @@ func Run(options ...RunOption) {
 		installDotfiles(ctx, cfg, tokenService, childProcEnvvars)
 	}
 
+	go configureCodeRemoteMachineSettings(".vscode-server-insiders")
+	go configureCodeRemoteMachineSettings(".vscode-server")
+
 	var ideWG sync.WaitGroup
 	ideWG.Add(1)
 	go startAndWatchIDE(ctx, cfg, &cfg.IDE, childProcEnvvars, &ideWG, cstate, ideReady, WebIDE)
@@ -1685,4 +1688,39 @@ func handleExit(ec *int) {
 	exitCode := *ec
 	log.WithField("exitCode", exitCode).Debug("supervisor exit")
 	os.Exit(exitCode)
+}
+
+func configureCodeRemoteMachineSettings(folderName string) (err error) {
+	defer func() {
+		if err != nil {
+			log.WithError(err).Warn("cannot configure code remote machine settings")
+		}
+	}()
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	dst := filepath.Join(homeDir, folderName, "data/Machine/settings.json")
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	settings := make(map[string]interface{})
+	if _, err := os.Stat(dst); !os.IsNotExist(err) {
+		prevContent, err := os.ReadFile(dst)
+		if err != nil {
+			return err
+		}
+		if err = json.Unmarshal(prevContent, &settings); err != nil {
+			return err
+		}
+	}
+	settings["remote.autoForwardPortsSource"] = "process"
+	settings["remote.autoForwardPorts"] = true
+
+	b, err := json.Marshal(settings)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(dst, b, 0644)
 }
