@@ -1704,7 +1704,6 @@ func configureCodeRemoteMachineSettings(folderName string) (err error) {
 	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
 		return err
 	}
-
 	settings := make(map[string]interface{})
 	if _, err := os.Stat(dst); !os.IsNotExist(err) {
 		prevContent, err := os.ReadFile(dst)
@@ -1718,9 +1717,21 @@ func configureCodeRemoteMachineSettings(folderName string) (err error) {
 	settings["remote.autoForwardPortsSource"] = "process"
 	settings["remote.autoForwardPorts"] = true
 
-	b, err := json.Marshal(settings)
+	b, err := json.MarshalIndent(settings, "", "\t")
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(dst, b, 0644)
+	if err = ioutil.WriteFile(dst, b, 0644); err != nil {
+		return err
+	}
+	return chownR(filepath.Join(homeDir, folderName), gitpodUID, gitpodGID)
+}
+
+func chownR(path string, uid, gid int) error {
+	return filepath.Walk(path, func(name string, info os.FileInfo, err error) error {
+		if err == nil {
+			err = os.Chown(name, uid, gid)
+		}
+		return err
+	})
 }
