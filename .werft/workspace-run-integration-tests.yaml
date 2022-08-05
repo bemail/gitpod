@@ -64,6 +64,10 @@ pod:
         - |
           set -euo pipefail
 
+          # Fix weird repeat running behavior
+          LAST_COMMIT_MSG=$(git log --pretty=format:"%s" -1)
+          if [[ $LAST_COMMIT_MSG =~ "integration test commit" ]]; then exit 0; fi
+
           BRANCH="wk-inte-test/"$(date +%Y%m%d%H%M%S)
           FAILURE_COUNT=0
           RUN_COUNT=0
@@ -124,7 +128,7 @@ pod:
           echo integration test >> README.md
           git checkout -B "${BRANCH}"
           git add README.md
-          git commit -m "integration test"
+          git commit -m "integration test commit
           git push --set-upstream origin "${BRANCH}"
           werft run github -a with-preview=true
           trap cleanup SIGINT SIGTERM EXIT
@@ -138,7 +142,13 @@ pod:
           echo "start build preview environment, job name: ${BUILD_ID}, this will take long time" | werft log slice "build preview environment"
           werft log result -d "build job" url "https://werft.gitpod-dev.com/job/${BUILD_ID}"
 
-          if ! werft job logs "${BUILD_ID}" | werft log slice "build preview environment";
+          BUILD_STATUS=$(werft job get ${BUILD_ID} -o yaml | yq4 '.phase')
+          until [ "$BUILD_STATUS" == "4" ]
+          do
+              sleep 10
+              BUILD_STATUS=$(werft job get ${BUILD_ID} -o yaml | yq4 '.phase')
+          done
+          if ! [ "$(werft job get "${BUILD_ID}" -o yaml | yq4 '.conditions.success')" == "true" ];
           then
               echo "build failed" | werft log slice "build preview environment"
               exit 1
