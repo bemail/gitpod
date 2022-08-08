@@ -492,9 +492,18 @@ func actOnPodEvent(ctx context.Context, m actingManager, manager *Manager, statu
 			}
 		}
 
-		_, startedDisposal := wso.Pod.Annotations[startedDisposalAnnotation]
-		span.LogKV("startedDisposal", startedDisposal)
-		if terminated && !startedDisposal {
+		// _, startedDisposal := wso.Pod.Annotations[startedDisposalAnnotation]
+		var ds workspaceDisposalStatus
+		if rawDisposalStatus, ok := pod.Annotations[disposalStatusAnnotation]; ok {
+			err := json.Unmarshal([]byte(rawDisposalStatus), &ds)
+			if err != nil {
+				log.WithError(err).Errorf("cannnot paarse disposalStatusAnnotation: %s", rawDisposalStatus)
+				break
+			}
+		}
+
+		span.LogKV("disposalStatusAnnotation", ds)
+		if terminated && !ds.Status.IsWorking() {
 			if wso.Pod.Annotations[workspaceFailedBeforeStoppingAnnotation] == util.BooleanTrueString && wso.Pod.Annotations[workspaceNeverReadyAnnotation] == util.BooleanTrueString {
 				// The workspace is never ready, so there is no need for a finalizer.
 				if _, ok := pod.Annotations[workspaceExplicitFailAnnotation]; !ok {
@@ -1014,17 +1023,10 @@ func (m *Monitor) finalizeWorkspaceContent(ctx context.Context, wso *workspaceOb
 			return
 		}
 
-		b, err := json.Marshal(disposalStatus)
+		err := m.manager.markDisposalStatus(ctx, workspaceID, disposalStatus)
 		if err != nil {
 			tracing.LogError(span, err)
-			log.WithError(err).Error("unable to marshal disposalStatus - this will break someone's experience")
-			return
-		}
-
-		err = m.manager.markWorkspace(ctx, workspaceID, addMark(disposalStatusAnnotation, string(b)))
-		if err != nil {
-			tracing.LogError(span, err)
-			log.WithError(err).Error("was unable to update pod's disposal state - this will break someone's experience")
+			log.WithError(err).Error("was unable to update pod's disposal status - this will break someone's experience")
 		}
 	}()
 
@@ -1113,10 +1115,13 @@ func (m *Monitor) finalizeWorkspaceContent(ctx context.Context, wso *workspaceOb
 			cancelReq()
 		}()
 
-		err = m.manager.markWorkspace(ctx, workspaceID, addMark(startedDisposalAnnotation, util.BooleanTrueString))
-		if err != nil {
-			tracing.LogError(span, err)
-			log.WithError(err).Error("was unable to update pod's start disposal state - this might cause an incorrect disposal state")
+		if disposalStatus.Status != "" {
+			disposalStatus.Status = DisposalStarted
+			err = m.manager.markDisposalStatus(ctx, workspaceID, disposalStatus)
+			if err != nil {
+				tracing.LogError(span, err)
+				log.WithError(err).Error("was unable to update pod's start disposal status - this might cause an incorrect disposal status")
+			}
 		}
 
 		if pvcFeatureEnabled {
@@ -1284,6 +1289,14 @@ func (m *Monitor) finalizeWorkspaceContent(ctx context.Context, wso *workspaceOb
 	)
 	t := time.Now()
 
+	disposalStatus = &workspaceDisposalStatus{
+		Status: DisposalStarted,
+	}
+	err = m.manager.markDisposalStatus(ctx, workspaceID, disposalStatus)
+	if err != nil {
+		tracing.LogError(span, err)
+		log.WithError(err).Error("was unable to update pod's start disposal status - this might cause an incorrect disposal status")
+	}
 	for i := 0; i < wsdaemonMaxAttempts; i++ {
 		span.LogKV("attempt", i)
 		didSometing, gs, err := doFinalize()
@@ -1310,6 +1323,14 @@ func (m *Monitor) finalizeWorkspaceContent(ctx context.Context, wso *workspaceOb
 		if (err != nil && strings.Contains(err.Error(), context.DeadlineExceeded.Error())) ||
 			st.Code() == codes.Unavailable ||
 			st.Code() == codes.Canceled {
+			if disposalStatus.Status != DisposalRetrying {
+				disposalStatus.Status = DisposalRetrying
+				err = m.manager.markDisposalStatus(ctx, workspaceID, disposalStatus)
+				if err != nil {
+					tracing.LogError(span, err)
+					log.WithError(err).Error("was unable to update pod's retrying disposal status - this might cause an incorrect disposal status")
+				}
+			}
 			// service is currently unavailable or we did not finish in time - let's wait some time and try again
 			span.LogKV("retrying-after-sleep", true)
 			time.Sleep(wsdaemonRetryInterval)
@@ -1338,6 +1359,7 @@ func (m *Monitor) finalizeWorkspaceContent(ctx context.Context, wso *workspaceOb
 	}
 
 	disposalStatus = &workspaceDisposalStatus{
+		Status:         DisposalFinished,
 		BackupComplete: true,
 		GitStatus:      gitStatus,
 	}
