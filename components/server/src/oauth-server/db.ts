@@ -65,7 +65,7 @@ function createVSCodeClient(protocol: "vscode" | "vscode-insiders" | "vscodium" 
         }: Gitpod extension`,
         redirectUris: [
             protocol + "://gitpod.gitpod-desktop/complete-gitpod-auth",
-            protocol + "://gitpod.gitpod-foo/complete-gitpod-auth",
+            "https://gitpodio-gitpodvscodeth-kwt2zgu8y2q.ws.jp-vscode-callback.preview.gitpod-dev.com/vscode-extension-auth-callback",
         ],
         allowedGrants: ["authorization_code"],
         scopes: [
