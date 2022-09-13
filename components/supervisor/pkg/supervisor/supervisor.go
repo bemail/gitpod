@@ -309,8 +309,8 @@ func Run(options ...RunOption) {
 		installDotfiles(ctx, cfg, tokenService, childProcEnvvars)
 	}
 
-	go configureCodeRemoteMachineSettings(".vscode-server-insiders")
-	go configureCodeRemoteMachineSettings(".vscode-server")
+	configureCodeRemoteMachineSettings(".vscode-server-insiders")
+	configureCodeRemoteMachineSettings(".vscode-server")
 
 	var ideWG sync.WaitGroup
 	ideWG.Add(1)
@@ -1696,6 +1696,7 @@ func configureCodeRemoteMachineSettings(folderName string) (err error) {
 			log.WithError(err).Warn("cannot configure code remote machine settings")
 		}
 	}()
+	log.WithField("folder", folderName).Info("start configure code remote machine settings")
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return err
