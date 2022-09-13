@@ -446,13 +446,13 @@ export class WorkspaceManagerBridge implements Disposable {
                     const installation = this.cluster.name;
                     log.debug("Controlling instances...", { installation });
 
-                    const runningInstances = await this.workspaceDB
+                    const nonStoppedInstances = await this.workspaceDB
                         .trace(ctx)
                         .findRunningInstancesWithWorkspaces(installation, undefined, true);
 
                     // Control running workspace instances against ws-manager
                     try {
-                        await this.controlRunningInstances(ctx, runningInstances, clientProvider);
+                        await this.controlNonStoppedWSManagerManagedInstances(ctx, nonStoppedInstances, clientProvider);
 
                         disconnectStarted = Number.MAX_SAFE_INTEGER; // Reset disconnect period
                     } catch (err) {
@@ -466,7 +466,7 @@ export class WorkspaceManagerBridge implements Disposable {
                     }
 
                     // Control workspace instances against timeouts
-                    await this.controlInstancesTimeouts(ctx, runningInstances);
+                    await this.controlInstancesTimeouts(ctx, nonStoppedInstances);
 
                     log.debug("Done controlling instances.", { installation });
                 } catch (err) {
@@ -485,17 +485,17 @@ export class WorkspaceManagerBridge implements Disposable {
      * This methods controls all instances that we have currently marked as "running" in the DB.
      * It checks whether they are still running with their respective ws-manager, and if not, marks them as stopped in the DB.
      */
-    protected async controlRunningInstances(
+    protected async controlNonStoppedWSManagerManagedInstances(
         parentCtx: TraceContext,
         runningInstances: RunningWorkspaceInfo[],
         clientProvider: ClientProvider,
     ) {
         const installation = this.config.installation;
 
-        const span = TraceContext.startSpan("controlRunningInstances", parentCtx);
+        const span = TraceContext.startSpan("controlNonStoppedWSManagerManagedInstances", parentCtx);
         const ctx = { span };
         try {
-            log.debug("Controlling running instances...", { installation });
+            log.debug("Controlling non-stopped instances that are managed by WS Manager...", { installation });
 
             const runningInstancesIdx = new Map<string, RunningWorkspaceInfo>();
             runningInstances.forEach((i) => runningInstancesIdx.set(i.latestInstance.id, i));
@@ -504,23 +504,38 @@ export class WorkspaceManagerBridge implements Disposable {
             const actuallyRunningInstances = await client.getWorkspaces(ctx, new GetWorkspacesRequest());
             actuallyRunningInstances.getStatusList().forEach((s) => runningInstancesIdx.delete(s.getId()));
 
+            // runningInstancesIdx only contains instances that ws-manager is not aware of
             for (const [instanceId, ri] of runningInstancesIdx.entries()) {
                 const instance = ri.latestInstance;
-                if (instance.status.phase !== "running") {
-                    log.debug({ instanceId }, "Skipping instance", {
-                        phase: instance.status.phase,
-                        creationTime: instance.creationTime,
-                        region: instance.region,
-                    });
+                const phase = instance.status.phase;
+
+                // When ws-manager is not aware of the following instances,
+                // they should be marked as stopped.
+                // If 'stopping', we give 10 sec estimated grace period in case of a race condition
+                if (
+                    phase === "pending" ||
+                    phase === "creating" ||
+                    phase === "initializing" ||
+                    phase === "running" ||
+                    (phase === "stopping" &&
+                        instance.stoppingTime &&
+                        durationLongerThanSeconds(Date.parse(instance.stoppingTime), 10))
+                ) {
+                    log.info(
+                        { instanceId, workspaceId: instance.workspaceId },
+                        "Database says the instance is running, but wsman does not know about it. Marking as stopped in database.",
+                        { installation },
+                        { phase },
+                    );
+                    await this.markWorkspaceInstanceAsStopped(ctx, ri, new Date());
                     continue;
                 }
 
-                log.info(
-                    { instanceId, workspaceId: instance.workspaceId },
-                    "Database says the instance is running, but wsman does not know about it. Marking as stopped in database.",
-                    { installation },
-                );
-                await this.markWorkspaceInstanceAsStopped(ctx, ri, new Date());
+                log.debug({ instanceId }, "Skipping instance", {
+                    phase: phase,
+                    creationTime: instance.creationTime,
+                    region: instance.region,
+                });
             }
 
             log.debug("Done controlling running instances.", { installation });
@@ -603,6 +618,7 @@ export class WorkspaceManagerBridge implements Disposable {
         const nowISO = now.toISOString();
         info.latestInstance.stoppingTime = nowISO;
         info.latestInstance.stoppedTime = nowISO;
+        info.latestInstance.status.message = `Stopped by ws-manager-bridge. Previously in phase ${info.latestInstance.status.phase}`;
         info.latestInstance.status.phase = "stopped";
         await this.workspaceDB.trace(ctx).storeInstance(info.latestInstance);
 
