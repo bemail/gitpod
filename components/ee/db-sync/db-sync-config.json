@@ -1,0 +1,23 @@
+{
+    "syncPeriod": 30000,
+    "roundRobin": true,
+    "tableSet": "test",
+    "disableTransactions": false,
+    "replicationLogDir": "./log",
+    "targets": [
+        {
+            "host": "localhost",
+            "port": 3306,
+            "database": "foo",
+            "user": "root",
+            "password": "password"
+        },
+        {
+            "host": "localhost",
+            "port": 3306,
+            "database": "bar",
+            "user": "root",
+            "password": "password"
+        }
+    ]
+}
