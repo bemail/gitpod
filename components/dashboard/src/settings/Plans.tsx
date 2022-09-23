@@ -714,6 +714,15 @@ export default function () {
                     </div>
                 )}
                 <div className="mt-4 flex justify-center space-x-3 2xl:space-x-7">{planCards}</div>
+                {assignedTs && (
+                    <InfoBox className="w-full mt-14 mx-auto">
+                        <p>Assigned Team Seats</p>
+                        <ul>
+                            {userBillingMode?.mode === "chargebee" &&
+                                (userBillingMode.teamNames || []).map((tn) => <li>{tn}</li>)}
+                        </ul>
+                    </InfoBox>
+                )}
                 <InfoBox className="w-2/3 mt-14 mx-auto">
                     If you are interested in purchasing a plan for a team, purchase a Team plan with one centralized
                     billing.{" "}
