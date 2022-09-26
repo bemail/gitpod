@@ -27,7 +27,6 @@ require (
 
 require (
 	github.com/fsouza/fake-gcs-server v1.37.11
-	github.com/stretchr/testify v1.7.1
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 )
 
@@ -77,6 +76,7 @@ require (
 	github.com/slok/go-http-metrics v0.10.0 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.7.1 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	go.opencensus.io v0.23.0 // indirect
