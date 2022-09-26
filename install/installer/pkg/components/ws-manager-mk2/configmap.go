@@ -55,16 +55,21 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 
 	classes := map[string]*config.WorkspaceClass{
 		config.DefaultWorkspaceClass: {
+			Name: config.DefaultWorkspaceClass,
 			Container: config.ContainerConfiguration{
-				Requests: &config.ResourceConfiguration{
+				Requests: &config.ResourceRequestConfiguration{
 					CPU:              quantityString(ctx.Config.Workspace.Resources.Requests, corev1.ResourceCPU),
 					Memory:           quantityString(ctx.Config.Workspace.Resources.Requests, corev1.ResourceMemory),
 					EphemeralStorage: quantityString(ctx.Config.Workspace.Resources.Requests, corev1.ResourceEphemeralStorage),
 				},
-				Limits: &config.ResourceConfiguration{
-					CPU:              quantityString(ctx.Config.Workspace.Resources.Limits, corev1.ResourceCPU),
+				Limits: &config.ResourceLimitConfiguration{
+					CPU: &config.CpuResourceLimit{
+						MinLimit:   quantityString(ctx.Config.Workspace.Resources.Limits, corev1.ResourceCPU),
+						BurstLimit: quantityString(ctx.Config.Workspace.Resources.Limits, corev1.ResourceCPU),
+					},
 					Memory:           quantityString(ctx.Config.Workspace.Resources.Limits, corev1.ResourceMemory),
 					EphemeralStorage: quantityString(ctx.Config.Workspace.Resources.Limits, corev1.ResourceEphemeralStorage),
+					Storage:          quantityString(ctx.Config.Workspace.Resources.Limits, corev1.ResourceStorage),
 				},
 			},
 			Templates: templatesCfg,
@@ -90,16 +95,21 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 				return err
 			}
 			classes[k] = &config.WorkspaceClass{
+				Name: c.Name,
 				Container: config.ContainerConfiguration{
-					Requests: &config.ResourceConfiguration{
+					Requests: &config.ResourceRequestConfiguration{
 						CPU:              quantityString(c.Resources.Requests, corev1.ResourceCPU),
 						Memory:           quantityString(c.Resources.Requests, corev1.ResourceMemory),
 						EphemeralStorage: quantityString(c.Resources.Requests, corev1.ResourceEphemeralStorage),
 					},
-					Limits: &config.ResourceConfiguration{
-						CPU:              quantityString(c.Resources.Limits, corev1.ResourceCPU),
-						Memory:           quantityString(c.Resources.Limits, corev1.ResourceMemory),
-						EphemeralStorage: quantityString(c.Resources.Limits, corev1.ResourceEphemeralStorage),
+					Limits: &config.ResourceLimitConfiguration{
+						CPU: &config.CpuResourceLimit{
+							MinLimit:   c.Resources.Limits.Cpu.MinLimit,
+							BurstLimit: c.Resources.Limits.Cpu.BurstLimit,
+						},
+						Memory:           c.Resources.Limits.Memory,
+						EphemeralStorage: c.Resources.Limits.EphemeralStorage,
+						Storage:          c.Resources.Limits.Storage,
 					},
 				},
 				Templates: tplsCfg,
