@@ -157,6 +157,7 @@ func (g *GitpodExposedPorts) doExpose(req *exposePortRequest) {
 	attempt := 0
 	for {
 		_, err = g.C.OpenPort(req.ctx, g.WorkspaceID, req.port)
+		log.WithField("port", req.port).WithField("attempt", attempt).Info("openPort")
 		if err == nil || req.ctx.Err() != nil || attempt == 5 {
 			return
 		}
