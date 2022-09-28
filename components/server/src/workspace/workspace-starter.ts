@@ -1368,6 +1368,8 @@ export class WorkspaceStarter {
 
         const envvars: EnvironmentVariable[] = [];
 
+        const sysEnvvars: EnvironmentVariable[] = [];
+
         // TODO(cw): for the time being we're still pushing the env vars as we did before.
         //           Once everything is running with the latest supervisor, we can stop doing that.
         allEnvVars.forEach((e) => {
@@ -1382,7 +1384,7 @@ export class WorkspaceStarter {
             const ideAliasEnv = new EnvironmentVariable();
             ideAliasEnv.setName("GITPOD_IDE_ALIAS");
             ideAliasEnv.setValue(ideAlias);
-            envvars.push(ideAliasEnv);
+            sysEnvvars.push(ideAliasEnv);
         }
 
         const contextUrlEnv = new EnvironmentVariable();
@@ -1390,19 +1392,19 @@ export class WorkspaceStarter {
         // Beware that `workspace.contextURL` is not normalized so it might contain other modifiers
         // making it not a valid URL
         contextUrlEnv.setValue(workspace.context.normalizedContextURL || workspace.contextURL);
-        envvars.push(contextUrlEnv);
+        sysEnvvars.push(contextUrlEnv);
 
         const contextEnv = new EnvironmentVariable();
         contextEnv.setName("GITPOD_WORKSPACE_CONTEXT");
         contextEnv.setValue(JSON.stringify(workspace.context));
-        envvars.push(contextEnv);
+        sysEnvvars.push(contextEnv);
 
         const info = this.config.workspaceClasses.find((cls) => cls.id === instance.workspaceClass);
         if (!!info) {
             const workspaceClassInfoEnv = new EnvironmentVariable();
             workspaceClassInfoEnv.setName("GITPOD_WORKSPACE_CLASS_INFO");
             workspaceClassInfoEnv.setValue(JSON.stringify(info));
-            envvars.push(workspaceClassInfoEnv);
+            sysEnvvars.push(workspaceClassInfoEnv);
         }
 
         log.debug("Workspace config", workspace.config);
@@ -1413,19 +1415,19 @@ export class WorkspaceStarter {
             const ev = new EnvironmentVariable();
             ev.setName("GITPOD_TASKS");
             ev.setValue(JSON.stringify(tasks));
-            envvars.push(ev);
+            sysEnvvars.push(ev);
         }
 
         const vsxRegistryUrl = new EnvironmentVariable();
         vsxRegistryUrl.setName("VSX_REGISTRY_URL");
         vsxRegistryUrl.setValue(this.config.vsxRegistryUrl);
-        envvars.push(vsxRegistryUrl);
+        sysEnvvars.push(vsxRegistryUrl);
 
         // supervisor ensures dotfiles are only used if the workspace is a regular workspace
         const dotfileEnv = new EnvironmentVariable();
         dotfileEnv.setName("SUPERVISOR_DOTFILE_REPO");
         dotfileEnv.setValue(user.additionalData?.dotfileRepo || "");
-        envvars.push(dotfileEnv);
+        sysEnvvars.push(dotfileEnv);
 
         if (workspace.config.coreDump?.enabled) {
             // default core dump size is 262144 blocks (if blocksize is 4096)
@@ -1439,7 +1441,7 @@ export class WorkspaceStarter {
                     hardLimit: workspace.config.coreDump?.hardLimit || defaultLimit,
                 }),
             );
-            envvars.push(rLimitCore);
+            sysEnvvars.push(rLimitCore);
         }
 
         const createGitpodTokenPromise = (async () => {
@@ -1569,16 +1571,20 @@ export class WorkspaceStarter {
         const spec = new StartWorkspaceSpec();
         await createGitpodTokenPromise;
         spec.setEnvvarsList(envvars);
+        spec.setSysEnvvarsList(sysEnvvars);
         spec.setGit(this.createGitSpec(workspace, user));
         spec.setPortsList(ports);
         spec.setInitializer((await initializerPromise).initializer);
+
         const startWorkspaceSpecIDEImage = new IDEImage();
         startWorkspaceSpecIDEImage.setWebRef(ideImage);
-        startWorkspaceSpecIDEImage.setDesktopRef(instance.configuration?.desktopIdeImage || "");
-        startWorkspaceSpecIDEImage.setDesktopPluginRef(instance.configuration?.desktopIdePluginImage || "");
-        startWorkspaceSpecIDEImage.setSupervisorRef(instance.configuration?.supervisorImage || "");
+        startWorkspaceSpecIDEImage.setSupervisorRef(instance.configuration?.supervisorImage ?? "");
         spec.setIdeImage(startWorkspaceSpecIDEImage);
-        spec.setDeprecatedIdeImage(ideImage);
+
+        instance.configuration?.desktopIdeImage && spec.addIdeImageLayers(instance.configuration?.desktopIdeImage);
+        instance.configuration?.desktopIdePluginImage &&
+            spec.addIdeImageLayers(instance.configuration?.desktopIdePluginImage);
+
         spec.setWorkspaceImage(instance.workspaceImage);
         spec.setWorkspaceLocation(workspace.config.workspaceLocation || checkoutLocation);
         spec.setFeatureFlagsList(this.toWorkspaceFeatureFlags(featureFlags));
