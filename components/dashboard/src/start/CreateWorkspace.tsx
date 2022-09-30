@@ -127,6 +127,7 @@ export default class CreateWorkspace extends React.Component<CreateWorkspaceProp
         );
 
         let error = this.state?.error;
+        let errorMessage = this.state?.error?.message || "";
         if (error) {
             switch (error.code) {
                 case ErrorCodes.CONTEXT_PARSE_ERROR:
@@ -285,7 +286,7 @@ export default class CreateWorkspace extends React.Component<CreateWorkspaceProp
                         isError={true}
                         initialSize={24}
                         errorObject={error}
-                        errorMessage={error?.message}
+                        errorMessage={errorMessage}
                     />
                 )}
                 {error && (
