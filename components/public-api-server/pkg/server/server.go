@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/bufbuild/connect-go"
 	"github.com/gitpod-io/gitpod/common-go/log"
 
 	"github.com/gitpod-io/gitpod/public-api/config"
@@ -18,10 +19,11 @@ import (
 
 	"github.com/gitpod-io/gitpod/common-go/baseserver"
 	"github.com/gitpod-io/gitpod/public-api-server/pkg/apiv1"
+	"github.com/gitpod-io/gitpod/public-api-server/pkg/auth"
 	"github.com/gitpod-io/gitpod/public-api-server/pkg/billingservice"
 	"github.com/gitpod-io/gitpod/public-api-server/pkg/proxy"
 	"github.com/gitpod-io/gitpod/public-api-server/pkg/webhooks"
-	v1 "github.com/gitpod-io/gitpod/public-api/v1"
+	"github.com/gitpod-io/gitpod/public-api/gitpod/v1/v1connect"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
@@ -64,7 +66,7 @@ func Start(logger *logrus.Entry, version string, cfg *config.Configuration) erro
 
 	srv.HTTPMux().Handle("/stripe/invoices/webhook", handlers.ContentTypeHandler(stripeWebhookHandler, "application/json"))
 
-	if registerErr := register(srv, gitpodAPI, srv.MetricsRegistry()); registerErr != nil {
+	if registerErr := register(srv, gitpodAPI, srv.MetricsRegistry(), cfg); registerErr != nil {
 		return fmt.Errorf("failed to register services: %w", registerErr)
 	}
 
@@ -75,13 +77,18 @@ func Start(logger *logrus.Entry, version string, cfg *config.Configuration) erro
 	return nil
 }
 
-func register(srv *baseserver.Server, serverAPIURL *url.URL, registry *prometheus.Registry) error {
+func register(srv *baseserver.Server, serverAPIURL *url.URL, registry *prometheus.Registry, cfg *config.Configuration) error {
 	proxy.RegisterMetrics(registry)
 
 	connPool := &proxy.NoConnectionPool{ServerAPI: serverAPIURL}
 
-	v1.RegisterWorkspacesServiceServer(srv.GRPC(), apiv1.NewWorkspaceService(connPool))
-	v1.RegisterPrebuildsServiceServer(srv.GRPC(), v1.UnimplementedPrebuildsServiceServer{})
+	cookieName := fmt.Sprintf("_%s_", strings.ReplaceAll(strings.ReplaceAll(os.Getenv("GITPOD_DOMAIN"), ".", "_"), "-", "_"))
+
+	route, handler := v1connect.NewWorkspacesServiceHandler(apiv1.NewWorkspaceService(connPool), connect.WithInterceptors(
+		auth.NewInterceptor(cookieName, cfg.CookieSigningSecret),
+	))
+
+	srv.HTTPMux().Handle(route, handler)
 
 	return nil
 }

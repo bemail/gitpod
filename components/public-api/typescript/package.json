@@ -18,6 +18,10 @@
     "opentracing": "^0.14.4"
   },
   "devDependencies": {
+    "@bufbuild/connect-web": "^0.2.1",
+    "@bufbuild/protobuf": "^0.1.1",
+    "@bufbuild/protoc-gen-connect-web": "^0.2.1",
+    "@bufbuild/protoc-gen-es": "^0.1.1",
     "@testdeck/mocha": "0.1.2",
     "@types/chai": "^4.1.2",
     "@types/google-protobuf": "^3.15.5",

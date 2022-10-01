@@ -21,9 +21,6 @@ lint
 
 install_dependencies
 go_protoc "$COMPONENTS_DIR" "gitpod/v1"
-mkdir -p go/v1
-mv go/gitpod/v1/*.pb.go go/v1
-rm -rf go/gitpod
-typescript_protoc "$COMPONENTS_DIR" "gitpod/v1"
+typescript_connect "$COMPONENTS_DIR" "gitpod/v1"
 
 update_license

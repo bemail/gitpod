@@ -10,7 +10,8 @@ import (
 	"testing"
 
 	"github.com/gitpod-io/gitpod/common-go/baseserver"
-	v1 "github.com/gitpod-io/gitpod/public-api/v1"
+	"github.com/gitpod-io/gitpod/public-api/config"
+	v1 "github.com/gitpod-io/gitpod/public-api/gitpod/v1"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
@@ -30,7 +31,7 @@ func TestPublicAPIServer_v1_WorkspaceService(t *testing.T) {
 	gitpodAPI, err := url.Parse("wss://main.preview.gitpod-dev.com/api/v1")
 	require.NoError(t, err)
 
-	require.NoError(t, register(srv, gitpodAPI, registry))
+	require.NoError(t, register(srv, gitpodAPI, registry, &config.Configuration{}))
 	baseserver.StartServerForTests(t, srv)
 
 	conn, err := grpc.Dial(srv.GRPCAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -74,7 +75,7 @@ func TestPublicAPIServer_v1_PrebuildService(t *testing.T) {
 	gitpodAPI, err := url.Parse("wss://main.preview.gitpod-dev.com/api/v1")
 	require.NoError(t, err)
 
-	require.NoError(t, register(srv, gitpodAPI, registry))
+	require.NoError(t, register(srv, gitpodAPI, registry, &config.Configuration{}))
 
 	baseserver.StartServerForTests(t, srv)
 

@@ -7,59 +7,49 @@ package apiv1
 import (
 	"context"
 
+	connect "github.com/bufbuild/connect-go"
 	protocol "github.com/gitpod-io/gitpod/gitpod-protocol"
+	"github.com/gitpod-io/gitpod/public-api-server/pkg/auth"
 	"github.com/gitpod-io/gitpod/public-api-server/pkg/proxy"
-	v1 "github.com/gitpod-io/gitpod/public-api/v1"
+	v1 "github.com/gitpod-io/gitpod/public-api/gitpod/v1"
+	"github.com/gitpod-io/gitpod/public-api/gitpod/v1/v1connect"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"github.com/relvacode/iso8601"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func NewWorkspaceService(serverConnPool proxy.ServerConnectionPool) *WorkspaceService {
 	return &WorkspaceService{
-		connectionPool:                       serverConnPool,
-		UnimplementedWorkspacesServiceServer: &v1.UnimplementedWorkspacesServiceServer{},
+		connectionPool: serverConnPool,
 	}
 }
 
 type WorkspaceService struct {
 	connectionPool proxy.ServerConnectionPool
 
-	*v1.UnimplementedWorkspacesServiceServer
+	v1connect.WorkspacesServiceHandler
 }
 
-func (w *WorkspaceService) GetWorkspace(ctx context.Context, r *v1.GetWorkspaceRequest) (*v1.GetWorkspaceResponse, error) {
+func (s *WorkspaceService) GetWorkspace(ctx context.Context, req *connect.Request[v1.GetWorkspaceRequest]) (*connect.Response[v1.GetWorkspaceResponse], error) {
+	token := auth.TokenFromContext(ctx)
 	logger := ctxlogrus.Extract(ctx)
-	token, err := bearerTokenFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
 
-	server, err := w.connectionPool.Get(ctx, token)
+	server, err := s.connectionPool.Get(ctx, token)
 	if err != nil {
 		logger.WithError(err).Error("Failed to get connection to server.")
-		return nil, status.Error(codes.Internal, "failed to establish connection to downstream services")
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	workspace, err := server.GetWorkspace(ctx, r.GetWorkspaceId())
+	workspace, err := server.GetWorkspace(ctx, req.Msg.GetWorkspaceId())
 	if err != nil {
 		logger.WithError(err).Error("Failed to get workspace.")
-		converted := proxy.ConvertError(err)
-		switch status.Code(converted) {
-		case codes.PermissionDenied:
-			return nil, status.Error(codes.PermissionDenied, "insufficient permission to access workspace")
-		case codes.NotFound:
-			return nil, status.Error(codes.NotFound, "workspace does not exist")
-		default:
-			return nil, status.Error(codes.Internal, "unable to retrieve workspace")
-		}
+		return nil, proxy.ConvertError(err)
 	}
 
-	return &v1.GetWorkspaceResponse{
+	return connect.NewResponse(&v1.GetWorkspaceResponse{
 		Result: &v1.Workspace{
 			WorkspaceId: workspace.Workspace.ID,
 			OwnerId:     workspace.Workspace.OwnerID,
@@ -73,72 +63,20 @@ func (w *WorkspaceService) GetWorkspace(ctx context.Context, r *v1.GetWorkspaceR
 			},
 			Description: workspace.Workspace.Description,
 		},
-	}, nil
+	}), nil
 }
 
-func (w *WorkspaceService) GetOwnerToken(ctx context.Context, r *v1.GetOwnerTokenRequest) (*v1.GetOwnerTokenResponse, error) {
+func (s *WorkspaceService) ListWorkspaces(ctx context.Context, req *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error) {
 	logger := ctxlogrus.Extract(ctx)
-	token, err := bearerTokenFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
+	token := auth.TokenFromContext(ctx)
 
-	server, err := w.connectionPool.Get(ctx, token)
+	server, err := s.connectionPool.Get(ctx, token)
 	if err != nil {
 		logger.WithError(err).Error("Failed to get connection to server.")
 		return nil, status.Error(codes.Internal, "failed to establish connection to downstream services")
 	}
 
-	ownerToken, err := server.GetOwnerToken(ctx, r.GetWorkspaceId())
-
-	if err != nil {
-		logger.WithError(err).Error("Failed to get owner token.")
-		converted := proxy.ConvertError(err)
-		switch status.Code(converted) {
-		case codes.PermissionDenied:
-			return nil, status.Error(codes.PermissionDenied, "insufficient permission to retrieve ownertoken")
-		case codes.NotFound:
-			return nil, status.Error(codes.NotFound, "workspace does not exist")
-		default:
-			return nil, status.Error(codes.Internal, "unable to retrieve owner token")
-		}
-	}
-
-	return &v1.GetOwnerTokenResponse{Token: ownerToken}, nil
-}
-
-func bearerTokenFromContext(ctx context.Context) (string, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return "", status.Error(codes.Unauthenticated, "no credentials provided")
-	}
-
-	values := md.Get("authorization")
-	if len(values) == 0 {
-		return "", status.Error(codes.Unauthenticated, "no authorization header specified")
-	}
-	if len(values) > 1 {
-		return "", status.Error(codes.Unauthenticated, "more than one authorization header specified, exactly one is required")
-	}
-
-	token := values[0]
-	return token, nil
-}
-
-func (w *WorkspaceService) ListWorkspaces(ctx context.Context, req *v1.ListWorkspacesRequest) (*v1.ListWorkspacesResponse, error) {
-	logger := ctxlogrus.Extract(ctx)
-	token, err := bearerTokenFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	server, err := w.connectionPool.Get(ctx, token)
-	if err != nil {
-		logger.WithError(err).Error("Failed to get connection to server.")
-		return nil, status.Error(codes.Internal, "failed to establish connection to downstream services")
-	}
-
-	limit, err := getLimitFromPagination(req.Pagination)
+	limit, err := getLimitFromPagination(req.Msg.GetPagination())
 	if err != nil {
 		// getLimitFromPagination returns gRPC errors
 		return nil, err
@@ -161,9 +99,11 @@ func (w *WorkspaceService) ListWorkspaces(ctx context.Context, req *v1.ListWorks
 		res = append(res, workspaceAndInstance)
 	}
 
-	return &v1.ListWorkspacesResponse{
-		Result: res,
-	}, nil
+	return connect.NewResponse(
+		&v1.ListWorkspacesResponse{
+			Result: res,
+		},
+	), nil
 }
 
 func getLimitFromPagination(pagination *v1.Pagination) (int, error) {

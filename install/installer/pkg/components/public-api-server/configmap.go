@@ -34,10 +34,19 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 		return nil
 	})
 
+	sessionSecret := "Important!Really-Change-This-Key!"
+	_ = ctx.WithExperimental(func(cfg *experimental.Config) error {
+		if cfg.WebApp != nil && cfg.WebApp.Server != nil && cfg.WebApp.Server.Session.Secret != "" {
+			sessionSecret = cfg.WebApp.Server.Session.Secret
+		}
+		return nil
+	})
+
 	cfg := config.Configuration{
 		GitpodServiceURL:               fmt.Sprintf("wss://%s/api/v1", ctx.Config.Domain),
 		StripeWebhookSigningSecretPath: stripeSecretPath,
 		BillingServiceAddress:          net.JoinHostPort(fmt.Sprintf("%s.%s.svc.cluster.local", usage.Component, ctx.Namespace), strconv.Itoa(usage.GRPCServicePort)),
+		CookieSigningSecret:            sessionSecret,
 		Server: &baseserver.Configuration{
 			Services: baseserver.ServicesConfiguration{
 				GRPC: &baseserver.ServerConfiguration{

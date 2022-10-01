@@ -6,7 +6,7 @@ package apiv1
 
 import (
 	"context"
-	v1 "github.com/gitpod-io/gitpod/public-api/v1"
+	v1 "github.com/gitpod-io/gitpod/public-api/gitpod/v1"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

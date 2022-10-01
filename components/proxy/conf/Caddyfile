@@ -8,7 +8,7 @@
 	# set default SNI for old clients
 	default_sni {$GITPOD_DOMAIN}
 
-	# debug
+	debug
 
 	# configure plugin order
 	# https://caddyserver.com/docs/caddyfile/directives#directive-order
@@ -213,6 +213,21 @@ https://{$GITPOD_DOMAIN} {
 			reverse_proxy server.{$KUBE_NAMESPACE}.{$KUBE_DOMAIN}:3000 {
 					import upstream_headers
 			}
+	}
+
+	@public-api path /public*
+	handle @public-api {
+		gitpod.cors_origin {
+			base_domain {$GITPOD_DOMAIN}
+		}
+
+		# note: no compression, as that breaks streaming for headless logs
+
+		uri strip_prefix /public
+		reverse_proxy public-api-server.{$KUBE_NAMESPACE}.{$KUBE_DOMAIN}:9002 {
+			import upstream_headers
+			import upstream_connection
+		}
 	}
 
 	@backend path /api/* /headless-logs/*

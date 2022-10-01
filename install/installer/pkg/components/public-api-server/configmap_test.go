@@ -5,8 +5,9 @@ package public_api_server
 
 import (
 	"fmt"
-	"github.com/gitpod-io/gitpod/installer/pkg/config/v1/experimental"
 	"testing"
+
+	"github.com/gitpod-io/gitpod/installer/pkg/config/v1/experimental"
 
 	"github.com/gitpod-io/gitpod/common-go/baseserver"
 	"github.com/gitpod-io/gitpod/installer/pkg/common"
@@ -33,6 +34,7 @@ func TestConfigMap(t *testing.T) {
 		GitpodServiceURL:               "wss://test.domain.everything.awesome.is/api/v1",
 		BillingServiceAddress:          fmt.Sprintf("usage.%s.svc.cluster.local:9001", ctx.Namespace),
 		StripeWebhookSigningSecretPath: stripeSecretPath,
+		CookieSigningSecret:            "Important!Really-Change-This-Key!",
 		Server: &baseserver.Configuration{
 			Services: baseserver.ServicesConfiguration{
 				GRPC: &baseserver.ServerConfiguration{
