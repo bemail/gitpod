@@ -48,7 +48,7 @@ func TestTitle(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Desc, func(t *testing.T) {
 			mux := NewMux()
-			defer mux.Close()
+			defer mux.Close(time.After(0))
 
 			tmpWorkdir, err := os.MkdirTemp("", "workdirectory")
 			if err != nil {
@@ -187,7 +187,7 @@ func TestAnnotations(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Desc, func(t *testing.T) {
 			mux := NewMux()
-			defer mux.Close()
+			defer mux.Close(time.After(0))
 
 			terminalService := NewMuxTerminalService(mux)
 			var err error
@@ -315,7 +315,7 @@ func TestConcurrent(t *testing.T) {
 
 func TestWorkDirProvider(t *testing.T) {
 	mux := NewMux()
-	defer mux.Close()
+	defer mux.Close(time.After(0))
 
 	terminalService := NewMuxTerminalService(mux)
 

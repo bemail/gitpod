@@ -10,10 +10,14 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/gitpod-io/gitpod/common-go/log"
+	"github.com/gitpod-io/gitpod/common-go/process"
+	"github.com/gitpod-io/gitpod/supervisor/pkg/supervisor"
+	"github.com/prometheus/procfs"
 	"github.com/spf13/cobra"
-	"golang.org/x/sys/unix"
+	"golang.org/x/sync/errgroup"
 )
 
 var initCmd = &cobra.Command{
@@ -21,34 +25,14 @@ var initCmd = &cobra.Command{
 	Short: "init the supervisor",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Init(ServiceName, Version, true, false)
-		// Because we're reaping with PID -1, we'll catch the child process for
-		// which we've missed the notification anyways.
+		cfg, err := supervisor.GetConfig()
+		if err != nil {
+			log.WithError(err).Info("cannnot load config")
+		}
 		var (
-			sigInput      = make(chan os.Signal, 1)
-			sigReaper     = make(chan os.Signal, 1)
-			sigSupervisor = make(chan os.Signal, 1)
+			sigInput = make(chan os.Signal, 1)
 		)
-		signal.Notify(sigInput, syscall.SIGCHLD, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			for s := range sigInput {
-				switch s {
-				default:
-					sigSupervisor <- s
-					// the reaper needs all signals so that it can turn into
-					// a terminating reaper if need be.
-					fallthrough
-				case syscall.SIGCHLD:
-					// we don't want to blob the SIGINT/SIGTERM behaviour because
-					// the reaper is still busy.
-					select {
-					case sigReaper <- s:
-					default:
-					}
-				}
-			}
-		}()
-
-		go reaper(sigReaper)
+		signal.Notify(sigInput, os.Interrupt, syscall.SIGTERM)
 
 		supervisorPath, err := os.Executable()
 		if err != nil {
@@ -81,61 +65,56 @@ var initCmd = &cobra.Command{
 		case <-supervisorDone:
 			// supervisor has ended - we're all done here
 			return
-		case s := <-sigSupervisor:
+		case <-sigInput:
 			// we received a terminating signal - pass on to supervisor and wait for it to finish
-			_ = runCommand.Process.Signal(s)
-			<-supervisorDone
+			timer := time.After(cfg.GetTerminationGracePeriod())
+			terminationDone := make(chan int)
+			go func() {
+				defer close(terminationDone)
+				err := process.TerminateSync(runCommand.Process.Pid, timer)
+				if err != nil {
+					log.WithError(err).Error("supervisor termination error")
+				}
+
+				// now terminate reparented processes until there are none anymore or the time is up
+				for {
+					processes, err := procfs.AllProcs()
+					if err != nil {
+						log.WithError(err).Error("Cannot obtain processes")
+					}
+					if len(processes) == 1 {
+						close(supervisorDone)
+						return
+					}
+					// send SIGTERM to all processes but ourself
+					g := new(errgroup.Group)
+					for _, proc := range processes {
+						if proc.PID == os.Getpid() {
+							continue
+						}
+						p := proc
+						g.Go(func() error {
+							return process.TerminateSync(p.PID, timer)
+						})
+					}
+					err = g.Wait()
+					if err != nil {
+						log.WithError(err).Error("terminating child processes")
+					}
+				}
+
+			}()
+			// wait for either successful termination or the timeout
+			select {
+			case <-timer:
+				// Time is up, but we give all the goroutines a bit more time to react to this.
+				time.Sleep(time.Millisecond * 500)
+			case <-terminationDone:
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-}
-
-func reaper(sigs <-chan os.Signal) {
-	// The reaper can be turned into a terminating reaper by writing true to this channel.
-	// When in terminating mode, the reaper will send SIGTERM to each child that gets reparented
-	// to us and is still running. We use this mechanism to send SIGTERM to a shell child processes
-	// that get reparented once their parent shell terminates during shutdown.
-	var terminating bool
-
-	for s := range sigs {
-		if s != syscall.SIGCHLD {
-			terminating = true
-			continue
-		}
-
-		for {
-			// wait on the process, hence remove it from the process table
-			pid, err := unix.Wait4(-1, nil, 0, nil)
-			// if we've been interrupted, try again until we're done
-			for err == syscall.EINTR {
-				pid, err = unix.Wait4(-1, nil, 0, nil)
-			}
-			// The calling process does not have any unwaited-for children. Let's wait for a SIGCHLD notification.
-			if err == unix.ECHILD {
-				break
-			}
-			if err != nil {
-				log.WithField("pid", pid).WithError(err).Debug("cannot call waitpid() for re-parented child")
-			}
-			if !terminating {
-				continue
-			}
-			proc, err := os.FindProcess(pid)
-			if err != nil {
-				log.WithField("pid", pid).WithError(err).Debug("cannot find re-parented process")
-				continue
-			}
-			err = proc.Signal(syscall.SIGTERM)
-			if err != nil {
-				if !strings.Contains(err.Error(), "os: process already finished") {
-					log.WithField("pid", pid).WithError(err).Debug("cannot send SIGTERM to re-parented process")
-				}
-				continue
-			}
-			log.WithField("pid", pid).Debug("SIGTERM'ed reparented child process")
-		}
-	}
 }
