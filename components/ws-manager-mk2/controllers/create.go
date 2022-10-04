@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/smithy-go/ptr"
 	"github.com/imdario/mergo"
 	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
@@ -50,10 +51,9 @@ const (
 type startWorkspaceContext struct {
 	Config         *config.Configuration
 	Workspace      *workspacev1.Workspace
-	Labels         map[string]string `json:"labels"`
-	IDEPort        int32             `json:"idePort"`
-	SupervisorPort int32             `json:"supervisorPort"`
-	Headless       bool              `json:"headless"`
+	IDEPort        int32 `json:"idePort"`
+	SupervisorPort int32 `json:"supervisorPort"`
+	Headless       bool  `json:"headless"`
 }
 
 // createWorkspacePod creates the actual workspace pod based on the definite workspace pod and appropriate
@@ -254,7 +254,7 @@ func createDefiniteWorkspacePod(sctx *startWorkspaceContext) (*corev1.Pod, error
 
 	labels := make(map[string]string)
 	labels["gitpod.io/networkpolicy"] = "default"
-	for k, v := range sctx.Labels {
+	for k, v := range kubernetesLabelsForWorkspaceObject(sctx.Workspace) {
 		labels[k] = v
 	}
 
@@ -277,6 +277,7 @@ func createDefiniteWorkspacePod(sctx *startWorkspaceContext) (*corev1.Pod, error
 	default:
 		prefix = "ws"
 	}
+	name := fmt.Sprintf("%s-%s", prefix, sctx.Workspace.Name)
 
 	annotations := map[string]string{
 		"prometheus.io/scrape": "true",
@@ -299,18 +300,14 @@ func createDefiniteWorkspacePod(sctx *startWorkspaceContext) (*corev1.Pod, error
 	// Mounting /dev/net/tun should be fine security-wise, because:
 	//   - the TAP driver documentation says so (see https://www.kernel.org/doc/Documentation/networking/tuntap.txt)
 	//   - systemd's nspawn does the same thing (if it's good enough for them, it's good enough for us)
-	var (
-		hostPathOrCreate = corev1.HostPathDirectoryOrCreate
-		daemonVolumeName = "daemon-mount"
-	)
+	var daemonVolumeName = "daemon-mount"
 	volumes := []corev1.Volume{
 		workspaceVolume,
 		{
 			Name: daemonVolumeName,
 			VolumeSource: corev1.VolumeSource{
-				HostPath: &corev1.HostPathVolumeSource{
-					Path: filepath.Join(sctx.Config.WorkspaceHostPath, sctx.Workspace.Name+"-daemon"),
-					Type: &hostPathOrCreate,
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: name,
 				},
 			},
 		},
@@ -393,7 +390,7 @@ func createDefiniteWorkspacePod(sctx *startWorkspaceContext) (*corev1.Pod, error
 
 	pod := corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-%s", prefix, sctx.Workspace.Name),
+			Name:        name,
 			Namespace:   sctx.Config.Namespace,
 			Labels:      labels,
 			Annotations: annotations,
@@ -413,6 +410,10 @@ func createDefiniteWorkspacePod(sctx *startWorkspaceContext) (*corev1.Pod, error
 					Type:             corev1.SeccompProfileTypeLocalhost,
 					LocalhostProfile: pointer.String(sctx.Config.SeccompProfile),
 				},
+
+				// 133332 is the Gitpod UID (33333) shifted by 99999. The shift happens inside the workspace container due to the user namespace use.
+				// We set this magical ID to make sure that gitpod user inside the workspace can write into /workspace folder mounted by PVC
+				FSGroup: ptr.Int64(133332),
 			},
 			Containers: []corev1.Container{
 				*workspaceContainer,
@@ -498,7 +499,9 @@ func createWorkspaceContainer(sctx *startWorkspaceContext) (*corev1.Container, e
 		SecurityContext: sec,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Ports: []corev1.ContainerPort{
-			{ContainerPort: sctx.IDEPort},
+			{
+				ContainerPort: sctx.IDEPort,
+			},
 		},
 		Resources: corev1.ResourceRequirements{
 			Limits:   limits,
@@ -506,10 +509,9 @@ func createWorkspaceContainer(sctx *startWorkspaceContext) (*corev1.Container, e
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{
-				Name:             workspaceVolumeName,
-				MountPath:        workspaceDir,
-				ReadOnly:         false,
-				MountPropagation: &mountPropagation,
+				Name:      workspaceVolumeName,
+				MountPath: workspaceDir,
+				ReadOnly:  false,
 			},
 			{
 				MountPath:        "/.workspace",
@@ -686,21 +688,24 @@ func newStartWorkspaceContext(ctx context.Context, cfg *config.Configuration, ws
 	}
 
 	return &startWorkspaceContext{
-		Labels: map[string]string{
-			"app":                  "gitpod",
-			"component":            "workspace",
-			wsk8s.WorkspaceIDLabel: ws.Spec.Ownership.WorkspaceID,
-			wsk8s.OwnerLabel:       ws.Spec.Ownership.Owner,
-			wsk8s.TypeLabel:        string(ws.Spec.Type),
-			instanceIDLabel:        ws.Name,
-			headlessLabel:          strconv.FormatBool(ws.Status.Headless),
-		},
 		Config:         cfg,
 		Workspace:      ws,
 		IDEPort:        23000,
 		SupervisorPort: 22999,
 		Headless:       ws.Status.Headless,
 	}, nil
+}
+
+func kubernetesLabelsForWorkspaceObject(ws *workspacev1.Workspace) map[string]string {
+	return map[string]string{
+		"app":                  "gitpod",
+		"component":            "workspace",
+		wsk8s.WorkspaceIDLabel: ws.Spec.Ownership.WorkspaceID,
+		wsk8s.OwnerLabel:       ws.Spec.Ownership.Owner,
+		wsk8s.TypeLabel:        string(ws.Spec.Type),
+		instanceIDLabel:        ws.Name,
+		headlessLabel:          strconv.FormatBool(ws.Status.Headless),
+	}
 }
 
 // validCookieChars contains all characters which may occur in an HTTP Cookie value (unicode \u0021 through \u007E),

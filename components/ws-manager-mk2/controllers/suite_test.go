@@ -11,6 +11,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -97,6 +98,10 @@ var _ = BeforeSuite(func() {
 			WorkspaceClasses: map[string]*config.WorkspaceClass{
 				"default": {
 					Name: "default",
+					PVC: config.PVCConfiguration{
+						Size:         resource.MustParse("1Gi"),
+						StorageClass: "default",
+					},
 				},
 			},
 		},

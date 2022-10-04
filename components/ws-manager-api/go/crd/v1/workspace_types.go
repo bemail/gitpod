@@ -161,6 +161,9 @@ const (
 
 	// BackupFailure contains information about the backup failure
 	WorkspaceConditionBackupFailure WorkspaceCondition = "BackupFailure"
+
+	// WorkspaceConditionPVCExists is true once the PVC of a workspace exists
+	WorkspaceConditionPVCExists WorkspaceCondition = "PVCExists"
 )
 
 // +kubebuilder:validation:Enum:=Unknown;Pending;Imagebuild;Creating;Initializing;Running;Stopping;Stopped

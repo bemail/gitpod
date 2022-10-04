@@ -27,36 +27,41 @@ const (
 	containerUnknownExitCode = 255
 )
 
-func updateWorkspaceStatus(ctx context.Context, workspace *workspacev1.Workspace, pods corev1.PodList) error {
-	log := log.FromContext(ctx)
-
-	switch len(pods.Items) {
-	case 0:
-		if workspace.Status.Phase != workspacev1.WorkspacePhasePending {
-			workspace.Status.Phase = workspacev1.WorkspacePhaseStopped
+func updateWorkspaceStatus(ctx context.Context, workspace *workspacev1.Workspace, obj *workspaceObjects) error {
+	if obj.HasPVC() {
+		err := updateWorkspaceStatusPVCOnly(ctx, workspace, obj)
+		if err != nil {
+			return err
 		}
-		return nil
-	case 1:
-		// continue below
-	default:
-		// This is exceptional - not sure what to do here. Probably fail the pod
-		workspace.Status.Conditions = addUniqueCondition(workspace.Status.Conditions, metav1.Condition{
-			Type:               string(workspacev1.WorkspaceConditionFailed),
-			Status:             metav1.ConditionTrue,
-			LastTransitionTime: metav1.Now(),
-			Message:            "multiple pods exists - this should never happen",
-		})
-
-		return nil
+	}
+	if obj.HasPod() {
+		err := updateWorkspaceStatusFromPod(ctx, workspace, obj)
+		if err != nil {
+			return err
+		}
+	} else {
+		// if workspace.Status.Phase != workspacev1.WorkspacePhasePending {
+		// 	workspace.Status.Phase = workspacev1.WorkspacePhaseStopped
+		// }
 	}
 
+	return nil
+}
+
+func updateWorkspaceStatusPVCOnly(ctx context.Context, workspace *workspacev1.Workspace, obj *workspaceObjects) error {
 	workspace.Status.Conditions = addUniqueCondition(workspace.Status.Conditions, metav1.Condition{
-		Type:               string(workspacev1.WorkspaceConditionDeployed),
+		Type:               string(workspacev1.WorkspaceConditionPVCExists),
 		Status:             metav1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
 	})
 
-	pod := &pods.Items[0]
+	return nil
+}
+
+func updateWorkspaceStatusFromPod(ctx context.Context, workspace *workspacev1.Workspace, obj *workspaceObjects) error {
+	log := log.FromContext(ctx)
+
+	pod := obj.Pod
 
 	if workspace.Status.Runtime == nil {
 		workspace.Status.Runtime = &workspacev1.WorkspaceRuntimeStatus{}

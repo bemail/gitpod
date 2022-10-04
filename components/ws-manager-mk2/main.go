@@ -16,6 +16,7 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
+	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -37,6 +38,7 @@ import (
 	common_grpc "github.com/gitpod-io/gitpod/common-go/grpc"
 	"github.com/gitpod-io/gitpod/common-go/log"
 	"github.com/gitpod-io/gitpod/common-go/pprof"
+	"github.com/gitpod-io/gitpod/content-service/pkg/layer"
 	regapi "github.com/gitpod-io/gitpod/registry-facade/api"
 	"github.com/gitpod-io/gitpod/ws-manager-mk2/controllers"
 	"github.com/gitpod-io/gitpod/ws-manager-mk2/service"
@@ -170,12 +172,18 @@ func setupGRPCService(cfg *config.ServiceConfiguration, k8s client.Client) (*ser
 
 	srv := service.NewWorkspaceManagerServer(k8s, &cfg.Manager)
 
+	contentProvider, err := layer.NewProvider(&cfg.Content.Storage)
+	if err != nil {
+		return nil, xerrors.Errorf("invalid content provider configuration: %w", err)
+	}
+
 	grpcServer := grpc.NewServer(grpcOpts...)
 	grpc_prometheus.Register(grpcServer)
 	wsmanapi.RegisterWorkspaceManagerServer(grpcServer, srv)
 	regapi.RegisterSpecProviderServer(grpcServer, &service.WorkspaceImageSpecProvider{
-		Client:    k8s,
-		Namespace: cfg.Manager.Namespace,
+		Client:          k8s,
+		Namespace:       cfg.Manager.Namespace,
+		ContentProvider: contentProvider,
 	})
 
 	lis, err := net.Listen("tcp", cfg.RPCServer.Addr)

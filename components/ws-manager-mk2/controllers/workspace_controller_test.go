@@ -23,14 +23,15 @@ import (
 
 var _ = Describe("WorkspaceController", func() {
 	Context("When starting workspaces", func() {
-		It("Should create Pods", func() {
+		It("Should create workspace objects", func() {
 			const (
 				WorkspaceName      = "test-cronjob"
 				WorkspaceNamespace = "default"
 
-				timeout  = time.Second * 10
-				duration = time.Second * 2
-				interval = time.Millisecond * 250
+				debugExtension = 0 * time.Hour
+				timeout        = 10*time.Second + debugExtension
+				duration       = 2*time.Second + debugExtension
+				interval       = 250*time.Millisecond + debugExtension
 			)
 
 			By("creating a status")
@@ -66,13 +67,18 @@ var _ = Describe("WorkspaceController", func() {
 			}
 			Expect(k8sClient.Create(ctx, workspace)).Should(Succeed())
 
-			By("creating a pod")
-			podLookupKey := types.NamespacedName{Name: "ws-" + WorkspaceName, Namespace: WorkspaceNamespace}
-			createdPod := &corev1.Pod{}
-
-			// We'll need to retry getting this newly created CronJob, given that creation may not immediately happen.
+			By("creating a PVC")
+			lookupKey := types.NamespacedName{Name: "ws-" + WorkspaceName, Namespace: WorkspaceNamespace}
+			var createdPVC corev1.PersistentVolumeClaim
 			Eventually(func() bool {
-				err := k8sClient.Get(ctx, podLookupKey, createdPod)
+				err := k8sClient.Get(ctx, lookupKey, &createdPVC)
+				return err == nil
+			}, timeout, interval).Should(BeTrue())
+
+			By("creating a pod")
+			var createdPod corev1.Pod
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, lookupKey, &createdPod)
 				return err == nil
 			}, timeout, interval).Should(BeTrue())
 
@@ -92,10 +98,10 @@ var _ = Describe("WorkspaceController", func() {
 			// Here we assume that the controller will have deleted the pod because it failed,
 			// and we removed the finalizer.
 			createdPod.Finalizers = []string{}
-			Expect(k8sClient.Update(ctx, createdPod)).To(Succeed())
-			Expect(k8sClient.Delete(ctx, createdPod)).To(Succeed())
+			Expect(k8sClient.Update(ctx, &createdPod)).To(Succeed())
+			Expect(k8sClient.Delete(ctx, &createdPod)).To(Succeed())
 			Eventually(func() bool {
-				err := k8sClient.Get(ctx, podLookupKey, createdPod)
+				err := k8sClient.Get(ctx, lookupKey, &createdPod)
 				if err != nil {
 					// TODO(cw): check if this is a not found error
 					// We have an error and assume we did not find the pod. This is what we want.
@@ -108,7 +114,7 @@ var _ = Describe("WorkspaceController", func() {
 
 			// Now we make sure the pod doesn't come back
 			Consistently(func() bool {
-				err := k8sClient.Get(ctx, podLookupKey, createdPod)
+				err := k8sClient.Get(ctx, lookupKey, &createdPod)
 				if err != nil {
 					// TODO(cw): check if this is a not found error
 					// We have an error and assume we did not find the pod. This is what we want.

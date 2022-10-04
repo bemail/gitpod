@@ -26,7 +26,7 @@ func role(ctx *common.RenderContext) ([]runtime.Object, error) {
 			Rules: []rbacv1.PolicyRule{
 				{
 					APIGroups: []string{""},
-					Resources: []string{"pods"},
+					Resources: []string{"pods", "persistentvolumeclaims"},
 					Verbs: []string{
 						"create",
 						"delete",
@@ -40,7 +40,7 @@ func role(ctx *common.RenderContext) ([]runtime.Object, error) {
 				{
 					Verbs:     []string{"get"},
 					APIGroups: []string{""},
-					Resources: []string{"pod/status"},
+					Resources: []string{"pod/status", "persistentvolumeclaim/status"},
 				},
 				{
 					APIGroups: []string{"workspace.gitpod.io"},

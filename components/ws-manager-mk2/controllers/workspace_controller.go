@@ -101,13 +101,11 @@ type actingManager interface {
 //+kubebuilder:rbac:groups=workspace.gitpod.io,resources=workspaces/finalizers,verbs=update
 //+kubebuilder:rbac:groups=core,resources=pod,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=pod/status,verbs=get
+//+kubebuilder:rbac:groups=core,resources=persistentVolumeClaim,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=persistentVolumeClaim/status,verbs=get
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Workspace object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
@@ -124,25 +122,24 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	// Make subsequent condition checks easier
 	if workspace.Status.Conditions == nil {
 		workspace.Status.Conditions = []metav1.Condition{}
 	}
 
 	log.Info("reconciling workspace", "ws", req.NamespacedName)
 
-	var workspacePods corev1.PodList
-	err := r.List(ctx, &workspacePods, client.InNamespace(req.Namespace), client.MatchingFields{wsOwnerKey: req.Name})
-	if err != nil {
-		log.Error(err, "unable to list workspace pods")
-		return ctrl.Result{}, err
-	}
-
-	err = updateWorkspaceStatus(ctx, &workspace, workspacePods)
+	obj, err := r.getWorkspaceObjectsForRequest(ctx, req)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	result, err := r.actOnStatus(ctx, &workspace, workspacePods)
+	err = updateWorkspaceStatus(ctx, &workspace, obj)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	result, err := r.actOnStatus(ctx, &workspace, obj)
 	if err != nil {
 		return result, err
 	}
@@ -160,12 +157,78 @@ func (r *WorkspaceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
-func (r *WorkspaceReconciler) actOnStatus(ctx context.Context, workspace *workspacev1.Workspace, workspacePods corev1.PodList) (ctrl.Result, error) {
+func (r *WorkspaceReconciler) actOnStatus(ctx context.Context, workspace *workspacev1.Workspace, obj *workspaceObjects) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
+
+	// if there isn't a PVC yet and we're not currently stopping, create one
+	if !obj.HasPVC() {
+		var prefix string
+		switch workspace.Spec.Type {
+		case workspacev1.WorkspaceTypePrebuild:
+			prefix = "prebuild"
+		case workspacev1.WorkspaceTypeImageBuild:
+			prefix = "imagebuild"
+		default:
+			prefix = "ws"
+		}
+
+		pvcConfig := r.Config.WorkspaceClasses[config.DefaultWorkspaceClass].PVC
+		if class, ok := r.Config.WorkspaceClasses[workspace.Spec.Class]; workspace.Spec.Class != "" && ok {
+			pvcConfig = class.PVC
+		} else if workspace.Spec.Class != "" && !ok {
+			// TODO(cw): decide if we should return with an error here
+			logger.WithValues("workspace", workspace.Name, "class", workspace.Spec.Class).Info("workspace has unknown workspace class")
+		}
+
+		pvc := &corev1.PersistentVolumeClaim{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fmt.Sprintf("%s-%s", prefix, workspace.Name),
+				Namespace: r.Config.Namespace,
+				Labels:    kubernetesLabelsForWorkspaceObject(workspace),
+			},
+			Spec: corev1.PersistentVolumeClaimSpec{
+				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceName(corev1.ResourceStorage): pvcConfig.Size,
+					},
+				},
+			},
+		}
+		if pvcConfig.StorageClass != "" {
+			// Specify the storageClassName when the storage class is non-empty.
+			// This way, the Kubernetes uses the default StorageClass within the cluster.
+			// Otherwise, the Kubernetes would try to request the PVC with no class.
+			pvc.Spec.StorageClassName = &pvcConfig.StorageClass
+		}
+
+		// if startContext.VolumeSnapshot != nil && startContext.VolumeSnapshot.VolumeSnapshotName != "" {
+		// 	snapshotApiGroup := volumesnapshotv1.GroupName
+		// 	PVC.Spec.DataSource = &corev1.TypedLocalObjectReference{
+		// 		APIGroup: &snapshotApiGroup,
+		// 		Kind:     "VolumeSnapshot",
+		// 		Name:     startContext.VolumeSnapshot.VolumeSnapshotName,
+		// 	}
+		// }
+
+		if err := ctrl.SetControllerReference(workspace, pvc, r.Scheme); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		err := r.Create(ctx, pvc)
+		if errors.IsAlreadyExists(err) {
+			// PVC exists, we're good
+		} else if err != nil {
+			logger.Error(err, "unable to create PVC for Workspace", "pvc", pvc)
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		return ctrl.Result{}, nil
+	}
 
 	// if there isn't a workspace pod and we're not currently deleting this workspace,
 	// create one.
-	if len(workspacePods.Items) == 0 && workspace.Status.PodStarts == 0 {
+	if !obj.HasPod() && workspace.Status.PodStarts == 0 && conditionPresentAndTrue(workspace.Status.Conditions, string(workspacev1.WorkspaceConditionPVCExists)) {
 		sctx, err := newStartWorkspaceContext(ctx, &r.Config, workspace)
 		if err != nil {
 			logger.Error(err, "unable to create startWorkspace context")
@@ -198,10 +261,10 @@ func (r *WorkspaceReconciler) actOnStatus(ctx context.Context, workspace *worksp
 	}
 
 	// all actions below assume there is a pod
-	if len(workspacePods.Items) == 0 {
+	if !obj.HasPod() {
 		return ctrl.Result{}, nil
 	}
-	pod := &workspacePods.Items[0]
+	pod := obj.Pod
 
 	switch {
 	// if there is a pod, and it's failed, delete it
@@ -623,6 +686,7 @@ func (r *WorkspaceReconciler) initializeWorkspaceContent(ctx context.Context, ws
 		},
 		Initializer:           &initializer,
 		FullWorkspaceBackup:   false,
+		PersistentVolumeClaim: true,
 		ContentManifest:       contentManifest,
 		RemoteStorageDisabled: ws.Spec.Type == workspacev1.WorkspaceTypeImageBuild,
 	})
@@ -645,9 +709,9 @@ var (
 // SetupWithManager sets up the controller with the Manager.
 func (r *WorkspaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	idx := func(rawObj client.Object) []string {
-		// grab the job object, extract the owner...
-		job := rawObj.(*corev1.Pod)
-		owner := metav1.GetControllerOf(job)
+		// grab the obj object, extract the owner...
+		obj := rawObj.(metav1.Object)
+		owner := metav1.GetControllerOf(obj)
 		if owner == nil {
 			return nil
 		}
@@ -660,6 +724,10 @@ func (r *WorkspaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return []string{owner.Name}
 	}
 	err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1.Pod{}, wsOwnerKey, idx)
+	if err != nil {
+		return err
+	}
+	err = mgr.GetFieldIndexer().IndexField(context.Background(), &corev1.PersistentVolumeClaim{}, wsOwnerKey, idx)
 	if err != nil {
 		return err
 	}
@@ -738,6 +806,7 @@ func checkWSDaemonEndpoint(namespace string, clientset client.Client) func(strin
 
 func addUniqueCondition(conds []metav1.Condition, cond metav1.Condition) []metav1.Condition {
 	if cond.Reason == "" {
+		// TODO(cw): replace this hack with something sensible
 		cond.Reason = "Foo"
 	}
 
@@ -749,4 +818,59 @@ func addUniqueCondition(conds []metav1.Condition, cond metav1.Condition) []metav
 	}
 
 	return append(conds, cond)
+}
+
+// workspaceObjects are objects that belong to a workspace.
+// We group them to make their handling easier.
+type workspaceObjects struct {
+	Pod *corev1.Pod
+	PVC *corev1.PersistentVolumeClaim
+}
+
+func (obj *workspaceObjects) HasPod() bool {
+	return obj.Pod != nil
+}
+func (obj *workspaceObjects) HasPVC() bool {
+	return obj.PVC != nil
+}
+
+// getWorkspaceObjectsForRequest returns the workspace objects for a particular reconciliation request.
+func (r *WorkspaceReconciler) getWorkspaceObjectsForRequest(ctx context.Context, req ctrl.Request) (*workspaceObjects, error) {
+	log := log.FromContext(ctx)
+
+	var res workspaceObjects
+
+	var pvcs corev1.PersistentVolumeClaimList
+	err := r.List(ctx, &pvcs, client.InNamespace(req.Namespace), client.MatchingFields{wsOwnerKey: req.Name})
+	if err != nil {
+		log.Error(err, "unable to list workspace PVCs")
+		return nil, err
+	}
+	switch len(pvcs.Items) {
+	case 0:
+		// no PVC, that's ok
+	case 1:
+		res.PVC = &pvcs.Items[0]
+	default:
+		// TODO(cw): figure out how to handle this
+		return nil, xerrors.Errorf("found too many workspace PVCs")
+	}
+
+	var workspacePods corev1.PodList
+	err = r.List(ctx, &workspacePods, client.InNamespace(req.Namespace), client.MatchingFields{wsOwnerKey: req.Name})
+	if err != nil {
+		log.Error(err, "unable to list workspace pods")
+		return nil, err
+	}
+	switch len(workspacePods.Items) {
+	case 0:
+		// no PVC, that's ok
+	case 1:
+		res.Pod = &workspacePods.Items[0]
+	default:
+		// TODO(cw): figure out how to handle this
+		return nil, xerrors.Errorf("found too many workspace pods")
+	}
+
+	return &res, nil
 }
