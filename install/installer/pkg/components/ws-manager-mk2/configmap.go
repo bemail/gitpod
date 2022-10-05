@@ -80,6 +80,20 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 			},
 		},
 	}
+
+	installationShortNameSuffix := ""
+	if ctx.Config.Metadata.InstallationShortname != "" && ctx.Config.Metadata.InstallationShortname != configv1.InstallationShortNameOldDefault {
+		installationShortNameSuffix = "-" + ctx.Config.Metadata.InstallationShortname
+	}
+
+	var schedulerName string
+	gitpodHostURL := "https://" + ctx.Config.Domain
+	workspaceClusterHost := fmt.Sprintf("ws.%s", ctx.Config.Domain)
+	workspaceURLTemplate := fmt.Sprintf("https://{{ .Prefix }}.ws%s.%s", installationShortNameSuffix, ctx.Config.Domain)
+	workspacePortURLTemplate := fmt.Sprintf("https://{{ .WorkspacePort }}-{{ .Prefix }}.ws%s.%s", installationShortNameSuffix, ctx.Config.Domain)
+
+	rateLimits := map[string]grpc.RateLimit{}
+
 	err = ctx.WithExperimental(func(ucfg *experimental.Config) error {
 		if ucfg.Workspace == nil {
 			return nil
@@ -115,8 +129,28 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 				Templates: tplsCfg,
 				PVC:       config.PVCConfiguration(c.PVC),
 			}
-			tpls = append(tpls, ctpls...)
+			for tmpl_n, tmpl_v := range ctpls {
+				if _, ok := tpls[tmpl_n]; ok {
+					return fmt.Errorf("duplicate workspace template %q in workspace class %q", tmpl_n, k)
+				}
+				tpls[tmpl_n] = tmpl_v
+			}
 		}
+		schedulerName = ucfg.Workspace.SchedulerName
+		if ucfg.Workspace.HostURL != "" {
+			gitpodHostURL = ucfg.Workspace.HostURL
+		}
+		if ucfg.Workspace.WorkspaceClusterHost != "" {
+			workspaceClusterHost = ucfg.Workspace.WorkspaceClusterHost
+		}
+		if ucfg.Workspace.WorkspaceURLTemplate != "" {
+			workspaceURLTemplate = ucfg.Workspace.WorkspaceURLTemplate
+		}
+		if ucfg.Workspace.WorkspacePortURLTemplate != "" {
+			workspacePortURLTemplate = ucfg.Workspace.WorkspacePortURLTemplate
+		}
+		rateLimits = ucfg.Workspace.WSManagerRateLimits
+
 		return nil
 	})
 	if err != nil {
@@ -126,7 +160,8 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 	wsmcfg := config.ServiceConfiguration{
 		Manager: config.Configuration{
 			Namespace:      ctx.Namespace,
-			SeccompProfile: fmt.Sprintf("localhost/workspace_default_%s.json", ctx.VersionManifest.Version),
+			SchedulerName:  schedulerName,
+			SeccompProfile: fmt.Sprintf("workspace_default_%s.json", ctx.VersionManifest.Version),
 			DryRun:         false,
 			WorkspaceDaemon: config.WorkspaceDaemonConfiguration{
 				Port: 8080,
@@ -142,13 +177,13 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 			},
 			WorkspaceClasses:     classes,
 			HeartbeatInterval:    util.Duration(30 * time.Second),
-			GitpodHostURL:        "https://" + ctx.Config.Domain,
-			WorkspaceClusterHost: fmt.Sprintf("ws.%s", ctx.Config.Domain),
+			GitpodHostURL:        gitpodHostURL,
+			WorkspaceClusterHost: workspaceClusterHost,
 			InitProbe: config.InitProbeConfiguration{
 				Timeout: (1 * time.Second).String(),
 			},
-			WorkspaceURLTemplate:     fmt.Sprintf("https://{{ .Prefix }}.ws.%s", ctx.Config.Domain),
-			WorkspacePortURLTemplate: fmt.Sprintf("https://{{ .WorkspacePort }}-{{ .Prefix }}.ws.%s", ctx.Config.Domain),
+			WorkspaceURLTemplate:     workspaceURLTemplate,
+			WorkspacePortURLTemplate: workspacePortURLTemplate,
 			WorkspaceHostPath:        wsdaemon.HostWorkingArea,
 			Timeouts: config.WorkspaceTimeoutConfiguration{
 				AfterClose:          timeoutAfterClose,
@@ -188,7 +223,7 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 				Certificate: "/certs/tls.crt",
 				PrivateKey:  "/certs/tls.key",
 			},
-			RateLimits: map[string]grpc.RateLimit{}, // todo(sje) add values
+			RateLimits: rateLimits,
 		},
 		ImageBuilderProxy: struct {
 			TargetAddr string "json:\"targetAddr\""
@@ -197,10 +232,10 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 		},
 		PProf: struct {
 			Addr string `json:"addr"`
-		}{Addr: "localhost:6060"},
+		}{Addr: common.LocalhostPprofAddr()},
 		Prometheus: struct {
 			Addr string `json:"addr"`
-		}{Addr: "127.0.0.1:9500"},
+		}{Addr: common.LocalhostPrometheusAddr()},
 	}
 
 	fc, err := common.ToJSONString(wsmcfg)
@@ -212,20 +247,29 @@ func configmap(ctx *common.RenderContext) ([]runtime.Object, error) {
 		&corev1.ConfigMap{
 			TypeMeta: common.TypeMetaConfigmap,
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      Component,
-				Namespace: ctx.Namespace,
-				Labels:    common.DefaultLabels(Component),
+				Name:        Component,
+				Namespace:   ctx.Namespace,
+				Labels:      common.CustomizeLabel(ctx, Component, common.TypeMetaConfigmap),
+				Annotations: common.CustomizeAnnotation(ctx, Component, common.TypeMetaConfigmap),
 			},
 			Data: map[string]string{
 				"config.json": string(fc),
 			},
 		},
+		&corev1.ConfigMap{
+			TypeMeta: common.TypeMetaConfigmap,
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      WorkspaceTemplateConfigMap,
+				Namespace: ctx.Namespace,
+				Labels:    common.DefaultLabels(Component),
+			},
+			Data: tpls,
+		},
 	}
-	res = append(res, tpls...)
 	return res, nil
 }
 
-func buildWorkspaceTemplates(ctx *common.RenderContext, cfgTpls *configv1.WorkspaceTemplates, className string) (config.WorkspacePodTemplateConfiguration, []runtime.Object, error) {
+func buildWorkspaceTemplates(ctx *common.RenderContext, cfgTpls *configv1.WorkspaceTemplates, className string) (config.WorkspacePodTemplateConfiguration, map[string]string, error) {
 	var (
 		cfg  config.WorkspacePodTemplateConfiguration
 		tpls = make(map[string]string)
@@ -252,20 +296,13 @@ func buildWorkspaceTemplates(ctx *common.RenderContext, cfgTpls *configv1.Worksp
 		if err != nil {
 			return cfg, nil, fmt.Errorf("unable to marshal %s workspace template: %w", op.Name, err)
 		}
-		fn := filepath.Join(className, op.Name+".yaml")
+		fn := op.Name + ".yaml"
+		if className != "" {
+			fn = className + "-" + fn
+		}
 		*op.Path = filepath.Join(WorkspaceTemplatePath, fn)
 		tpls[fn] = string(fc)
 	}
 
-	return cfg, []runtime.Object{
-		&corev1.ConfigMap{
-			TypeMeta: common.TypeMetaConfigmap,
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      WorkspaceTemplateConfigMap,
-				Namespace: ctx.Namespace,
-				Labels:    common.DefaultLabels(Component),
-			},
-			Data: tpls,
-		},
-	}, nil
+	return cfg, tpls, nil
 }
