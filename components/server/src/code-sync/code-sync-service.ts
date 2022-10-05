@@ -10,6 +10,7 @@ import { User } from "@gitpod/gitpod-protocol/lib/protocol";
 import bodyParser = require("body-parser");
 import * as util from "util";
 import * as express from "express";
+import * as uuid from "uuid";
 import { inject, injectable } from "inversify";
 import { BearerAuth } from "../auth/bearer-authenticator";
 import { isWithFunctionAccessGuard } from "../auth/function-access";
@@ -49,7 +50,7 @@ export type CodeSyncConfig = Partial<{
     };
 }>;
 
-function getNamePrefix(resource: ServerResource) {
+function getBasePrefix(resource: ServerResource) {
     if (resource === "editSessions") {
         return "edit-sessions/";
     } else {
@@ -57,8 +58,23 @@ function getNamePrefix(resource: ServerResource) {
     }
 }
 
-function toObjectName(resource: ServerResource, rev: string): string {
-    return getNamePrefix(resource) + resource + "/" + rev;
+function toObjectName(resource: ServerResource, rev: string, collection?: string): string {
+    let name = getBasePrefix(resource);
+    if (collection) {
+        name += "collection/";
+        if (collection === "all") {
+            return name;
+        }
+        name += collection + "/";
+    }
+
+    name += resource + "/";
+    if (rev === "all") {
+        return name;
+    }
+    name += rev;
+
+    return name;
 }
 
 const fromTheiaRev = "from-theia";
@@ -318,7 +334,7 @@ export class CodeSyncService {
             await this.db.deleteSettingsSyncResources(userId, async () => {
                 const request = new DeleteRequest();
                 request.setOwnerId(userId);
-                request.setPrefix(getNamePrefix("machines"));
+                request.setPrefix(getBasePrefix("machines"));
                 try {
                     const blobsClient = this.blobsProvider.getDefault();
                     await util.promisify(blobsClient.delete.bind(blobsClient))(request);
@@ -345,6 +361,39 @@ export class CodeSyncService {
 
             const userId = req.user.id;
             await this.deleteResource(userId, resource, ref);
+            res.sendStatus(200);
+        });
+
+        router.get("/v1/collection", async (req, res) => {
+            if (!User.is(req.user)) {
+                res.sendStatus(204);
+                return;
+            }
+
+            const collections = await this.db.getCollections(req.user.id);
+
+            res.json(collections);
+            return;
+        });
+        router.post("/v1/collection", async (req, res) => {
+            if (!User.is(req.user)) {
+                res.sendStatus(204);
+                return;
+            }
+            res.type("text/plain");
+            res.send(uuid.v4());
+            return;
+        });
+        router.delete("/v1/collection/:collection?", async (req, res) => {
+            if (!User.is(req.user)) {
+                res.sendStatus(204);
+                return;
+            }
+
+            const userId = req.user.id;
+            const { collection } = req.params;
+            await this.deleteCollection(userId, collection);
+
             res.sendStatus(200);
         });
 
@@ -396,7 +445,7 @@ export class CodeSyncService {
                     if (rev) {
                         request.setExact(toObjectName(resourceKey, rev));
                     } else {
-                        request.setPrefix(getNamePrefix(resourceKey) + resourceKey);
+                        request.setPrefix(toObjectName(resourceKey, "all"));
                     }
                     const blobsClient = this.blobsProvider.getDefault();
                     await util.promisify<DeleteRequest, DeleteResponse>(blobsClient.delete.bind(blobsClient))(request);
@@ -415,6 +464,28 @@ export class CodeSyncService {
             } else {
                 log.error({ userId }, "code sync: failed to delete", e);
             }
+            throw e;
+        }
+    }
+
+    protected async deleteCollection(userId: string, collection?: string) {
+        try {
+            await this.db.deleteCollection(userId, collection, async (collection?: string) => {
+                try {
+                    const request = new DeleteRequest();
+                    request.setOwnerId(userId);
+                    request.setPrefix(toObjectName("machines", "all", collection ?? "all"));
+                    const blobsClient = this.blobsProvider.getDefault();
+                    await util.promisify<DeleteRequest, DeleteResponse>(blobsClient.delete.bind(blobsClient))(request);
+                } catch (e) {
+                    if (e.code === status.NOT_FOUND) {
+                        return;
+                    }
+                    throw e;
+                }
+            });
+        } catch (e) {
+            log.error({ userId }, "code sync: failed to delete collections", e);
             throw e;
         }
     }
