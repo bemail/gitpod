@@ -7,6 +7,7 @@
 import { status } from "@grpc/grpc-js";
 import fetch from "node-fetch";
 import { User } from "@gitpod/gitpod-protocol/lib/protocol";
+import { IAnalyticsWriter } from "@gitpod/gitpod-protocol/lib/analytics";
 import * as util from "util";
 import * as express from "express";
 import { inject, injectable } from "inversify";
@@ -104,6 +105,9 @@ export class CodeSyncService {
 
     @inject(UserStorageResourcesDB)
     private readonly userStorageResourcesDB: UserStorageResourcesDB;
+
+    @inject(IAnalyticsWriter)
+    private readonly analytics: IAnalyticsWriter;
 
     get apiRouter(): express.Router {
         const config = this.config.codeSync;
@@ -267,6 +271,16 @@ export class CodeSyncService {
                 installed: true,
             });
         }
+        if (extensions.length) {
+            this.analytics.track({
+                userId,
+                event: "vscode_sync_theia_migration",
+                properties: {
+                    resource: "extensions",
+                    totalExtensions: extensions.length,
+                },
+            });
+        }
         return JSON.stringify(extensions);
     }
 
@@ -343,6 +357,15 @@ export class CodeSyncService {
                 version = 5;
             } else if (resourceKey === SyncResource.Settings) {
                 let settings = await this.userStorageResourcesDB.get(req.user.id, userSettingsUri);
+                if (settings) {
+                    this.analytics.track({
+                        userId: req.user.id,
+                        event: "vscode_sync_theia_migration",
+                        properties: {
+                            resource: "settings",
+                        },
+                    });
+                }
                 settings = settings === "" ? "{}" : settings;
                 value = JSON.stringify(<ISettingsSyncContent>{ settings });
                 version = 2;
@@ -396,6 +419,14 @@ export class CodeSyncService {
         if (!resourceKey) {
             res.sendStatus(204);
             return;
+        }
+
+        if (collection) {
+            const collections = await this.db.getCollections(req.user.id);
+            if (!collections.includes(collection)) {
+                res.sendStatus(400);
+                return;
+            }
         }
 
         let latestRev: string | undefined = req.headers["if-match"];
