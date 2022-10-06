@@ -228,7 +228,7 @@ export class CodeSyncResourceDB {
             return manager
                 .createQueryBuilder(DBCodeSyncResource, "resource")
                 .where(
-                    "resource.userId = :userId AND resource.kind = :kind AND collection = :collection AND resource.deleted = 0",
+                    "resource.userId = :userId AND resource.kind = :kind AND resource.collection = :collection AND resource.deleted = 0",
                     { userId, kind, collection: collection || uuid.NIL },
                 )
                 .orderBy("resource.created", "DESC")
@@ -237,7 +237,7 @@ export class CodeSyncResourceDB {
             return manager
                 .createQueryBuilder(DBCodeSyncResource, "resource")
                 .where(
-                    "resource.userId = :userId AND resource.kind = :kind AND collection = :collection AND resource.deleted = 0",
+                    "resource.userId = :userId AND resource.kind = :kind AND resource.collection = :collection AND resource.deleted = 0",
                     { userId, kind, collection: collection || uuid.NIL },
                 )
                 .andWhere("resource.rev = :rev", { rev })
@@ -255,7 +255,7 @@ export class CodeSyncResourceDB {
             .getRepository(DBCodeSyncResource)
             .createQueryBuilder("resource")
             .where(
-                "resource.userId = :userId AND resource.kind = :kind AND collection = :collection AND resource.deleted = 0",
+                "resource.userId = :userId AND resource.kind = :kind AND resource.collection = :collection AND resource.deleted = 0",
                 { userId, kind, collection: collection || uuid.NIL },
             )
             .orderBy("resource.created", "DESC")
