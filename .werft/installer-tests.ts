@@ -293,7 +293,7 @@ export async function installerTests(config: TestConfig) {
 
             await sendFailureSlackAlert(phaseSteps.description, err, slackHook.get("self-hosted-jobs"));
 
-            werft.fail(`create-${cloud}-infra`, err.message);
+            werft.fail(majorPhase, err.message);
 
             return;
         }
