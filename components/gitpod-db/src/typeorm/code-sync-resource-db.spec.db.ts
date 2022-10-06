@@ -32,31 +32,27 @@ export class CodeSyncResourceDBSpec {
             inserted = true;
         };
         const kind = "machines";
-        let latest = await this.db.getResource(this.userId, kind, "latest");
+        let latest = await this.db.getResource(this.userId, kind, "latest", undefined);
         expect(latest).to.be.undefined;
 
         let inserted = false;
-        let rev = await this.db.insert(this.userId, kind, doInsert);
+        let rev = await this.db.insert(this.userId, kind, undefined, undefined, doInsert);
         expect(rev).not.to.be.undefined;
         expect(inserted).to.be.true;
 
-        latest = await this.db.getResource(this.userId, kind, "latest");
+        latest = await this.db.getResource(this.userId, kind, "latest", undefined);
         expect(latest?.rev).to.deep.equal(rev);
 
-        const resource = await this.db.getResource(this.userId, kind, rev!);
+        const resource = await this.db.getResource(this.userId, kind, rev!, undefined);
         expect(resource).to.deep.equal(latest);
 
         inserted = false;
-        rev = await this.db.insert(this.userId, kind, doInsert, {
-            latestRev: uuid.v4(),
-        });
+        rev = await this.db.insert(this.userId, kind, undefined, uuid.v4(), doInsert);
         expect(rev).to.be.undefined;
         expect(inserted).to.be.false;
 
         inserted = false;
-        rev = await this.db.insert(this.userId, kind, doInsert, {
-            latestRev: latest?.rev,
-        });
+        rev = await this.db.insert(this.userId, kind, undefined, latest?.rev, doInsert);
         expect(rev).not.to.be.undefined;
         expect(rev).not.to.eq(latest?.rev);
         expect(inserted).to.be.true;
@@ -65,16 +61,16 @@ export class CodeSyncResourceDBSpec {
     @test()
     async getResources(): Promise<void> {
         const kind = "machines";
-        let resources = await this.db.getResources(this.userId, kind);
+        let resources = await this.db.getResources(this.userId, kind, undefined);
         expect(resources).to.be.empty;
 
         const expected = [];
         for (let i = 0; i < 5; i++) {
-            const rev = await this.db.insert(this.userId, kind, async () => {});
+            const rev = await this.db.insert(this.userId, kind, undefined, undefined, async () => {});
             expected.unshift(rev);
         }
 
-        resources = await this.db.getResources(this.userId, kind);
+        resources = await this.db.getResources(this.userId, kind, undefined);
         expect(resources.map((r) => r.rev)).to.deep.equal(expected);
     }
 
@@ -84,18 +80,26 @@ export class CodeSyncResourceDBSpec {
         expect(manifest).to.deep.eq(<IUserDataManifest>{
             session: this.userId,
             latest: {},
+            collections: {},
         });
 
-        let machinesRev = await this.db.insert(this.userId, "machines", async () => {});
+        let machinesRev = await this.db.insert(this.userId, "machines", undefined, undefined, async () => {});
         manifest = await this.db.getManifest(this.userId);
         expect(manifest).to.deep.eq(<IUserDataManifest>{
             session: this.userId,
             latest: {
                 machines: machinesRev,
             },
+            collections: {},
         });
 
-        let extensionsRev = await this.db.insert(this.userId, SyncResource.Extensions, async () => {});
+        let extensionsRev = await this.db.insert(
+            this.userId,
+            SyncResource.Extensions,
+            undefined,
+            undefined,
+            async () => {},
+        );
         manifest = await this.db.getManifest(this.userId);
         expect(manifest).to.deep.eq(<IUserDataManifest>{
             session: this.userId,
@@ -103,9 +107,10 @@ export class CodeSyncResourceDBSpec {
                 machines: machinesRev,
                 extensions: extensionsRev,
             },
+            collections: {},
         });
 
-        machinesRev = await this.db.insert(this.userId, "machines", async () => {});
+        machinesRev = await this.db.insert(this.userId, "machines", undefined, undefined, async () => {});
         manifest = await this.db.getManifest(this.userId);
         expect(manifest).to.deep.eq(<IUserDataManifest>{
             session: this.userId,
@@ -113,6 +118,7 @@ export class CodeSyncResourceDBSpec {
                 machines: machinesRev,
                 extensions: extensionsRev,
             },
+            collections: {},
         });
     }
 
@@ -128,35 +134,35 @@ export class CodeSyncResourceDBSpec {
             }
 
             for (let rev of oldRevs) {
-                await this.db.deleteResource(this.userId, kind, rev, async () => {});
+                await this.db.deleteResource(this.userId, kind, rev, undefined, async () => {});
             }
         };
         const revLimit = 3;
 
         const assertResources = async () => {
-            const resources = await this.db.getResources(this.userId, kind);
+            const resources = await this.db.getResources(this.userId, kind, undefined);
             expect(resources.map((r) => r.rev)).to.deep.eq(expectation);
         };
 
         await assertResources();
 
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
         await assertResources();
 
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
         expectation.length = revLimit;
         await assertResources();
 
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
         expectation.length = revLimit;
         await assertResources();
 
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
-        await this.db.insert(this.userId, kind, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
+        await this.db.insert(this.userId, kind, undefined, undefined, doInsert, { revLimit, overwrite: true });
         expectation.length = revLimit;
         await assertResources();
     }

@@ -7,10 +7,8 @@
 import { status } from "@grpc/grpc-js";
 import fetch from "node-fetch";
 import { User } from "@gitpod/gitpod-protocol/lib/protocol";
-import bodyParser = require("body-parser");
 import * as util from "util";
 import * as express from "express";
-import * as uuid from "uuid";
 import { inject, injectable } from "inversify";
 import { BearerAuth } from "../auth/bearer-authenticator";
 import { isWithFunctionAccessGuard } from "../auth/function-access";
@@ -50,18 +48,19 @@ export type CodeSyncConfig = Partial<{
     };
 }>;
 
-function getBasePrefix(resource: ServerResource) {
+function getBasePrefix(resource: ServerResource, collection: string | undefined) {
     if (resource === "editSessions") {
         return "edit-sessions/";
+    } else if (collection) {
+        return "code-sync-collection/";
     } else {
         return "code-sync/";
     }
 }
 
-function toObjectName(resource: ServerResource, rev: string, collection?: string): string {
-    let name = getBasePrefix(resource);
+function toObjectName(resource: ServerResource, rev: string, collection: string | undefined): string {
+    let name = getBasePrefix(resource, collection);
     if (collection) {
-        name += "collection/";
         if (collection === "all") {
             return name;
         }
@@ -140,6 +139,7 @@ export class CodeSyncService {
             }
             return next();
         });
+
         router.get("/v1/manifest", async (req, res) => {
             if (!User.is(req.user)) {
                 res.sendStatus(204);
@@ -155,174 +155,23 @@ export class CodeSyncService {
             res.json(manifest);
             return;
         });
-        router.get("/v1/resource/:resource", async (req, res) => {
-            if (!User.is(req.user)) {
-                res.sendStatus(204);
-                return;
-            }
-            const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === req.params.resource);
-            const revs = resourceKey && (await this.db.getResources(req.user.id, resourceKey));
-            if (!revs || !revs.length) {
-                res.sendStatus(204);
-                return;
-            }
-            const result: { url: string; created: number }[] = revs.map((e) => ({
-                url: req.originalUrl + "/" + e.rev,
-                created: Date.parse(e.created) / 1000 /* client expects in secondsm */,
-            }));
-            res.json(result);
-            return;
-        });
-        router.get("/v1/resource/:resource/:ref", async (req, res) => {
-            if (!User.is(req.user)) {
-                res.sendStatus(204);
-                return;
-            }
-            const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === req.params.resource);
-            if (!resourceKey) {
-                res.sendStatus(204);
-                return;
-            }
-            let resourceRev: string | undefined = req.params.ref;
-            if (resourceRev !== fromTheiaRev) {
-                resourceRev = (await this.db.getResource(req.user.id, resourceKey, resourceRev))?.rev;
-            }
-            if (!resourceRev && (resourceKey === SyncResource.Extensions || resourceKey === SyncResource.Settings)) {
-                resourceRev = fromTheiaRev;
-            }
-            if (!resourceRev) {
-                res.setHeader("etag", "0");
-                res.sendStatus(204);
-                return;
-            }
-            if (req.headers["If-None-Match"] === resourceRev) {
-                res.sendStatus(304);
-                return;
-            }
 
-            let content: string;
-            if (resourceRev === fromTheiaRev) {
-                let version = 1;
-                let value = "";
-                if (resourceKey === SyncResource.Extensions) {
-                    value = await this.getTheiaCodeSyncResource(req.user.id);
-                    version = 5;
-                } else if (resourceKey === SyncResource.Settings) {
-                    let settings = await this.userStorageResourcesDB.get(req.user.id, userSettingsUri);
-                    settings = settings === "" ? "{}" : settings;
-                    value = JSON.stringify(<ISettingsSyncContent>{ settings });
-                    version = 2;
-                }
-                content = JSON.stringify(<ISyncData>{ version, content: value });
-            } else {
-                const contentType = req.headers["content-type"] || "*/*";
-                const request = new DownloadUrlRequest();
-                request.setOwnerId(req.user.id);
-                request.setName(toObjectName(resourceKey, resourceRev));
-                request.setContentType(contentType);
-                try {
-                    const blobsClient = this.blobsProvider.getDefault();
-                    const urlResponse = await util.promisify<DownloadUrlRequest, DownloadUrlResponse>(
-                        blobsClient.downloadUrl.bind(blobsClient),
-                    )(request);
-                    const response = await fetch(urlResponse.getUrl(), {
-                        timeout: 10000,
-                        headers: {
-                            "content-type": contentType,
-                        },
-                    });
-                    if (response.status !== 200) {
-                        throw new Error(
-                            `code sync: blob service: download failed with ${response.status} ${response.statusText}`,
-                        );
-                    }
-                    content = await response.text();
-                } catch (e) {
-                    if (e.code === status.NOT_FOUND) {
-                        res.sendStatus(204);
-                        return;
-                    }
-                    throw e;
-                }
-            }
-            res.setHeader("etag", resourceRev);
-            res.type("text/plain");
-            res.send(content);
-        });
+        router.get("/v1/collection/:collection/resource/:resource", this.getResources);
+        router.get("/v1/resource/:resource", this.getResources);
+        router.get("/v1/collection/:collection/resource/:resource/:ref", this.getResource);
+        router.get("/v1/resource/:resource/:ref", this.getResource);
+        router.post(
+            "/v1/collection/:collection/resource/:resource",
+            express.text({ limit: config?.contentLimit || defaultContentLimit }),
+            this.postResource,
+        );
         router.post(
             "/v1/resource/:resource",
-            bodyParser.text({
-                limit: config?.contentLimit || defaultContentLimit,
-            }),
-            async (req, res) => {
-                if (!User.is(req.user)) {
-                    res.sendStatus(204);
-                    return;
-                }
-                const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === req.params.resource);
-                if (!resourceKey) {
-                    res.sendStatus(204);
-                    return;
-                }
-                let latestRev = typeof req.headers["If-Match"] === "string" ? req.headers["If-Match"] : undefined;
-                if (latestRev === fromTheiaRev) {
-                    latestRev = undefined;
-                }
-                const revLimit =
-                    resourceKey === "machines"
-                        ? 1
-                        : config.resources?.[resourceKey]?.revLimit || config?.revLimit || defaultRevLimit;
-                const isEditSessionsResource = resourceKey === "editSessions";
-                const userId = req.user.id;
-                const contentType = req.headers["content-type"] || "*/*";
-                let oldRevList: string[] | undefined;
-                const newRev = await this.db.insert(
-                    userId,
-                    resourceKey,
-                    async (rev, oldRevs) => {
-                        const request = new UploadUrlRequest();
-                        request.setOwnerId(userId);
-                        request.setName(toObjectName(resourceKey, rev));
-                        request.setContentType(contentType);
-                        const blobsClient = this.blobsProvider.getDefault();
-                        const urlResponse = await util.promisify<UploadUrlRequest, UploadUrlResponse>(
-                            blobsClient.uploadUrl.bind(blobsClient),
-                        )(request);
-                        const url = urlResponse.getUrl();
-                        const content = req.body as string;
-                        const response = await fetch(url, {
-                            timeout: 10000,
-                            method: "PUT",
-                            body: content,
-                            headers: {
-                                "content-length": req.headers["content-length"] || String(content.length),
-                                "content-type": contentType,
-                            },
-                        });
-                        if (response.status !== 200) {
-                            throw new Error(
-                                `code sync: blob service: upload failed with ${response.status} ${response.statusText}`,
-                            );
-                        }
-                        oldRevList = oldRevs;
-                    },
-                    { latestRev, revLimit, overwrite: !isEditSessionsResource },
-                );
-                if (oldRevList && oldRevList.length > 0) {
-                    // sync delete old revs from storage
-                    Promise.allSettled(oldRevList.map((rev) => this.deleteResource(userId, resourceKey, rev))).catch(
-                        () => {},
-                    );
-                }
-                if (!newRev) {
-                    res.sendStatus(isEditSessionsResource ? 400 : 412);
-                    return;
-                }
-                res.setHeader("etag", newRev);
-                res.sendStatus(200);
-                return;
-            },
+            express.text({ limit: config?.contentLimit || defaultContentLimit }),
+            this.postResource,
         );
+        router.delete("/v1/collection/:collection/resource/:resource/:ref?", this.deleteResource);
+        router.delete("/v1/resource/:resource/:ref?", this.deleteResource);
         router.delete("/v1/resource", async (req, res) => {
             if (!User.is(req.user)) {
                 res.sendStatus(204);
@@ -334,7 +183,7 @@ export class CodeSyncService {
             await this.db.deleteSettingsSyncResources(userId, async () => {
                 const request = new DeleteRequest();
                 request.setOwnerId(userId);
-                request.setPrefix(getBasePrefix("machines"));
+                request.setPrefix(getBasePrefix(SyncResource.GlobalState, undefined));
                 try {
                     const blobsClient = this.blobsProvider.getDefault();
                     await util.promisify(blobsClient.delete.bind(blobsClient))(request);
@@ -345,23 +194,6 @@ export class CodeSyncService {
             res.sendStatus(200);
 
             return;
-        });
-        router.delete("/v1/resource/:resource/:ref?", async (req, res) => {
-            if (!User.is(req.user)) {
-                res.sendStatus(204);
-                return;
-            }
-
-            // This endpoint is used to delete edit sessions data only
-            const { resource, ref } = req.params;
-            if (resource !== "editSessions") {
-                res.sendStatus(400);
-                return;
-            }
-
-            const userId = req.user.id;
-            await this.deleteResource(userId, resource, ref);
-            res.sendStatus(200);
         });
 
         router.get("/v1/collection", async (req, res) => {
@@ -380,8 +212,11 @@ export class CodeSyncService {
                 res.sendStatus(204);
                 return;
             }
+
+            const collection = await this.db.createCollection(req.user.id);
+
             res.type("text/plain");
-            res.send(uuid.v4());
+            res.send(collection);
             return;
         });
         router.delete("/v1/collection/:collection?", async (req, res) => {
@@ -390,9 +225,8 @@ export class CodeSyncService {
                 return;
             }
 
-            const userId = req.user.id;
             const { collection } = req.params;
-            await this.deleteCollection(userId, collection);
+            await this.deleteCollection(req.user.id, collection);
 
             res.sendStatus(200);
         });
@@ -436,16 +270,237 @@ export class CodeSyncService {
         return JSON.stringify(extensions);
     }
 
-    protected async deleteResource(userId: string, resourceKey: ServerResource, rev?: string) {
+    private async getResources(req: express.Request<{ resource: string; collection?: string }>, res: express.Response) {
+        if (!User.is(req.user)) {
+            res.sendStatus(204);
+            return;
+        }
+
+        const { resource, collection } = req.params;
+        const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
+        if (!resourceKey) {
+            res.sendStatus(204);
+            return;
+        }
+
+        const revs = await this.db.getResources(req.user.id, resourceKey, collection);
+        if (!revs.length) {
+            res.sendStatus(204);
+            return;
+        }
+
+        const result: { url: string; created: number }[] = revs.map((e) => ({
+            url: req.originalUrl + "/" + e.rev,
+            created: Date.parse(e.created) / 1000 /* client expects in seconds */,
+        }));
+        res.json(result);
+        return;
+    }
+
+    private async getResource(
+        req: express.Request<{ resource: string; ref: string; collection?: string }>,
+        res: express.Response,
+    ) {
+        if (!User.is(req.user)) {
+            res.sendStatus(204);
+            return;
+        }
+
+        const { resource, ref, collection } = req.params;
+        const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
+        if (!resourceKey) {
+            res.sendStatus(204);
+            return;
+        }
+
+        let resourceRev: string | undefined = ref;
+        if (resourceRev !== fromTheiaRev) {
+            resourceRev = (await this.db.getResource(req.user.id, resourceKey, resourceRev, collection))?.rev;
+        }
+        if (
+            !resourceRev &&
+            !collection &&
+            (resourceKey === SyncResource.Extensions || resourceKey === SyncResource.Settings)
+        ) {
+            resourceRev = fromTheiaRev;
+        }
+        if (!resourceRev) {
+            res.setHeader("etag", "0");
+            res.sendStatus(204);
+            return;
+        }
+        if (req.headers["if-none-match"] === resourceRev) {
+            res.sendStatus(304);
+            return;
+        }
+
+        let content: string;
+        if (resourceRev === fromTheiaRev) {
+            let version = 1;
+            let value = "";
+            if (resourceKey === SyncResource.Extensions) {
+                value = await this.getTheiaCodeSyncResource(req.user.id);
+                version = 5;
+            } else if (resourceKey === SyncResource.Settings) {
+                let settings = await this.userStorageResourcesDB.get(req.user.id, userSettingsUri);
+                settings = settings === "" ? "{}" : settings;
+                value = JSON.stringify(<ISettingsSyncContent>{ settings });
+                version = 2;
+            }
+            content = JSON.stringify(<ISyncData>{ version, content: value });
+        } else {
+            const contentType = req.headers["content-type"] || "*/*";
+            const request = new DownloadUrlRequest();
+            request.setOwnerId(req.user.id);
+            request.setName(toObjectName(resourceKey, resourceRev, collection));
+            request.setContentType(contentType);
+            try {
+                const blobsClient = this.blobsProvider.getDefault();
+                const urlResponse = await util.promisify<DownloadUrlRequest, DownloadUrlResponse>(
+                    blobsClient.downloadUrl.bind(blobsClient),
+                )(request);
+                const response = await fetch(urlResponse.getUrl(), {
+                    timeout: 10000,
+                    headers: {
+                        "content-type": contentType,
+                    },
+                });
+                if (response.status !== 200) {
+                    throw new Error(
+                        `code sync: blob service: download failed with ${response.status} ${response.statusText}`,
+                    );
+                }
+                content = await response.text();
+            } catch (e) {
+                if (e.code === status.NOT_FOUND) {
+                    res.sendStatus(204);
+                    return;
+                }
+                throw e;
+            }
+        }
+
+        res.setHeader("etag", resourceRev);
+        res.type("text/plain");
+        res.send(content);
+    }
+
+    private async postResource(req: express.Request<{ resource: string; collection?: string }>, res: express.Response) {
+        if (!User.is(req.user)) {
+            res.sendStatus(204);
+            return;
+        }
+
+        const { resource, collection } = req.params;
+        const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
+        if (!resourceKey) {
+            res.sendStatus(204);
+            return;
+        }
+
+        let latestRev: string | undefined = req.headers["if-match"];
+        if (latestRev === fromTheiaRev) {
+            latestRev = undefined;
+        }
+
+        const revLimit =
+            resourceKey === "machines"
+                ? 1
+                : this.config.codeSync.resources?.[resourceKey]?.revLimit ||
+                  this.config.codeSync?.revLimit ||
+                  defaultRevLimit;
+        const isEditSessionsResource = resourceKey === "editSessions";
+        const userId = req.user.id;
+        const contentType = req.headers["content-type"] || "*/*";
+        const newRev = await this.db.insert(
+            userId,
+            resourceKey,
+            collection,
+            latestRev,
+            async (rev, oldRevs) => {
+                const request = new UploadUrlRequest();
+                request.setOwnerId(userId);
+                request.setName(toObjectName(resourceKey, rev, collection));
+                request.setContentType(contentType);
+                const blobsClient = this.blobsProvider.getDefault();
+                const urlResponse = await util.promisify<UploadUrlRequest, UploadUrlResponse>(
+                    blobsClient.uploadUrl.bind(blobsClient),
+                )(request);
+                const url = urlResponse.getUrl();
+                const content = req.body as string;
+                const response = await fetch(url, {
+                    timeout: 10000,
+                    method: "PUT",
+                    body: content,
+                    headers: {
+                        "content-length": req.headers["content-length"] || String(content.length),
+                        "content-type": contentType,
+                    },
+                });
+                if (response.status !== 200) {
+                    throw new Error(
+                        `code sync: blob service: upload failed with ${response.status} ${response.statusText}`,
+                    );
+                }
+
+                if (oldRevs.length) {
+                    // Asynchonously delete old revs from storage
+                    Promise.allSettled(
+                        oldRevs.map((rev) => this.doDeleteResource(userId, resourceKey, rev, collection)),
+                    ).catch(() => {});
+                }
+            },
+            { revLimit, overwrite: !isEditSessionsResource },
+        );
+
+        if (!newRev) {
+            res.sendStatus(isEditSessionsResource ? 400 : 412);
+            return;
+        }
+
+        res.setHeader("etag", newRev);
+        res.sendStatus(200);
+        return;
+    }
+
+    private async deleteResource(
+        req: express.Request<{ resource: string; ref?: string; collection?: string }>,
+        res: express.Response,
+    ) {
+        if (!User.is(req.user)) {
+            res.sendStatus(204);
+            return;
+        }
+
+        // This endpoint is used to delete edit sessions data for now
+
+        const { resource, ref, collection } = req.params;
+        const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
+        if (!resourceKey) {
+            res.sendStatus(204);
+            return;
+        }
+
+        await this.doDeleteResource(req.user.id, resourceKey, ref, collection);
+        res.sendStatus(200);
+        return;
+    }
+
+    private async doDeleteResource(
+        userId: string,
+        resourceKey: ServerResource,
+        rev: string | undefined,
+        collection: string | undefined,
+    ) {
         try {
-            await this.db.deleteResource(userId, resourceKey, rev, async (rev?: string) => {
+            await this.db.deleteResource(userId, resourceKey, rev, collection, async (rev?: string) => {
                 try {
                     const request = new DeleteRequest();
                     request.setOwnerId(userId);
                     if (rev) {
-                        request.setExact(toObjectName(resourceKey, rev));
+                        request.setExact(toObjectName(resourceKey, rev, collection));
                     } else {
-                        request.setPrefix(toObjectName(resourceKey, "all"));
+                        request.setPrefix(toObjectName(resourceKey, "all", collection));
                     }
                     const blobsClient = this.blobsProvider.getDefault();
                     await util.promisify<DeleteRequest, DeleteResponse>(blobsClient.delete.bind(blobsClient))(request);
@@ -459,7 +514,7 @@ export class CodeSyncService {
         } catch (e) {
             if (rev) {
                 log.error({ userId }, "code sync: failed to delete obj", e, {
-                    object: toObjectName(resourceKey, rev),
+                    object: toObjectName(resourceKey, rev, collection),
                 });
             } else {
                 log.error({ userId }, "code sync: failed to delete", e);
@@ -468,13 +523,13 @@ export class CodeSyncService {
         }
     }
 
-    protected async deleteCollection(userId: string, collection?: string) {
+    private async deleteCollection(userId: string, collection: string | undefined) {
         try {
             await this.db.deleteCollection(userId, collection, async (collection?: string) => {
                 try {
                     const request = new DeleteRequest();
                     request.setOwnerId(userId);
-                    request.setPrefix(toObjectName("machines", "all", collection ?? "all"));
+                    request.setPrefix(toObjectName(SyncResource.GlobalState, "all", collection ?? "all"));
                     const blobsClient = this.blobsProvider.getDefault();
                     await util.promisify<DeleteRequest, DeleteResponse>(blobsClient.delete.bind(blobsClient))(request);
                 } catch (e) {
