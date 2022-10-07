@@ -190,6 +190,9 @@ EOF`);
         exec(`yq w -i ${this.options.installerConfigPath} experimental.workspace.classes["small"].pvc.size 20Gi`, { slice: slice });
         exec(`yq w -i ${this.options.installerConfigPath} experimental.workspace.classes["small"].pvc.storageClass rook-ceph-block`, { slice: slice });
         exec(`yq w -i ${this.options.installerConfigPath} experimental.workspace.classes["small"].pvc.snapshotClass csi-rbdplugin-snapclass`, { slice: slice });
+
+        // Explicit disable the protected_secrets
+        exec(`yq w -i ${this.options.installerConfigPath} experimental.workspace.enableProtectedSecrets false`, { slice: slice });
     }
 
     private configureObjectStorage(slice: string) {
