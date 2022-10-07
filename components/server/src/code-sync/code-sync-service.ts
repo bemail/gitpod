@@ -160,22 +160,22 @@ export class CodeSyncService {
             return;
         });
 
-        router.get("/v1/collection/:collection/resource/:resource", this.getResources);
-        router.get("/v1/resource/:resource", this.getResources);
-        router.get("/v1/collection/:collection/resource/:resource/:ref", this.getResource);
-        router.get("/v1/resource/:resource/:ref", this.getResource);
+        router.get("/v1/collection/:collection/resource/:resource", this.getResources.bind(this));
+        router.get("/v1/resource/:resource", this.getResources.bind(this));
+        router.get("/v1/collection/:collection/resource/:resource/:ref", this.getResource.bind(this));
+        router.get("/v1/resource/:resource/:ref", this.getResource.bind(this));
         router.post(
             "/v1/collection/:collection/resource/:resource",
             express.text({ limit: config?.contentLimit || defaultContentLimit }),
-            this.postResource,
+            this.postResource.bind(this),
         );
         router.post(
             "/v1/resource/:resource",
             express.text({ limit: config?.contentLimit || defaultContentLimit }),
-            this.postResource,
+            this.postResource.bind(this),
         );
-        router.delete("/v1/collection/:collection/resource/:resource/:ref?", this.deleteResource);
-        router.delete("/v1/resource/:resource/:ref?", this.deleteResource);
+        router.delete("/v1/collection/:collection/resource/:resource/:ref?", this.deleteResource.bind(this));
+        router.delete("/v1/resource/:resource/:ref?", this.deleteResource.bind(this));
         router.delete("/v1/resource", async (req, res) => {
             if (!User.is(req.user)) {
                 res.sendStatus(204);
