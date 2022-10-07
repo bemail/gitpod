@@ -1,7 +1,6 @@
 import { previewNameFromBranchName } from "../../util/preview";
 import { exec } from "../../util/shell";
 import { Werft } from "../../util/werft";
-import * as VM from "../../vm/vm";
 import { CORE_DEV_KUBECONFIG_PATH, GCLOUD_SERVICE_ACCOUNT_PATH, HARVESTER_KUBECONFIG_PATH } from "./const";
 import { issueMetaCerts } from "./deploy-to-preview-environment";
 import { JobConfig } from "./job-config";
@@ -121,16 +120,15 @@ function createVM(werft: Werft, config: JobConfig) {
 
     werft.log(prepareSlices.BOOT_VM, "Creating  VM");
 
-    const createVM = exec(`${commonVars} \
-                                    ./dev/preview/workflow/preview/deploy-harvester.sh`,
-        {slice: prepareSlices.BOOT_VM}
-    );
-
-    if (createVM.code > 0) {
-        const err = new Error(`Failed creating VM`)
-        createVM.stderr.split('\n').forEach(stderrLine => werft.log(prepareSlices.BOOT_VM, stderrLine))
-        werft.failSlice(prepareSlices.BOOT_VM, err)
-        return
+    try {
+        exec(`${commonVars} \
+                        ./dev/preview/workflow/preview/deploy-harvester.sh`,
+            {slice: prepareSlices.BOOT_VM}
+        );
+    } catch (err) {
+        werft.currentPhaseSpan.setAttribute("preview.created_vm", false);
+        werft.fail(prepareSlices.BOOT_VM, new Error(`Failed creating VM: ${err}`))
+        return;
     }
 
     werft.currentPhaseSpan.setAttribute("preview.created_vm", true);

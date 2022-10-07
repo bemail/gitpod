@@ -14,36 +14,23 @@ import * as shell from "shelljs";
  */
 export function deleteVM(options: { name: string }) {
     const werft = getGlobalWerftInstance();
-    const deleteVM = exec(`DESTROY=true \
+
+    try {
+        exec(`DESTROY=true \
                                     GOOGLE_BACKEND_CREDENTIALS=${GCLOUD_SERVICE_ACCOUNT_PATH} \
                                     TF_VAR_dev_kube_path=${CORE_DEV_KUBECONFIG_PATH} \
                                     TF_VAR_harvester_kube_path=${HARVESTER_KUBECONFIG_PATH} \
                                     TF_VAR_preview_name=${options.name} \
                                     ./dev/preview/workflow/preview/deploy-harvester.sh`,
-        {slice: "Deleting VM."}
-    );
-
-    if (deleteVM.code > 0) {
-        const err = new Error(`Failed deleting VM`)
-        deleteVM.stderr.split('\n').forEach(stderrLine => werft.log("Deleting VM.", stderrLine))
-        werft.failSlice("Deleting VM.", err)
-        return
+            {slice: "Deleting VM."})
+    } catch (err) {
+        werft.currentPhaseSpan.setAttribute("preview.deleted_vm", false);
+        werft.fail("Deleting VM.", new Error(`Failed creating VM: ${err}`))
+        return;
     }
 
-    werft.currentPhaseSpan.setAttribute("preview.deleted_vm", true);
-}
 
-/**
- * Check if a VM with the given name already exists.
- * @returns true if the VM already exists
- */
-export function vmExists(options: { name: string }) {
-    const namespace = `preview-${options.name}`;
-    const status = exec(`kubectl --kubeconfig ${HARVESTER_KUBECONFIG_PATH} -n ${namespace} get vmi ${options.name}`, {
-        dontCheckRc: true,
-        silent: true,
-    });
-    return status.code == 0;
+    werft.currentPhaseSpan.setAttribute("preview.deleted_vm", true);
 }
 
 export class NotFoundError extends Error {
