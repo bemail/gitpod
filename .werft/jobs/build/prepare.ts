@@ -5,7 +5,6 @@ import * as VM from "../../vm/vm";
 import { CORE_DEV_KUBECONFIG_PATH, GCLOUD_SERVICE_ACCOUNT_PATH, HARVESTER_KUBECONFIG_PATH } from "./const";
 import { issueMetaCerts } from "./deploy-to-preview-environment";
 import { JobConfig } from "./job-config";
-import * as Manifests from "../../vm/manifests";
 
 const phaseName = "prepare";
 const prepareSlices = {
@@ -90,7 +89,6 @@ function decideHarvesterVMCreation(werft: Werft, config: JobConfig) {
     if (shouldCreateVM(config)) {
         createVM(werft, config);
     }
-    applyLoadBalancer({ name: config.previewEnvironment.destname });
     werft.done(prepareSlices.BOOT_VM);
 }
 
@@ -104,26 +102,42 @@ function shouldCreateVM(config: JobConfig) {
 // createVM only triggers the VM creation.
 // Readiness is not guaranted.
 function createVM(werft: Werft, config: JobConfig) {
+    const cpu = config.withLargeVM ? 12 : 6;
+    const memory = config.withLargeVM ? 24 : 12;
+
+    // set some common vars for TF
+    // We pass the GCP credentials explicitly, otherwise for some reason TF doesn't pick them up
+    const commonVars = `GOOGLE_BACKEND_CREDENTIALS=${GCLOUD_SERVICE_ACCOUNT_PATH} \
+                        TF_VAR_dev_kube_path=${CORE_DEV_KUBECONFIG_PATH} \
+                        TF_VAR_harvester_kube_path=${HARVESTER_KUBECONFIG_PATH} \
+                        TF_VAR_preview_name=${config.previewEnvironment.destname} \
+                        TF_VAR_vm_cpu=${cpu} \
+                        TF_VAR_vm_memory=${memory}Gi \
+                        TF_VAR_vm_storage_class="longhorn-gitpod-k3s-202209251218-onereplica"`
+
     if (config.cleanSlateDeployment) {
         werft.log(prepareSlices.BOOT_VM, "Cleaning previously created VM");
-        VM.deleteVM({ name: config.previewEnvironment.destname });
+        // -replace=... forces recreation of the resource
+        exec(`${commonVars} \
+                        TF_CLI_ARGS_plan="-replace=harvester_virtualmachine.harvester" \
+                        ./dev/preview/workflow/preview/deploy-harvester.sh`,
+            {slice: prepareSlices.BOOT_VM}
+        );
     }
 
     werft.log(prepareSlices.BOOT_VM, "Creating  VM");
-    const cpu = config.withLargeVM ? 12 : 6;
-    const memory = config.withLargeVM ? 24 : 12;
-    VM.startVM({ name: config.previewEnvironment.destname, cpu, memory });
-    werft.currentPhaseSpan.setAttribute("preview.created_vm", true);
-}
 
-function applyLoadBalancer(option: { name: string }) {
-    function kubectlApplyManifest(manifest: string, options?: { validate?: boolean }) {
-        exec(`
-            cat <<EOF | kubectl --kubeconfig ${CORE_DEV_KUBECONFIG_PATH} apply --validate=${!!options?.validate} -f -
-${manifest}
-EOF
-        `);
+    const createVM = exec(`${commonVars} \
+                                    ./dev/preview/workflow/preview/deploy-harvester.sh`,
+        {slice: prepareSlices.BOOT_VM}
+    );
+
+    if (createVM.code > 0) {
+        const err = new Error(`Failed creating VM`)
+        createVM.stderr.split('\n').forEach(stderrLine => werft.log(prepareSlices.BOOT_VM, stderrLine))
+        werft.failSlice(prepareSlices.BOOT_VM, err)
+        return
     }
-    kubectlApplyManifest(Manifests.LBDeployManifest({ name: option.name }));
-    kubectlApplyManifest(Manifests.LBServiceManifest({ name: option.name }));
+
+    werft.currentPhaseSpan.setAttribute("preview.created_vm", true);
 }
