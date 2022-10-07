@@ -51,6 +51,11 @@ var listPortsCmd = &cobra.Command{
 		for _, port := range ports {
 			status := "not served"
 			statusColor := tablewriter.FgHiBlackColor
+			exposedUrl := ""
+			if port.Exposed != nil {
+				exposedUrl = port.Exposed.Url
+			}
+
 			if port.Exposed == nil && port.Tunneled == nil {
 				if port.AutoExposure == supervisor.PortAutoExposure_failed {
 					status = "failed to expose"
@@ -83,7 +88,7 @@ var listPortsCmd = &cobra.Command{
 			}
 
 			table.Rich(
-				[]string{fmt.Sprint(port.LocalPort), status, port.Exposed.Url, nameAndDescription},
+				[]string{fmt.Sprint(port.LocalPort), status, exposedUrl, nameAndDescription},
 				colors,
 			)
 		}
