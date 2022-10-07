@@ -410,7 +410,7 @@ delete-cm-setup:
 
 
 gitpod-debug-info:
-	@echo -e "\033[${b};31mGitpod is not ready\033[0;m"
+	@echo -e "\033[;31mGitpod is not ready\033[0;m"
 	@kubectl --kubeconfig=${KUBECONFIG} get pods -n gitpod
 	@kubectl --kubeconfig=${KUBECONFIG} get certificate -n gitpod
 	@echo "Uploading diagnostics to gs://nightly-tests/nightly-tests-errors/${TF_VAR_TEST_ID}"
