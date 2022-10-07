@@ -86,17 +86,11 @@ async function issueCertificate(werft: Werft, config: JobConfig): Promise<boolea
 }
 
 function decideHarvesterVMCreation(werft: Werft, config: JobConfig) {
-    if (shouldCreateVM(config)) {
+    // always try to create - usually it will be no-op, but if tf changed for any reason we would reconcile
+    if (config.withPreview) {
         createVM(werft, config);
     }
     werft.done(prepareSlices.BOOT_VM);
-}
-
-function shouldCreateVM(config: JobConfig) {
-    return (
-        config.withPreview &&
-        (!VM.vmExists({ name: config.previewEnvironment.destname }) || config.cleanSlateDeployment)
-    );
 }
 
 // createVM only triggers the VM creation.
