@@ -93,7 +93,7 @@ export class CodeSyncResourceDB {
             if (!collections[resource.collection]) {
                 collections[resource.collection] = { latest: Object.create(null) };
             }
-            collections[resource.collection].latest[resource.kind] = resource.rev;
+            collections[resource.collection].latest![resource.kind] = resource.rev;
         }
 
         return { session: userId, latest, collections };
@@ -269,6 +269,15 @@ export class CodeSyncResourceDB {
             .where("collection.userId = :userId", { userId })
             .getMany();
         return result.map((r) => r.collection);
+    }
+
+    async isCollection(userId: string, collection: string): Promise<boolean> {
+        const connection = await this.typeORM.getConnection();
+        const result = await connection.manager
+            .createQueryBuilder(DBCodeSyncCollection, "collection")
+            .where("collection.userId = :userId AND collection.collection = :collection", { userId, collection })
+            .getOne();
+        return !!result;
     }
 
     async createCollection(userId: string): Promise<string> {

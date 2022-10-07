@@ -37,7 +37,7 @@ export type IUserDataResourceManifest = Record<ServerResource, string>;
 
 export interface IUserDataCollectionManifest {
     [collectionId: string]: {
-        readonly latest: IUserDataResourceManifest;
+        readonly latest?: IUserDataResourceManifest;
     };
 }
 

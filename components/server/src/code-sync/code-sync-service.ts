@@ -120,7 +120,7 @@ export class CodeSyncService {
         router.use(this.auth.restHandler);
         router.use(async (req, res, next) => {
             if (!User.is(req.user)) {
-                res.sendStatus(204);
+                res.sendStatus(400);
                 return;
             }
 
@@ -146,9 +146,10 @@ export class CodeSyncService {
 
         router.get("/v1/manifest", async (req, res) => {
             if (!User.is(req.user)) {
-                res.sendStatus(204);
+                res.sendStatus(400);
                 return;
             }
+
             const manifest = await this.db.getManifest(req.user.id);
             if (manifest.latest && !manifest.latest.extensions) {
                 manifest.latest.extensions = fromTheiaRev;
@@ -178,7 +179,7 @@ export class CodeSyncService {
         router.delete("/v1/resource/:resource/:ref?", this.deleteResource.bind(this));
         router.delete("/v1/resource", async (req, res) => {
             if (!User.is(req.user)) {
-                res.sendStatus(204);
+                res.sendStatus(400);
                 return;
             }
 
@@ -202,7 +203,7 @@ export class CodeSyncService {
 
         router.get("/v1/collection", async (req, res) => {
             if (!User.is(req.user)) {
-                res.sendStatus(204);
+                res.sendStatus(400);
                 return;
             }
 
@@ -213,7 +214,7 @@ export class CodeSyncService {
         });
         router.post("/v1/collection", async (req, res) => {
             if (!User.is(req.user)) {
-                res.sendStatus(204);
+                res.sendStatus(400);
                 return;
             }
 
@@ -225,7 +226,7 @@ export class CodeSyncService {
         });
         router.delete("/v1/collection/:collection?", async (req, res) => {
             if (!User.is(req.user)) {
-                res.sendStatus(204);
+                res.sendStatus(400);
                 return;
             }
 
@@ -286,15 +287,23 @@ export class CodeSyncService {
 
     private async getResources(req: express.Request<{ resource: string; collection?: string }>, res: express.Response) {
         if (!User.is(req.user)) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
         }
 
         const { resource, collection } = req.params;
         const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
         if (!resourceKey) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
+        }
+
+        if (collection) {
+            const valid = await this.db.isCollection(req.user.id, collection);
+            if (!valid) {
+                res.sendStatus(405);
+                return;
+            }
         }
 
         const revs = await this.db.getResources(req.user.id, resourceKey, collection);
@@ -316,15 +325,23 @@ export class CodeSyncService {
         res: express.Response,
     ) {
         if (!User.is(req.user)) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
         }
 
         const { resource, ref, collection } = req.params;
         const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
         if (!resourceKey) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
+        }
+
+        if (collection) {
+            const valid = await this.db.isCollection(req.user.id, collection);
+            if (!valid) {
+                res.sendStatus(405);
+                return;
+            }
         }
 
         let resourceRev: string | undefined = ref;
@@ -410,21 +427,21 @@ export class CodeSyncService {
 
     private async postResource(req: express.Request<{ resource: string; collection?: string }>, res: express.Response) {
         if (!User.is(req.user)) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
         }
 
         const { resource, collection } = req.params;
         const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
         if (!resourceKey) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
         }
 
         if (collection) {
-            const collections = await this.db.getCollections(req.user.id);
-            if (!collections.includes(collection)) {
-                res.sendStatus(400);
+            const valid = await this.db.isCollection(req.user.id, collection);
+            if (!valid) {
+                res.sendStatus(405);
                 return;
             }
         }
@@ -499,7 +516,7 @@ export class CodeSyncService {
         res: express.Response,
     ) {
         if (!User.is(req.user)) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
         }
 
@@ -508,8 +525,16 @@ export class CodeSyncService {
         const { resource, ref, collection } = req.params;
         const resourceKey = ALL_SERVER_RESOURCES.find((key) => key === resource);
         if (!resourceKey) {
-            res.sendStatus(204);
+            res.sendStatus(400);
             return;
+        }
+
+        if (collection) {
+            const valid = await this.db.isCollection(req.user.id, collection);
+            if (!valid) {
+                res.sendStatus(405);
+                return;
+            }
         }
 
         await this.doDeleteResource(req.user.id, resourceKey, ref, collection);
