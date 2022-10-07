@@ -267,6 +267,20 @@ export class CodeSyncResourceDBSpec {
 
         resources = await this.db.getResources(this.userId, kind, collection);
         expect(resources).to.be.empty;
+
+        const expected2 = [];
+        for (let i = 0; i < 5; i++) {
+            const rev = await this.db.insert(this.userId, kind, collection, undefined, async () => {});
+            expected2.unshift(rev);
+        }
+
+        resources = await this.db.getResources(this.userId, kind, collection);
+        expect(resources.map((r) => r.rev)).to.deep.equal(expected2);
+
+        await this.db.deleteCollection(this.userId, collection, async () => {});
+
+        resources = await this.db.getResources(this.userId, kind, collection);
+        expect(resources).to.be.empty;
     }
 
     @test()
