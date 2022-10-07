@@ -80,6 +80,7 @@ export async function triggerUpgradeTests(werft: Werft, config: JobConfig, usern
 
 export async function triggerSelfHostedPreview(werft: Werft, config: JobConfig, username: string) {
     const replicatedChannel =  config.replicatedChannel || config.repository.branch;
+    const version =  config.replicatedVersion || "-"
     const cluster =  config.cluster || "k3s";
     const formattedBranch = config.repository.branch.replace("/", "-").slice(0,11)
     const phase = phases[cluster]
@@ -114,7 +115,7 @@ export async function triggerSelfHostedPreview(werft: Werft, config: JobConfig, 
 
     exec(`git config --global user.name "${username}"`);
 
-    annotation = `${annotation} -a channel=${replicatedChannel} -a preview=true -a runTests=false -a deps=external`;
+    annotation = `${annotation} -a version=${version} -a channel=${replicatedChannel} -a preview=true -a skipTests=true -a deps=external`;
 
     werft.phase("self-hosted-preview", `Create self-hosted preview in ${cluster}`);
 
