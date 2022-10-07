@@ -150,12 +150,13 @@ export class CodeSyncService {
                 return;
             }
 
-            const manifest = await this.db.getManifest(req.user.id);
-            if (manifest.latest && !manifest.latest.extensions) {
-                manifest.latest.extensions = fromTheiaRev;
-            }
-            if (manifest.latest && !manifest.latest.settings) {
-                manifest.latest.settings = fromTheiaRev;
+            let manifest = await this.db.getManifest(req.user.id);
+            if (!manifest) {
+                // Uncoment this after theia code is removed, check it also sends etag
+                // res.sendStatus(204);
+                // return;
+
+                manifest = { session: req.user.id, latest: { extensions: fromTheiaRev, settings: fromTheiaRev } };
             }
             res.json(manifest);
             return;

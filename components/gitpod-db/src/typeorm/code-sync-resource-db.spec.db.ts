@@ -38,7 +38,7 @@ export class CodeSyncResourceDBSpec {
         expect(latest).to.be.undefined;
 
         let inserted = false;
-        let rev = await this.db.insert(this.userId, kind, undefined, undefined, doInsert);
+        let rev = await this.db.insert(this.userId, kind, undefined, "0", doInsert);
         expect(rev).not.to.be.undefined;
         expect(inserted).to.be.true;
 
@@ -92,11 +92,7 @@ export class CodeSyncResourceDBSpec {
     @test()
     async getManifest(): Promise<void> {
         let manifest = await this.db.getManifest(this.userId);
-        expect(manifest).to.deep.eq(<IUserDataManifest>{
-            session: this.userId,
-            latest: {},
-            collections: {},
-        });
+        expect(manifest).to.undefined;
 
         let machinesRev = await this.db.insert(this.userId, "machines", undefined, undefined, async () => {});
         manifest = await this.db.getManifest(this.userId);
@@ -105,7 +101,6 @@ export class CodeSyncResourceDBSpec {
             latest: {
                 machines: machinesRev,
             },
-            collections: {},
         });
 
         let extensionsRev = await this.db.insert(
@@ -122,7 +117,6 @@ export class CodeSyncResourceDBSpec {
                 machines: machinesRev,
                 extensions: extensionsRev,
             },
-            collections: {},
         });
 
         machinesRev = await this.db.insert(this.userId, "machines", undefined, undefined, async () => {});
@@ -133,7 +127,6 @@ export class CodeSyncResourceDBSpec {
                 machines: machinesRev,
                 extensions: extensionsRev,
             },
-            collections: {},
         });
     }
 
@@ -223,7 +216,7 @@ export class CodeSyncResourceDBSpec {
         expect(latest).to.be.undefined;
 
         let inserted = false;
-        let rev = await this.db.insert(this.userId, kind, collection, undefined, doInsert);
+        let rev = await this.db.insert(this.userId, kind, collection, "0", doInsert);
         expect(rev).not.to.be.undefined;
         expect(inserted).to.be.true;
 
@@ -279,11 +272,7 @@ export class CodeSyncResourceDBSpec {
     @test()
     async getCollectionManifest(): Promise<void> {
         let manifest = await this.db.getManifest(this.userId);
-        expect(manifest).to.deep.eq(<IUserDataManifest>{
-            session: this.userId,
-            latest: {},
-            collections: {},
-        });
+        expect(manifest).to.be.undefined;
 
         const collection1 = await this.db.createCollection(this.userId);
 
@@ -375,6 +364,6 @@ export class CodeSyncResourceDBSpec {
                     },
                 },
             },
-        } as unknown as IUserDataManifest);
+        } as IUserDataManifest);
     }
 }

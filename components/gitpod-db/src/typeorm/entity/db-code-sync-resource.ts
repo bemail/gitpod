@@ -33,7 +33,7 @@ export const ALL_SYNC_RESOURCES: SyncResource[] = [
     SyncResource.Profiles,
 ];
 
-export type IUserDataResourceManifest = Record<ServerResource, string>;
+export type IUserDataResourceManifest = Partial<Record<ServerResource, string>>;
 
 export interface IUserDataCollectionManifest {
     [collectionId: string]: {

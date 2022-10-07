@@ -27,9 +27,9 @@ export class CodeSyncResourceDB {
     @inject(TypeORM)
     private readonly typeORM: TypeORM;
 
-    async getManifest(userId: string): Promise<IUserDataManifest> {
+    async getManifest(userId: string): Promise<IUserDataManifest | undefined> {
         const connection = await this.typeORM.getConnection();
-        const result = await connection.manager
+        const resourcesResult = await connection.manager
             .createQueryBuilder(DBCodeSyncResource, "resource")
             .where(
                 "resource.userId = :userId AND resource.kind != 'editSessions' AND resource.collection = :collection AND resource.deleted = 0",
@@ -56,7 +56,7 @@ export class CodeSyncResourceDB {
             })
             .getMany();
         const latest: IUserDataResourceManifest = Object.create(null);
-        for (const resource of result) {
+        for (const resource of resourcesResult) {
             latest[resource.kind] = resource.rev;
         }
 
@@ -88,6 +88,7 @@ export class CodeSyncResourceDB {
                 return "(resource.userId,resource.kind,resource.collection,resource.created) IN " + subQuery;
             })
             .getMany();
+
         const collections: IUserDataCollectionManifest = Object.create(null);
         for (const resource of collectionsResult) {
             if (!collections[resource.collection]) {
@@ -96,7 +97,15 @@ export class CodeSyncResourceDB {
             collections[resource.collection].latest![resource.kind] = resource.rev;
         }
 
-        return { session: userId, latest, collections };
+        if (!resourcesResult.length && !collectionsResult.length) {
+            return undefined;
+        }
+
+        let manifest: IUserDataManifest = { session: userId, latest };
+        if (collectionsResult.length) {
+            manifest = { session: userId, latest, collections };
+        }
+        return manifest;
     }
 
     async getResource(
@@ -197,7 +206,7 @@ export class CodeSyncResourceDB {
             }
 
             // user setting always show with diff so we need to make sure it’s changed from prev revision
-            if (latestRev && latest?.rev !== latestRev) {
+            if (latestRev && latestRev !== (latest?.rev ?? "0")) {
                 return undefined;
             }
 
