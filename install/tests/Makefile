@@ -420,7 +420,7 @@ gitpod-debug-info:
 	kubectl --kubeconfig=${KUBECONFIG} --namespace gitpod get pod -ojson > pods.json \
 	&& gsutil cp pods.json gs://nightly-tests/nightly-tests-errors/${TF_VAR_TEST_ID}/pods.json
 
-	kubectl --kubeconfig=${KUBECONFIG} --namespace gitpod get event -o '.metadata.creationTimestamp' > events.log \
+	kubectl --kubeconfig=${KUBECONFIG} --namespace gitpod get event --sort-by '.metadata.creationTimestamp' > events.log \
 	&& gsutil cp events.log gs://nightly-tests/nightly-tests-errors/${TF_VAR_TEST_ID}/events.log
 
 	kubectl --kubeconfig=${KUBECONFIG} --namespace gitpod describe certificate https-certificates > cert.log \
